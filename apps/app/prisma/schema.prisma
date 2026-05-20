@@ -1,0 +1,165 @@
+// Prisma Schema for Clarise — AI-Powered Learning Platform
+// Database: PostgreSQL via Supabase
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ──────────────────────────────────────────────
+// Enums
+// ──────────────────────────────────────────────
+
+enum UserRole {
+  FREE
+  PREMIUM
+}
+
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  PENDING
+}
+
+// ──────────────────────────────────────────────
+// Models
+// ──────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(cuid())
+  clerkId      String   @unique
+  email        String   @unique
+  name         String?
+  imageUrl     String?
+  role         UserRole @default(FREE)
+  xp           Int      @default(0)
+  level        Int      @default(1)
+  streak       Int      @default(0)
+  lastActiveAt DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  progress     UserProgress[]
+  badges       UserBadge[]
+  subscription Subscription?
+
+  @@index([clerkId])
+  @@index([email])
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  icon        String?
+  description String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  courses Course[]
+
+  @@index([slug])
+}
+
+model Course {
+  id           String     @id @default(cuid())
+  title        String
+  slug         String     @unique
+  description  String?
+  categoryId   String
+  difficulty   Difficulty @default(BEGINNER)
+  totalModules Int        @default(0)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  category Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  modules  Module[]
+  progress UserProgress[]
+
+  @@index([slug])
+  @@index([categoryId])
+}
+
+model Module {
+  id        String   @id @default(cuid())
+  title     String
+  slug      String
+  courseId   String
+  order     Int      @default(0)
+  xpReward  Int      @default(10)
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course   Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  progress UserProgress[]
+
+  @@unique([courseId, slug])
+  @@index([courseId])
+}
+
+model UserProgress {
+  id          String    @id @default(cuid())
+  userId      String
+  moduleId    String
+  courseId     String
+  completedAt DateTime?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  module Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, moduleId])
+  @@index([userId])
+  @@index([courseId])
+}
+
+model Badge {
+  id          String @id @default(cuid())
+  name        String @unique
+  description String
+  icon        String
+  condition   String
+
+  users UserBadge[]
+}
+
+model UserBadge {
+  id       String   @id @default(cuid())
+  userId   String
+  badgeId  String
+  earnedAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge Badge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+  @@index([userId])
+}
+
+model Subscription {
+  id              String             @id @default(cuid())
+  userId          String             @unique
+  status          SubscriptionStatus @default(PENDING)
+  tripayReference String?
+  startDate       DateTime?
+  endDate         DateTime?
+  createdAt       DateTime           @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tripayReference])
+}

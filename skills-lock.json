@@ -1,0 +1,197 @@
+{
+  "version": 1,
+  "skills": {
+    "accessibility": {
+      "source": "addyosmani/web-quality-skills",
+      "sourceType": "github",
+      "skillPath": "skills/accessibility/SKILL.md",
+      "computedHash": "ebfa09617a2ac4fd64afd73267726b787145a8d14294df3f8802b462c91594ab"
+    },
+    "best-practices": {
+      "source": "addyosmani/web-quality-skills",
+      "sourceType": "github",
+      "skillPath": "skills/best-practices/SKILL.md",
+      "computedHash": "f84707a5ba30771f4c3e672846457e4b0ed4dff5fd268bf0fe6cd17583637671"
+    },
+    "core-web-vitals": {
+      "source": "addyosmani/web-quality-skills",
+      "sourceType": "github",
+      "skillPath": "skills/core-web-vitals/SKILL.md",
+      "computedHash": "4684e264c8e3dd529aefe97c3102814e3b63a9ea21a163d0f835ed506773e3f8"
+    },
+    "next-best-practices": {
+      "source": "vercel-labs/next-skills",
+      "sourceType": "github",
+      "skillPath": "skills/next-best-practices/SKILL.md",
+      "computedHash": "f4678aef4ffc10a5ea64a91e57abe5a5081af813b06d58d565caf3e8ef56e26c"
+    },
+    "owasp-security": {
+      "source": "hoodini/ai-agents-skills",
+      "sourceType": "github",
+      "skillPath": "skills/owasp-security/SKILL.md",
+      "computedHash": "880d7aa73b001e7e28b9562639defeff11c073d958fe5a253eeea572539439a2"
+    },
+    "performance": {
+      "source": "addyosmani/web-quality-skills",
+      "sourceType": "github",
+      "skillPath": "skills/performance/SKILL.md",
+      "computedHash": "646931a3af896ae12a3cad3d762668cb6487fe3ab179daf8fdc974fb79acfe49"
+    },
+    "seo": {
+      "source": "addyosmani/web-quality-skills",
+      "sourceType": "github",
+      "skillPath": "skills/seo/SKILL.md",
+      "computedHash": "3d72168e266b759454b3e16028e7306ec716f21de6878cac7e98a0a3834ab5db"
+    },
+    "supabase": {
+      "source": "supabase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/supabase/SKILL.md",
+      "computedHash": "2df21087c49ef5d9cc1189ea24d41d67e4b06b64009e580f44d0e89b1a8b079b"
+    },
+    "supabase-audit-auth-config": {
+      "source": "yoanbernabeu/supabase-pentest-skills",
+      "sourceType": "github",
+      "skillPath": "skills/audit-auth/supabase-audit-auth-config/SKILL.md",
+      "computedHash": "66aa2872bf6638ce1edf67723270e4b187f1c51a0e88feb6a55d9ffdad84f208"
+    },
+    "supabase-audit-auth-signup": {
+      "source": "yoanbernabeu/supabase-pentest-skills",
+      "sourceType": "github",
+      "skillPath": "skills/audit-auth/supabase-audit-auth-signup/SKILL.md",
+      "computedHash": "85bf6352aff75501b4b10c68aa5783fd355ab8f9e4d0d56dba91381f03aa6b82"
+    },
+    "supabase-audit-auth-users": {
+      "source": "yoanbernabeu/supabase-pentest-skills",
+      "sourceType": "github",
+      "skillPath": "skills/audit-auth/supabase-audit-auth-users/SKILL.md",
+      "computedHash": "3533a00abbb49517ea9d0d5097f1002c46e1bf0a32ebc0b7fc476fbfc0db2be1"
+    },
+    "supabase-audit-buckets-list": {
+      "source": "yoanbernabeu/supabase-pentest-skills",
+      "sourceType": "github",
+      "skillPath": "skills/audit-storage/supabase-audit-buckets-list/SKILL.md",
+      "computedHash": "20c4c55074ca71c7e9f3c91f67e40f7eea1163c298e73b896801fcdbd115fbff"
+    },
+    "supabase-audit-buckets-public": {
+      "source": "yoanbernabeu/supabase-pentest-skills",
+      "sourceType": "github",
+      "skillPath": "skills/audit-storage/supabase-audit-buckets-public/SKILL.md",
+      "computedHash": "9e2f39f5110935b2a01c3ac3cb6b81ca4d5b92440b27c23bd9c64ffb8c7550b6"
+    },
+    "supabase-audit-buckets-read": {
+      "source": "yoanbernabeu/supabase-pentest-skills",
+      "sourceType": "github",
+      "skillPath": "skills/audit-storage/supabase-audit-buckets-read/SKILL.md",
+      "computedHash": "a17adf30be6f9091713eeff86ae9bdbfc5a5b789e1108199755a8232140d17e7"
+    },
+    "supabase-audit-functions": {
+      "source": "yoanbernabeu/supabase-pentest-skills",
+      "sourceType": "github",
+      "skillPath": "skills/audit-functions/supabase-audit-functions/SKILL.md",
+      "computedHash": "15a708c0f963dd6291af8b663bb064e82dd6759d15f6f212193c0bd14f9f3a67"
+    },
+    "supabase-audit-realtime": {
+      "source": "yoanbernabeu/supabase-pentest-skills",
+      "sourceType": "github",
+      "skillPath": "skills/audit-realtime/supabase-audit-realtime/SKILL.md",
+      "computedHash": "51a995e710077ff84c7f1a74b44e9cd032739290fb68ed8bc89ae15641cfd042"
+    },
+    "supabase-audit-rpc": {
+      "source": "yoanbernabeu/supabase-pentest-skills",
+      "sourceType": "github",
+      "skillPath": "skills/audit-api/supabase-audit-rpc/SKILL.md",
+      "computedHash": "0438b6e5e3897f7b3fadf580feadf762f57a543c674affaaf892105ef2985ebd"
+    },
+    "supabase-audit-tables-read": {
+      "source": "yoanbernabeu/supabase-pentest-skills",
+      "sourceType": "github",
+      "skillPath": "skills/audit-api/supabase-audit-tables-read/SKILL.md",
+      "computedHash": "f2136704b464331b860a300408fcb8dae2ea0a179572822e27d41c274c5a51c4"
+    },
+    "supabase-detect": {
+      "source": "yoanbernabeu/supabase-pentest-skills",
+      "sourceType": "github",
+      "skillPath": "skills/detection/supabase-detect/SKILL.md",
+      "computedHash": "0f1e87addb12efeb4cb4a03cbfbb9759d4e43e34d348292e58442dd46dd60189"
+    },
+    "supabase-extract-anon-key": {
+      "source": "yoanbernabeu/supabase-pentest-skills",
+      "sourceType": "github",
+      "skillPath": "skills/extraction/supabase-extract-anon-key/SKILL.md",
+      "computedHash": "4c0103337f45c62fe27839993f1ceede33b47ff934bbfc7294088d29584b93c0"
+    },
+    "supabase-extract-db-string": {
+      "source": "yoanbernabeu/supabase-pentest-skills",
+      "sourceType": "github",
+      "skillPath": "skills/extraction/supabase-extract-db-string/SKILL.md",
+      "computedHash": "586eee65a34a522ea8ecf64eda413c564c4777943bebbdad7b69ff2efdef04ea"
+    },
+    "supabase-extract-jwt": {
+      "source": "yoanbernabeu/supabase-pentest-skills",
+      "sourceType": "github",
+      "skillPath": "skills/extraction/supabase-extract-jwt/SKILL.md",
+      "computedHash": "0f7270d185c8907dcf27dd530dd9d06a409329a224aa3e03835973aedcfc62d4"
+    },
+    "supabase-extract-service-key": {
+      "source": "yoanbernabeu/supabase-pentest-skills",
+      "sourceType": "github",
+      "skillPath": "skills/extraction/supabase-extract-service-key/SKILL.md",
+      "computedHash": "e4b5bed0df23ca85e9bfd68e85b1f247c6a1fad8039fafa5446b70d4eeb0316a"
+    },
+    "supabase-extract-url": {
+      "source": "yoanbernabeu/supabase-pentest-skills",
+      "sourceType": "github",
+      "skillPath": "skills/extraction/supabase-extract-url/SKILL.md",
+      "computedHash": "c5b4632713743af6112eafac7b40afad7259ace61d8dfa4f4e93977abb194c02"
+    },
+    "supabase-help": {
+      "source": "yoanbernabeu/supabase-pentest-skills",
+      "sourceType": "github",
+      "skillPath": "skills/orchestration/supabase-help/SKILL.md",
+      "computedHash": "81dcbf9a6dd92f15c06be4adcfc0fd6671cbcfa566aa740f14a878f7e42d9ac8"
+    },
+    "supabase-pentest": {
+      "source": "yoanbernabeu/supabase-pentest-skills",
+      "sourceType": "github",
+      "skillPath": "skills/orchestration/supabase-pentest/SKILL.md",
+      "computedHash": "cf53e79ad50403d471080df4d76380ab447e8fa07e3b31d5f074e37999d273e1"
+    },
+    "supabase-postgres-best-practices": {
+      "source": "supabase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/supabase-postgres-best-practices/SKILL.md",
+      "computedHash": "38fb49d3b57c46cba18b07a44254bd42c4c93903fda1d8cb683429615d32fec4"
+    },
+    "supabase-report": {
+      "source": "yoanbernabeu/supabase-pentest-skills",
+      "sourceType": "github",
+      "skillPath": "skills/report/supabase-report/SKILL.md",
+      "computedHash": "73ab2d04f0bdae979c0947056cd4d3b867df51e4796f8e87a0260f870e854460"
+    },
+    "supabase-report-compare": {
+      "source": "yoanbernabeu/supabase-pentest-skills",
+      "sourceType": "github",
+      "skillPath": "skills/report/supabase-report-compare/SKILL.md",
+      "computedHash": "98751065913bb8b77aa5d5d5f39897875a15fb635a4273c3ef40adb8d6e20cbb"
+    },
+    "turborepo": {
+      "source": "vercel/turborepo",
+      "sourceType": "github",
+      "skillPath": "skills/turborepo/SKILL.md",
+      "computedHash": "6a23ee82918e35f8848b6fc2ccbea699d740a30fee65f288201adb4e98bf3827"
+    },
+    "web-perf": {
+      "source": "cloudflare/skills",
+      "sourceType": "github",
+      "skillPath": "skills/web-perf/SKILL.md",
+      "computedHash": "a411d7a1d052e39069ad7c898d6b7e22100945a3f104794e0b76e3af480d3f44"
+    },
+    "web-quality-audit": {
+      "source": "addyosmani/web-quality-skills",
+      "sourceType": "github",
+      "skillPath": "skills/web-quality-audit/SKILL.md",
+      "computedHash": "10db799d6bff4fc98a4067aa04fdee2e9f34eaca1c42fd4207a89aafe644a6f0"
+    }
+  }
+}
