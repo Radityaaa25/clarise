@@ -33,6 +33,14 @@ enum SubscriptionStatus {
   PENDING
 }
 
+enum SourceType {
+  DOCUMENTATION
+  ARTICLE
+  YOUTUBE
+  BOOK
+  OTHER
+}
+
 // ──────────────────────────────────────────────
 // Models
 // ──────────────────────────────────────────────
@@ -51,9 +59,11 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  progress     UserProgress[]
-  badges       UserBadge[]
-  subscription Subscription?
+  progress      UserProgress[]
+  badges        UserBadge[]
+  subscription  Subscription?
+  ratings       CourseRating[]
+  createdCourses Course[]      @relation("CourseAuthor")
 
   @@index([clerkId])
   @@index([email])
@@ -74,22 +84,32 @@ model Category {
 }
 
 model Course {
-  id           String     @id @default(cuid())
-  title        String
-  slug         String     @unique
-  description  String?
-  categoryId   String
-  difficulty   Difficulty @default(BEGINNER)
-  totalModules Int        @default(0)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  id             String     @id @default(cuid())
+  title          String
+  slug           String     @unique
+  description    String?
+  categoryId     String
+  difficulty     Difficulty @default(BEGINNER)
+  totalModules   Int        @default(0)
+  isUserGenerated Boolean   @default(false)
+  isPrivate      Boolean    @default(false)
+  isPublished    Boolean    @default(false)
+  isPremium      Boolean    @default(false)
+  authorId       String?
+  rating         Float      @default(0)
+  ratingCount    Int        @default(0)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 
-  category Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  category Category        @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  author   User?           @relation("CourseAuthor", fields: [authorId], references: [id], onDelete: SetNull)
   modules  Module[]
   progress UserProgress[]
+  ratings  CourseRating[]
 
   @@index([slug])
   @@index([categoryId])
+  @@index([authorId])
 }
 
 model Module {
@@ -99,15 +119,40 @@ model Module {
   courseId   String
   order     Int      @default(0)
   xpReward  Int      @default(10)
-  content   String   @db.Text
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   course   Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  slides   Slide[]
   progress UserProgress[]
 
   @@unique([courseId, slug])
   @@index([courseId])
+}
+
+model Slide {
+  id       String @id @default(cuid())
+  moduleId String
+  order    Int    @default(0)
+  title    String
+  content  Json   // {type: "text"|"code"|"formula"|"image", body: "...", language?: "js", tooltips?: [{token, explanation}]}
+
+  module  Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  sources Source[]
+
+  @@index([moduleId])
+}
+
+model Source {
+  id      String     @id @default(cuid())
+  slideId String
+  type    SourceType @default(OTHER)
+  title   String
+  url     String
+
+  slide Slide @relation(fields: [slideId], references: [id], onDelete: Cascade)
+
+  @@index([slideId])
 }
 
 model UserProgress {
@@ -116,6 +161,8 @@ model UserProgress {
   moduleId    String
   courseId     String
   completedAt DateTime?
+  enrolledAt  DateTime  @default(now())
+  activeSlide Int       @default(0)
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   module Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
@@ -123,6 +170,21 @@ model UserProgress {
 
   @@unique([userId, moduleId])
   @@index([userId])
+  @@index([courseId])
+}
+
+model CourseRating {
+  id        String   @id @default(cuid())
+  userId    String
+  courseId   String
+  rating    Int      // 1-5
+  review    String?
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
   @@index([courseId])
 }
 

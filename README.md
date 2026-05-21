@@ -1,26 +1,151 @@
-# Turborepo starter
+# Clarise - Learning Management System
 
-This Turborepo starter is maintained by the Turborepo core team.
+A modern, scalable learning management system built with Next.js, Turborepo, and Supabase.
 
-## Using this example
+## Project Overview
 
-Run the following command:
+Clarise is a comprehensive e-learning platform featuring course management, AI-powered assistance, payment integration, and user achievement tracking. Built as a monorepo using Turborepo for efficient management of multiple applications and shared packages.
 
-```sh
-npx create-turbo@latest
+## Project Structure
+
+### Root Level Files
+
+- `package.json` - Root workspace configuration
+- `pnpm-workspace.yaml` - pnpm workspace configuration
+- `turbo.json` - Turborepo configuration and task pipelines
+- `pnpm-lock.yaml` - Dependency lock file
+- `DESIGN.md` - Design system and UI guidelines
+- `README.md` - This file
+- `skills-lock.json` - Skills configuration lock file
+- `.npmrc` - NPM configuration
+- `.gitignore` - Git ignore rules
+
+### Directory Structure
+
+```
+clarise/
+├── apps/                           # Monorepo applications
+│   ├── app/                        # Main application (Next.js)
+│   │   ├── app/                    # App directory (Next.js 13+)
+│   │   │   ├── (auth)/             # Auth routes group
+│   │   │   │   ├── sign-in/        # Sign in page
+│   │   │   │   └── sign-up/        # Sign up page
+│   │   │   ├── (course)/           # Course routes group
+│   │   │   │   └── course/
+│   │   │   │       └── [slug]/     # Dynamic course page
+│   │   │   ├── (dashboard)/        # Dashboard routes group
+│   │   │   │   ├── dashboard/      # Main dashboard
+│   │   │   │   ├── achievment/     # Achievements/progress page
+│   │   │   │   └── explore/        # Course exploration page
+│   │   │   ├── api/                # API routes
+│   │   │   │   ├── ai/
+│   │   │   │   │   └── ask/        # AI assistant endpoint
+│   │   │   │   └── webhook/
+│   │   │   │       └── tripay/     # Payment webhook (Tripay)
+│   │   │   ├── layout.tsx          # Root layout component
+│   │   │   ├── page.tsx            # Home page
+│   │   │   └── globals.css         # Global styles
+│   │   ├── components/             # Reusable React components
+│   │   │   ├── ai/                 # AI-related components
+│   │   │   ├── course/             # Course-related components
+│   │   │   ├── dashboard/          # Dashboard components
+│   │   │   ├── layout/             # Layout components (header, footer, etc.)
+│   │   │   └── ui/                 # Basic UI components
+│   │   ├── hooks/                  # Custom React hooks
+│   │   ├── lib/                    # Utility libraries and helpers
+│   │   │   ├── gemini.ts           # Google Gemini AI integration
+│   │   │   ├── prisma.ts           # Prisma ORM client
+│   │   │   ├── supabase.ts         # Supabase client setup
+│   │   │   ├── ratelimit.ts        # Rate limiting utilities
+│   │   │   └── utils.ts            # General utility functions
+│   │   ├── types/                  # TypeScript type definitions
+│   │   ├── prisma/
+│   │   │   └── schema.prisma       # Database schema definition
+│   │   ├── middleware.ts           # Next.js middleware
+│   │   ├── next.config.ts          # Next.js configuration
+│   │   ├── postcss.config.mjs      # PostCSS configuration
+│   │   ├── tsconfig.json           # TypeScript configuration
+│   │   ├── components.json         # Shadcn/ui configuration
+│   │   ├── package.json            # App dependencies
+│   │   ├── .env.local              # Environment variables (local)
+│   │   └── .clerk/                 # Clerk authentication config
+│   │
+│   └── landing/                    # Landing page app (Next.js)
+│       ├── app/
+│       │   ├── layout.tsx          # Landing layout
+│       │   ├── page.tsx            # Landing page
+│       │   └── globals.css         # Landing styles
+│       ├── components/             # Landing components
+│       ├── lib/
+│       │   └── utils.ts            # Landing utilities
+│       ├── public/                 # Static assets
+│       ├── next.config.ts
+│       ├── postcss.config.mjs
+│       ├── tsconfig.json
+│       ├── components.json
+│       ├── package.json
+│       ├── .env.local
+│       └── next-env.d.ts
+│
+├── packages/                       # Shared packages
+│   ├── eslint-config/              # Shared ESLint configurations
+│   │   ├── base.js                 # Base ESLint rules
+│   │   ├── next.js                 # Next.js ESLint config
+│   │   ├── react-internal.js       # React ESLint config
+│   │   ├── package.json
+│   │   └── README.md
+│   │
+│   ├── typescript-config/          # Shared TypeScript configurations
+│   │   ├── base.json               # Base TypeScript config
+│   │   ├── nextjs.json             # Next.js specific config
+│   │   ├── react-library.json      # React library config
+│   │   └── package.json
+│   │
+│   └── ui/                         # Shared UI component library
+│       ├── src/                    # Component source files
+│       │   ├── button.tsx          # Button component
+│       │   ├── card.tsx            # Card component
+│       │   └── code.tsx            # Code component
+│       ├── eslint.config.mjs
+│       ├── tsconfig.json
+│       ├── package.json
+│       └── next-env.d.ts
+│
+├── .agents/                        # AI agent skills and configurations
+│   └── skills/                     # Reusable skills for agents
+│       ├── accessibility/          # A11y audit and WCAG compliance
+│       ├── best-practices/         # Web dev best practices
+│       ├── performance/            # Performance optimization
+│       ├── seo/                    # SEO optimization
+│       ├── supabase/               # Supabase utilities and auditing
+│       ├── next-best-practices/    # Next.js specific best practices
+│       ├── owasp-security/         # OWASP security practices
+│       ├── turborepo/              # Turborepo configuration help
+│       └── ... (other skills)
+│
+└── node_modules/                  # Workspace dependencies
 ```
 
-## What's inside?
+### Key Technologies
 
-This Turborepo includes the following packages/apps:
+- **Next.js** - React framework for production
+- **TypeScript** - Static type checking
+- **Prisma** - ORM for database operations
+- **Supabase** - Backend as a Service (PostgreSQL, Auth, Storage)
+- **Turborepo** - Monorepo task orchestration
+- **Tailwind CSS** - Utility-first CSS framework
+- **Shadcn/ui** - Component library
+- **Google Gemini** - AI assistant integration
+- **Tripay** - Payment gateway integration
+- **Clerk** - Authentication service
 
 ### Apps and Packages
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+- **`app`**: Main application - Core LMS features including courses, dashboard, authentication, and AI assistant
+- **`landing`**: Landing page - Marketing and information website
+- **`@repo/ui`**: Shared component library - Reusable UI components
+- **`@repo/eslint-config`**: Shared ESLint configurations
+- **`@repo/typescript-config`**: Shared TypeScript configurations
 
 Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
 

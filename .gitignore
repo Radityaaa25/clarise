@@ -11,6 +11,7 @@ node_modules
 .env.development.local
 .env.test.local
 .env.production.local
+.env.example.backup
 
 # Testing
 coverage
@@ -27,6 +28,9 @@ out/
 build
 dist
 
+# Prisma
+prisma/migrations/*
+!prisma/migrations/.gitkeep
 
 # Debug
 npm-debug.log*
@@ -36,3 +40,16 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# OS
+Thumbs.db
+
+# Audit evidence (optional - uncomment if you don't want to commit audit files)
+# .sb-pentest-context.json
+# .sb-pentest-audit.log
+# .sb-pentest-evidence/

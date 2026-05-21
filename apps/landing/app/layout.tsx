@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { Darker_Grotesque, DM_Sans } from "next/font/google";
+import { Darker_Grotesque, Jost } from "next/font/google";
 import { ThemeProvider } from "next-themes";
+import { FloatingNavbar } from "@/components/layout/navbar";
 import "./globals.css";
 
 const darkerGrotesque = Darker_Grotesque({
@@ -10,9 +11,9 @@ const darkerGrotesque = Darker_Grotesque({
   display: "swap",
 });
 
-const dmSans = DM_Sans({
+const jost = Jost({
   subsets: ["latin"],
-  weight: ["300", "400", "500"],
+  weight: ["300", "400", "500", "700"],
   variable: "--font-body",
   display: "swap",
 });
@@ -40,18 +41,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={`${darkerGrotesque.variable} ${dmSans.variable}`}
-    >
-      <body>
+      <html
+        lang="en"
+        suppressHydrationWarning
+        className={`${darkerGrotesque.variable} ${jost.variable}`}
+      >
+        <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+        </head>
+        <body>
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
-          enableSystem
+          defaultTheme="light"
+          enableSystem={false}
           disableTransitionOnChange
         >
+          <FloatingNavbar />
           {children}
         </ThemeProvider>
       </body>

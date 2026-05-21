@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import { Darker_Grotesque, DM_Sans } from "next/font/google";
+import { Darker_Grotesque, Jost } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "next-themes";
+import { ErrorBoundary } from "@/components/layout/error-boundary";
 import "./globals.css";
 
 const darkerGrotesque = Darker_Grotesque({
@@ -11,9 +12,9 @@ const darkerGrotesque = Darker_Grotesque({
   display: "swap",
 });
 
-const dmSans = DM_Sans({
+const jost = Jost({
   subsets: ["latin"],
-  weight: ["300", "400", "500"],
+  weight: ["300", "400", "500", "700"],
   variable: "--font-body",
   display: "swap",
 });
@@ -42,21 +43,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider afterSignOutUrl="/sign-in"  dynamic>
       <html
         lang="en"
         suppressHydrationWarning
-        className={`${darkerGrotesque.variable} ${dmSans.variable}`}
+        className={`${darkerGrotesque.variable} ${jost.variable}`}
       >
-        <body>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-          </ThemeProvider>
+        <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+        </head>
+        <body suppressHydrationWarning>
+          <ErrorBoundary>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="light"
+              enableSystem={false}
+              disableTransitionOnChange
+            >
+              {children}
+            </ThemeProvider>
+          </ErrorBoundary>
         </body>
       </html>
     </ClerkProvider>
