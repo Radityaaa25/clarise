@@ -16,7 +16,9 @@
         "NEXT_PUBLIC_APP_URL",
         "NEXT_PUBLIC_SUPABASE_URL",
         "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-        "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY"
+        "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+        "VERCEL_*",
+        "NEXT_PUBLIC_*"
       ],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**"]
