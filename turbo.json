@@ -4,22 +4,6 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "env": [
-        "SUPABASE_SERVICE_ROLE_KEY",
-        "DATABASE_URL",
-        "DIRECT_URL",
-        "CLERK_SECRET_KEY",
-        "GEMINI_API_KEY",
-        "UPSTASH_REDIS_REST_URL",
-        "UPSTASH_REDIS_REST_TOKEN",
-        "SENTRY_AUTH_TOKEN",
-        "NEXT_PUBLIC_APP_URL",
-        "NEXT_PUBLIC_SUPABASE_URL",
-        "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-        "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
-        "VERCEL_*",
-        "NEXT_PUBLIC_*"
-      ],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**"]
     },
