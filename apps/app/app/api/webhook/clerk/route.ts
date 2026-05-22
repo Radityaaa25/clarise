@@ -50,21 +50,35 @@ export async function POST(req: NextRequest) {
     }
 
     const name = [first_name, last_name].filter(Boolean).join(" ") || null;
+    const referralCode = Math.random().toString(36).substring(2, 10).toUpperCase();
 
-    await prisma.user.upsert({
-      where: { clerkId: id },
-      update: {
-        email: primaryEmail,
-        name,
-        imageUrl: image_url || null,
-      },
-      create: {
-        clerkId: id,
-        email: primaryEmail,
-        name,
-        imageUrl: image_url || null,
-      },
-    });
+    if (eventType === "user.created") {
+      await prisma.user.create({
+        data: {
+          clerkId: id,
+          email: primaryEmail,
+          name,
+          imageUrl: image_url || null,
+          referralCode,
+          subscription: {
+            create: {
+              status: "ACTIVE",
+              plan: "FREE",
+              startDate: new Date(),
+            }
+          }
+        },
+      });
+    } else {
+      await prisma.user.update({
+        where: { clerkId: id },
+        data: {
+          email: primaryEmail,
+          name,
+          imageUrl: image_url || null,
+        },
+      });
+    }
   }
 
   if (eventType === "user.deleted") {

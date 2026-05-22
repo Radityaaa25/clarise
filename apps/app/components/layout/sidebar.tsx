@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import {
   LayoutDashboard,
   Compass,
@@ -46,12 +47,8 @@ export function Sidebar({
       <div className={`flex h-16 items-center px-4 border-b border-hairline ${collapsed ? 'justify-center' : 'justify-between'}`}>
         {!collapsed && (
           <Link href="/dashboard" className="flex items-center gap-2.5 overflow-hidden">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-core-blue text-white shadow-sm">
-              <span className="font-heading font-black text-lg">C</span>
-            </div>
-            <span className="font-heading text-xl font-black tracking-wide text-ink dark:text-white whitespace-nowrap">
-              Clarise.
-            </span>
+            <Image src="/logoLM.png" alt="Clarise Logo" width={80} height={26} className="w-[80px] h-auto dark:hidden" />
+            <Image src="/logoDM.png" alt="Clarise Logo" width={80} height={26} className="w-[80px] h-auto hidden dark:block" />
           </Link>
         )}
         <button

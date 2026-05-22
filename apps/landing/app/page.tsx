@@ -2,6 +2,7 @@ import { ArrowRight, Sparkles, BookOpen, Trophy, Play, Search, GraduationCap, Ch
 import { AppPreview } from "@/components/sections/app-preview";
 import { ArrowButton } from "@/components/ui/arrow-button";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function HomePage() {
   return (
@@ -158,7 +159,7 @@ export default function HomePage() {
                   <div className="w-3 h-3 rounded-full bg-yellow-500" />
                   <div className="w-3 h-3 rounded-full bg-green-500" />
                   <span className="text-xs text-white/50 ml-2 font-mono">
-                    ai-chat.tsx
+                    Clarise AI
                   </span>
                 </div>
                 <div className="space-y-3 font-mono text-sm">
@@ -254,11 +255,22 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-12 mb-16">
             <div className="col-span-1 md:col-span-4 flex flex-col">
               <Link href="/" className="flex items-center gap-2 mb-4">
-                <span className="font-heading text-2xl font-black tracking-wide text-ink dark:text-white">
-                  Clarise.
-                </span>
+                <Image
+                  src="/logoLM.png"
+                  alt="Clarise Logo"
+                  width={120}
+                  height={40}
+                  className="w-[100px] md:w-[120px] h-auto -mt-10 dark:hidden"
+                />
+                <Image
+                  src="/logoDM.png"
+                  alt="Clarise Logo"
+                  width={120}
+                  height={40}
+                  className="w-[100px] md:w-[120px] h-auto -mt-10 hidden dark:block"
+                />
               </Link>
-              <p className="text-body dark:text-white/60 leading-relaxed mb-6">
+              <p className="text-body dark:text-white/60 leading-relaxed mb-6 -mt-14">
                 Learn anything. Understand everything.
               </p>
             </div>

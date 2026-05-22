@@ -25,15 +25,42 @@ export const metadata: Metadata = {
     template: "%s | Clarise",
   },
   description:
-    "Master new skills with AI-powered adaptive learning. Personalized courses, real-time feedback, and gamified progress tracking.",
+    "Master new skills with AI-powered adaptive learning. Personalized courses, real-time feedback, and gamified progress tracking. Belajar AI dengan tutor interaktif.",
+  keywords: [
+    "Clarise App", "Clarise AI", "Platform Belajar AI", "Kursus AI Interaktif",
+    "Belajar AI Bahasa Indonesia", "Dashboard Belajar", "LMS AI Indonesia"
+  ],
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "https://app.clarise.com"
+    process.env.NEXT_PUBLIC_APP_URL || "https://app.clarise.my.id"
   ),
   openGraph: {
-    title: "Clarise — AI-Powered Learning Platform",
+    title: "Clarise App — AI-Powered Learning Platform",
     description:
-      "Master new skills with AI-powered adaptive learning. Personalized courses, real-time feedback, and gamified progress tracking.",
+      "Akses dashboard belajarmu, selesaikan modul, dan tanya AI Tutor. Clarise: Belajar AI dengan mudah.",
     type: "website",
+    siteName: "Clarise App",
+    locale: "id_ID",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Clarise App — AI-Powered Learning Platform",
+    description: "Akses dashboard belajarmu dan tanya AI Tutor di Clarise App.",
+  },
+  robots: {
+    index: false,
+    follow: false,
+  },
+  icons: {
+    icon: [
+      { url: '/favicon/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon/android-chrome-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/favicon/android-chrome-512x512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/favicon/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+    shortcut: ['/favicon/favicon.ico'],
   },
 };
 
@@ -45,7 +72,7 @@ export default function RootLayout({
   return (
     <ClerkProvider afterSignOutUrl="/sign-in"  dynamic>
       <html
-        lang="en"
+        lang="id"
         suppressHydrationWarning
         className={`${darkerGrotesque.variable} ${jost.variable}`}
       >

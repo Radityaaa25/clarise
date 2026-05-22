@@ -13,7 +13,7 @@ export default function PricingPage() {
         <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] dark:opacity-[0.04] mix-blend-overlay" />
       </div>
 
-      <div className="max-w-6xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-6">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -32,25 +32,25 @@ export default function PricingPage() {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {/* Free Tier */}
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="rounded-3xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/5 p-8 backdrop-blur-md flex flex-col shadow-xl shadow-black/5"
+            className="rounded-3xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/5 p-8 backdrop-blur-md flex flex-col shadow-xl shadow-black/5 hover:-translate-y-2 transition-transform duration-300"
           >
-            <h3 className="text-2xl font-bold font-heading text-ink dark:text-white mb-2">Basic</h3>
+            <h3 className="text-2xl font-bold font-heading text-ink dark:text-white mb-2">Free</h3>
             <p className="text-body dark:text-frost/50 mb-6">Cocok buat yang mau nyobain dulu.</p>
             <div className="mb-8">
               <span className="text-5xl font-black text-ink dark:text-white">Rp 0</span>
               <span className="text-body dark:text-frost/50">/selamanya</span>
             </div>
             <ul className="space-y-4 mb-8 flex-1">
-              {["Akses ke kursus dasar", "Standard AI assistance", "Community support", "Basic progress tracking"].map((feature, i) => (
-                <li key={i} className="flex gap-3 items-center text-ink dark:text-frost/80 font-medium">
-                  <CheckCircle2 className="h-5 w-5 text-black/20 dark:text-frost/30" />
-                  {feature}
+              {["1 course aktif (Level Dasar)", "10x tanya AI per hari", "XP, Level & Streak basic", "Public course visibility"].map((feature, i) => (
+                <li key={i} className="flex gap-3 items-start text-ink dark:text-frost/80 font-medium">
+                  <CheckCircle2 className="h-5 w-5 text-black/20 dark:text-frost/30 shrink-0 mt-0.5" />
+                  <span className="leading-tight">{feature}</span>
                 </li>
               ))}
             </ul>
@@ -59,33 +59,59 @@ export default function PricingPage() {
             </a>
           </motion.div>
 
-          {/* Premium Tier */}
+          {/* Premium Bulanan Tier */}
           <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="rounded-3xl border border-core-blue/50 bg-gradient-to-b from-core-blue/10 to-transparent dark:from-core-blue/20 dark:to-void p-8 backdrop-blur-md flex flex-col relative overflow-hidden shadow-2xl shadow-core-blue/20"
+            className="rounded-3xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/5 p-8 backdrop-blur-md flex flex-col shadow-xl shadow-black/5 hover:-translate-y-2 transition-transform duration-300"
           >
-            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-core-blue to-sky" />
-            <div className="absolute top-4 right-4 bg-core-blue/10 dark:bg-core-blue/20 text-core-blue dark:text-sky text-xs font-bold px-3 py-1 rounded-full border border-core-blue/30">
-              RECOMMENDED
-            </div>
-            <h3 className="text-2xl font-bold font-heading text-ink dark:text-white mb-2">Pro</h3>
-            <p className="text-body dark:text-frost/50 mb-6">Buat lo yang serius pengen level up.</p>
+            <h3 className="text-2xl font-bold font-heading text-ink dark:text-white mb-2">Premium Bulanan</h3>
+            <p className="text-body dark:text-frost/50 mb-6">Akses penuh ke semua fitur Clarise secara fleksibel.</p>
             <div className="mb-8">
-              <span className="text-5xl font-black text-ink dark:text-white">Rp 99k</span>
+              <span className="text-5xl font-black text-ink dark:text-white">Rp 79k</span>
               <span className="text-body dark:text-frost/50">/bulan</span>
             </div>
             <ul className="space-y-4 mb-8 flex-1">
-              {["Akses SEMUA materi premium", "Unlimited AI mentoring", "Priority feedback", "Advanced analytics & roadmap", "Sertifikat kelulusan"].map((feature, i) => (
-                <li key={i} className="flex gap-3 items-center text-ink dark:text-frost/90 font-medium">
-                  <CheckCircle2 className="h-5 w-5 text-core-blue dark:text-sky" />
-                  {feature}
+              {["Unlimited course (Semua Level)", "AI Unlimited & Buat kursus AI", "Sertifikat & Download PDF", "Streak protection (1x/bulan)", "Pro badges & Priority support"].map((feature, i) => (
+                <li key={i} className="flex gap-3 items-start text-ink dark:text-frost/80 font-medium">
+                  <CheckCircle2 className="h-5 w-5 text-core-blue dark:text-sky shrink-0 mt-0.5" />
+                  <span className="leading-tight">{feature}</span>
+                </li>
+              ))}
+            </ul>
+            <a href={`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/sign-up`} className="w-full py-4 rounded-xl border border-core-blue text-core-blue dark:text-sky font-bold text-center hover:bg-core-blue/10 dark:hover:bg-sky/10 transition-colors">
+              Langganan Bulanan
+            </a>
+          </motion.div>
+
+          {/* Premium Tahunan Tier */}
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="rounded-3xl border border-core-blue/50 bg-gradient-to-b from-core-blue/10 to-transparent dark:from-core-blue/20 dark:to-void p-8 backdrop-blur-md flex flex-col relative overflow-hidden shadow-2xl shadow-core-blue/20 md:scale-[1.02] hover:-translate-y-2 transition-transform duration-300 z-10"
+          >
+            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-core-blue to-sky" />
+            <div className="absolute top-4 right-4 bg-reward/10 dark:bg-reward/20 text-reward dark:text-reward text-xs font-bold px-3 py-1 rounded-full border border-reward/30">
+              HEMAT ~37%
+            </div>
+            <h3 className="text-2xl font-bold font-heading text-ink dark:text-white mb-2">Premium Tahunan</h3>
+            <p className="text-body dark:text-frost/50 mb-6">Investasi belajar terbaik dengan harga paling hemat.</p>
+            <div className="mb-8">
+              <span className="text-5xl font-black text-ink dark:text-white">Rp 599k</span>
+              <span className="text-body dark:text-frost/50">/tahun</span>
+            </div>
+            <ul className="space-y-4 mb-8 flex-1">
+              {["Semua fitur Premium Bulanan", "Hemat lebih dari Rp 340.000", "AI Recommendations khusus", "Clarise Wrapped Detailed Report", "Investasi belajar terbaik"].map((feature, i) => (
+                <li key={i} className="flex gap-3 items-start text-ink dark:text-frost/90 font-medium">
+                  <CheckCircle2 className="h-5 w-5 text-reward shrink-0 mt-0.5" />
+                  <span className="leading-tight">{feature}</span>
                 </li>
               ))}
             </ul>
             <a href={`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/sign-up`} className="w-full py-4 rounded-xl bg-core-blue text-white font-bold text-center hover:bg-core-blue/90 transition-all shadow-lg shadow-core-blue/20 hover:scale-[1.02] active:scale-95">
-              Upgrade ke Pro
+              Paling Hemat
             </a>
           </motion.div>
         </div>

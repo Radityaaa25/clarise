@@ -30,10 +30,10 @@ export async function POST(req: Request) {
     // Get user from DB to check role
     const user = await prisma.user.findUnique({
       where: { clerkId: userId },
-      select: { role: true },
+      include: { subscription: true }
     });
 
-    const isPro = user?.role === "PREMIUM";
+    const isPro = user?.subscription?.plan === "PREMIUM" || user?.subscription?.plan === "PREMIUM_YEARLY";
     
     // Apply Rate Limiting based on Tier
     const limiter = isPro ? proRatelimit : freeRatelimit;

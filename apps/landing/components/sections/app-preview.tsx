@@ -6,36 +6,41 @@ const features = [
   { 
     id: "dashboard", 
     label: "Dashboard", 
-    file: "/Dashboard.png", 
-    desc: "Pantau progress, XP, dan pertahankan learning streak harianmu dengan mudah.",
+    fileLM: "/DashboardLM.png",
+    fileDM: "/DashboardDM.png", 
+    desc: "Pantau progress, XP, dan pertahankan learning streak harianmu dengan mudah. Ringkasan performa divisualisasikan dengan elegan.",
     badge: "Overview"
   },
   { 
     id: "explore", 
     label: "Explore", 
-    file: "/Explore.png", 
-    desc: "Temukan ratusan kursus dari berbagai kategori. Discover your next skill.",
+    fileLM: "/ExploreLM.png",
+    fileDM: "/ExploreDM.png", 
+    desc: "Temukan ratusan kursus dari berbagai kategori. Discover your next skill dengan modul pembelajaran terstruktur yang disesuaikan.",
     badge: "Library"
   },
   { 
     id: "mycourse", 
     label: "My Courses", 
-    file: "/MyCourse.png", 
-    desc: "Kelola dan lanjutkan kursus aktifmu kapan saja. Seamless learning experience.",
+    fileLM: "/MyCourseLM.png",
+    fileDM: "/MyCourseDM.png", 
+    desc: "Kelola dan lanjutkan kursus aktifmu kapan saja. Seamless learning experience yang membuat kamu selalu ingin kembali.",
     badge: "Learning"
   },
   { 
     id: "streak", 
     label: "Achievements", 
-    file: "/Streak.png", 
-    desc: "Kumpulkan berbagai badge eksklusif dan tingkatkan levelmu. Gamified for you.",
+    fileLM: "/AchievmentLM.png",
+    fileDM: "/AchievmentDM.png", 
+    desc: "Kumpulkan berbagai badge eksklusif dan tingkatkan levelmu. Gamified for you agar perjalanan belajarmu tidak pernah membosankan.",
     badge: "Gamification"
   },
   { 
     id: "create", 
     label: "AI Course Builder", 
-    file: "/CreateCourse.png", 
-    desc: "Buat kursus kustom secara instan dengan bantuan AI. Your personal course creator.",
+    fileLM: "/CreateCourseLM.png",
+    fileDM: "/CreateCourseDm.png", 
+    desc: "Buat kursus kustom secara instan dengan bantuan AI. Your personal course creator yang memahami materi spesifik keinginanmu.",
     badge: "Premium"
   },
 ]
@@ -67,13 +72,21 @@ export function AppPreview() {
               <div className="absolute inset-0 bg-gradient-to-r from-core-blue/10 to-sky/10 dark:from-core-blue/20 dark:to-sky/20 rounded-2xl md:rounded-[32px] blur-3xl group-hover:blur-[60px] transition-all duration-700 -z-10" />
               
               <div className="rounded-2xl md:rounded-[32px] border border-hairline bg-canvas dark:bg-void-elevated p-2 md:p-3 shadow-2xl transition-transform duration-500 hover:-translate-y-2">
-                <div className="w-full overflow-hidden rounded-xl md:rounded-[20px] border border-hairline bg-slate-50 dark:bg-void">
+                <div className="w-full overflow-hidden rounded-xl md:rounded-[20px] border border-hairline bg-slate-50 dark:bg-void relative">
                   <Image
-                    src={feature.file}
+                    src={feature.fileLM}
                     alt={feature.label}
                     width={1200}
                     height={800}
-                    className="w-full h-auto object-contain"
+                    className="w-full h-auto object-contain dark:hidden"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
+                  <Image
+                    src={feature.fileDM}
+                    alt={`${feature.label} Dark`}
+                    width={1200}
+                    height={800}
+                    className="w-full h-auto object-contain hidden dark:block"
                     sizes="(max-width: 768px) 100vw, 50vw"
                   />
                 </div>

@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@clerk/nextjs/server";
 
-// GET /api/courses/[slug] — Get single course with modules and slides
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
@@ -12,58 +11,36 @@ export async function GET(
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    const { slug } = await params;
+    
+    // In Next.js 15+ async params
+    const resolvedParams = await params;
+    const { slug } = resolvedParams;
 
     const course = await prisma.course.findUnique({
       where: { slug },
       include: {
-        category: { select: { name: true, slug: true } },
+        category: true,
+        author: {
+          select: { name: true, imageUrl: true }
+        },
         modules: {
-          orderBy: { order: "asc" },
+          orderBy: { order: 'asc' },
           include: {
             slides: {
-              orderBy: { order: "asc" },
-              include: {
-                sources: true,
-              },
-            },
-          },
-        },
-        ratings: {
-          select: {
-            rating: true,
-            review: true,
-            createdAt: true,
-            user: { select: { name: true, imageUrl: true } },
-          },
-          orderBy: { createdAt: "desc" },
-          take: 10,
-        },
-      },
+              orderBy: { order: 'asc' }
+            }
+          }
+        }
+      }
     });
 
     if (!course) {
       return NextResponse.json({ error: "Course not found" }, { status: 404 });
     }
 
-    // Check access: private courses only accessible by author
-    if (course.isPrivate && course.authorId !== userId) {
-      return NextResponse.json({ error: "Access denied" }, { status: 403 });
-    }
-
-    // Get user progress for this course
-    const userProgress = await prisma.userProgress.findMany({
-      where: { userId, courseId: course.id },
-      select: { moduleId: true, completedAt: true, activeSlide: true },
-    });
-
-    return NextResponse.json({
-      course,
-      userProgress,
-    });
+    return NextResponse.json({ course });
   } catch (error) {
-    console.error("[GET /api/courses/[slug]]", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    console.error("Fetch course detail error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

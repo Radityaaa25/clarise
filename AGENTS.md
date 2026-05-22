@@ -188,6 +188,7 @@ Required env vars for **apps/app**:
 #### API Routes
 - [ ] `app/api/ai/ask/route.ts` — Implement Gemini chat endpoint (POST: message → AI response, rate-limited, user context-aware)
 - [ ] `app/api/webhook/duitku/route.ts` — Implement Duitku payment webhook (verify signature, update Subscription status)
+- [ ] **Payments:** Implement Idempotency Key (Hash `userId` + `planId` + `timestamp`) when generating Duitku checkout URL to prevent double charges.
 - [ ] `app/api/courses/route.ts` — GET courses list (with category/difficulty filters, pagination)
 - [ ] `app/api/courses/[slug]/route.ts` — GET single course with modules
 - [ ] `app/api/progress/route.ts` — POST mark module complete, GET user progress

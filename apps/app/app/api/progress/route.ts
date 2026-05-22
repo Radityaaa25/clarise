@@ -1,151 +1,113 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@clerk/nextjs/server";
+import { z } from "zod";
 
-// POST /api/progress — Mark module as complete or update active slide
-export async function POST(req: NextRequest) {
+const progressSchema = z.object({
+  moduleId: z.string(),
+  courseId: z.string(),
+});
+
+export async function GET(req: NextRequest) {
   try {
-    const { userId: clerkId } = await auth();
-    if (!clerkId) {
+    const { userId } = await auth();
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get internal user
-    const user = await prisma.user.findUnique({ where: { clerkId } });
-    if (!user) {
-      return NextResponse.json({ error: "User not found in database" }, { status: 404 });
-    }
+    const { searchParams } = new URL(req.url);
+    const courseId = searchParams.get("courseId");
 
-    const body = await req.json();
-    const { moduleId, courseId, action, activeSlide } = body;
+    const user = await prisma.user.findUnique({
+      where: { clerkId: userId },
+      select: { id: true }
+    });
 
-    if (!moduleId || !courseId) {
-      return NextResponse.json({ error: "moduleId and courseId are required" }, { status: 400 });
-    }
+    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-    // Free user: check if they already have an enrolled course
-    if (user.role === "FREE") {
-      const existingEnrollment = await prisma.userProgress.findFirst({
-        where: {
-          userId: user.id,
-          courseId: { not: courseId },
-        },
-      });
-
-      if (existingEnrollment) {
-        return NextResponse.json(
-          { error: "Akun gratis hanya bisa mengambil 1 kursus. Upgrade ke Premium untuk akses unlimited." },
-          { status: 403 }
-        );
+    const progress = await prisma.userProgress.findMany({
+      where: {
+        userId: user.id,
+        ...(courseId ? { courseId } : {})
       }
-    }
+    });
 
-    if (action === "complete") {
-      // Mark module as complete
-      const progress = await prisma.userProgress.upsert({
-        where: {
-          userId_moduleId: { userId: user.id, moduleId },
-        },
-        update: {
-          completedAt: new Date(),
-        },
-        create: {
-          userId: user.id,
-          moduleId,
-          courseId,
-          completedAt: new Date(),
-        },
-      });
-
-      // Award XP
-      const module = await prisma.module.findUnique({ where: { id: moduleId } });
-      if (module) {
-        await prisma.user.update({
-          where: { id: user.id },
-          data: {
-            xp: { increment: module.xpReward },
-            lastActiveAt: new Date(),
-          },
-        });
-
-        // Check level up (100 XP per level)
-        const updatedUser = await prisma.user.findUnique({ where: { id: user.id } });
-        if (updatedUser) {
-          const newLevel = Math.floor(updatedUser.xp / 100) + 1;
-          if (newLevel > updatedUser.level) {
-            await prisma.user.update({
-              where: { id: user.id },
-              data: { level: newLevel },
-            });
-          }
-        }
-      }
-
-      return NextResponse.json({ progress, message: "Module marked as complete" });
-    }
-
-    if (action === "updateSlide" && typeof activeSlide === "number") {
-      // Update active slide position
-      const progress = await prisma.userProgress.upsert({
-        where: {
-          userId_moduleId: { userId: user.id, moduleId },
-        },
-        update: {
-          activeSlide,
-        },
-        create: {
-          userId: user.id,
-          moduleId,
-          courseId,
-          activeSlide,
-        },
-      });
-
-      // Update last active
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { lastActiveAt: new Date() },
-      });
-
-      return NextResponse.json({ progress });
-    }
-
-    return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+    return NextResponse.json({ progress });
   } catch (error) {
-    console.error("[POST /api/progress]", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    console.error("Fetch progress error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
-// GET /api/progress — Get user's progress across all courses
-export async function GET(req: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    const { userId: clerkId } = await auth();
-    if (!clerkId) {
+    const { userId } = await auth();
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({ where: { clerkId } });
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const body = await req.json();
+    const result = progressSchema.safeParse(body);
+
+    if (!result.success) {
+      return NextResponse.json({ error: "Invalid data", details: result.error }, { status: 400 });
     }
 
-    const progress = await prisma.userProgress.findMany({
-      where: { userId: user.id },
-      include: {
-        course: {
-          select: { title: true, slug: true, totalModules: true },
-        },
-        module: {
-          select: { title: true, slug: true, order: true },
-        },
-      },
-      orderBy: { enrolledAt: "desc" },
+    const { moduleId, courseId } = result.data;
+
+    const user = await prisma.user.findUnique({
+      where: { clerkId: userId },
+      select: { id: true, xp: true }
     });
 
-    return NextResponse.json({ progress, user: { xp: user.xp, level: user.level, streak: user.streak } });
+    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+
+    const module = await prisma.module.findUnique({
+      where: { id: moduleId },
+      select: { xpReward: true }
+    });
+
+    if (!module) return NextResponse.json({ error: "Module not found" }, { status: 404 });
+
+    // Upsert progress
+    const progress = await prisma.userProgress.upsert({
+      where: {
+        userId_moduleId: {
+          userId: user.id,
+          moduleId
+        }
+      },
+      update: {
+        completedAt: new Date(),
+      },
+      create: {
+        userId: user.id,
+        moduleId,
+        courseId,
+        completedAt: new Date(),
+      }
+    });
+
+    // Add XP to user (simplified, without transaction for now)
+    await prisma.user.update({
+      where: { clerkId: userId },
+      data: {
+        xp: { increment: module.xpReward }
+      }
+    });
+
+    // Also record UserActivity
+    await prisma.userActivity.create({
+      data: {
+        userId: user.id,
+        type: "MODULE_COMPLETE",
+        metadata: { moduleId, courseId, xpEarned: module.xpReward }
+      }
+    });
+
+    return NextResponse.json({ success: true, progress, xpEarned: module.xpReward });
   } catch (error) {
-    console.error("[GET /api/progress]", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    console.error("Update progress error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

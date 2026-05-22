@@ -16,14 +16,25 @@ datasource db {
 // ──────────────────────────────────────────────
 
 enum UserRole {
-  FREE
-  PREMIUM
+  USER
+  ADMIN
 }
 
 enum Difficulty {
   BEGINNER
   INTERMEDIATE
   ADVANCED
+}
+
+enum SubscriptionPlan {
+  FREE
+  PREMIUM
+  PREMIUM_YEARLY
+}
+
+enum CourseVisibility {
+  PUBLIC
+  PRIVATE
 }
 
 enum SubscriptionStatus {
@@ -50,23 +61,39 @@ model User {
   clerkId      String   @unique
   email        String   @unique
   name         String?
-  imageUrl     String?
-  role         UserRole @default(FREE)
-  xp           Int      @default(0)
-  level        Int      @default(1)
-  streak       Int      @default(0)
-  lastActiveAt DateTime @default(now())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  imageUrl             String?
+  role                 UserRole   @default(USER)
+  onboardingCompleted  Boolean    @default(false)
+  learningGoal         String?
+  currentLevel         Difficulty?
+  dailyHours           Int?
+  referralCode         String?    @unique
+  referredBy           String?
+  aiPreferences        Json?
+  xp                   Int        @default(0)
+  level                Int        @default(1)
+  currentStreak        Int        @default(0)
+  longestStreak        Int        @default(0)
+  streakProtectionUsed Int        @default(0)
+  lastActiveDate       DateTime?
+  gracePeriodEnd       DateTime?
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
 
   progress      UserProgress[]
   badges        UserBadge[]
   subscription  Subscription?
   ratings       CourseRating[]
   createdCourses Course[]      @relation("CourseAuthor")
+  notifications Notification[]
+  activities    UserActivity[]
+  referralLogs  ReferralLog[]  @relation("Referrer")
+  aiChatHistory AiChatHistory[]
+  dailyReminder DailyReminder?
 
   @@index([clerkId])
   @@index([email])
+  @@index([referralCode])
 }
 
 model Category {
@@ -91,12 +118,14 @@ model Course {
   categoryId     String
   difficulty     Difficulty @default(BEGINNER)
   totalModules   Int        @default(0)
-  isUserGenerated Boolean   @default(false)
-  isPrivate      Boolean    @default(false)
-  isPublished    Boolean    @default(false)
-  isPremium      Boolean    @default(false)
+  isUserGenerated Boolean          @default(false)
+  isPrivate      Boolean           @default(false)
+  visibility     CourseVisibility  @default(PUBLIC)
+  language       String            @default("id")
+  isPublished    Boolean           @default(false)
+  isPremium      Boolean           @default(false)
   authorId       String?
-  rating         Float      @default(0)
+  rating         Float             @default(0)
   ratingCount    Int        @default(0)
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
@@ -171,6 +200,7 @@ model UserProgress {
   @@unique([userId, moduleId])
   @@index([userId])
   @@index([courseId])
+  @@index([userId, courseId])
 }
 
 model CourseRating {
@@ -215,7 +245,8 @@ model Subscription {
   id              String             @id @default(cuid())
   userId          String             @unique
   status          SubscriptionStatus @default(PENDING)
-  tripayReference String?
+  plan            SubscriptionPlan   @default(FREE)
+  duitkuReference String?
   startDate       DateTime?
   endDate         DateTime?
   createdAt       DateTime           @default(now())
@@ -223,5 +254,80 @@ model Subscription {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@index([tripayReference])
+  @@index([duitkuReference])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // STREAK_REMINDER, SUBSCRIPTION_EXPIRING, BADGE_EARNED, dll
+  title     String
+  body      String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model UserActivity {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // COURSE_VIEW, MODULE_COMPLETE, AI_CHAT, LOGIN
+  metadata  Json?
+  date      DateTime @default(now())
+  duration  Int?     // in seconds
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, date])
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  target    String   @default("ALL") // ALL/FREE/PREMIUM
+  isActive  Boolean  @default(true)
+  startAt   DateTime
+  endAt     DateTime?
+  createdAt DateTime @default(now())
+}
+
+model ReferralLog {
+  id          String   @id @default(cuid())
+  referrerId  String
+  referredId  String
+  rewardGiven Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  referrer    User     @relation("Referrer", fields: [referrerId], references: [id], onDelete: Cascade)
+
+  @@index([referrerId])
+}
+
+model AiChatHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  courseId  String?
+  moduleId  String?
+  messages  Json     // Array of {role: "user"|"ai", content: "..."}
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model DailyReminder {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  enabled       Boolean  @default(false)
+  preferredTime String   @default("08:00") // format HH:mm
+  channel       String   @default("EMAIL") // EMAIL/PUSH
+  updatedAt     DateTime @updatedAt
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
