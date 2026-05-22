@@ -53,7 +53,7 @@ export default function HomePage() {
         <div className="fade-in-up delay-300 flex flex-col sm:flex-row items-center gap-4">
           {/* Mulai Gratis — split arrow animation */}
           <ArrowButton
-            href={`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/sign-up`}>
+            href={`${process.env.NEXT_PUBLIC_APP_URL || "https://app.clarise.my.id"}/sign-up`}>
             Mulai Gratis
           </ArrowButton>
           {/* Pelajari Lebih Lanjut — simple outline, no arrow */}
@@ -146,7 +146,7 @@ export default function HomePage() {
                   yang siap membantumu 24/7 dengan konteks yang akurat.
                 </p>
                 <a
-                  href={`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/sign-up`}
+                  href={`${process.env.NEXT_PUBLIC_APP_URL || "https://app.clarise.my.id"}/sign-up`}
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold text-core-blue transition-all hover:bg-white/90">
                   Try AI Tutor
                   <ArrowRight className="h-4 w-4" />
@@ -243,7 +243,7 @@ export default function HomePage() {
         </p>
 
         <ArrowButton
-          href={`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/sign-up`}
+          href={`${process.env.NEXT_PUBLIC_APP_URL || "https://app.clarise.my.id"}/sign-up`}
           className="px-16 py-3 text-[15px]">
           Mulai Gratis Sekarang
         </ArrowButton>

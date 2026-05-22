@@ -54,7 +54,7 @@ export default function PricingPage() {
                 </li>
               ))}
             </ul>
-            <a href={`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/sign-up`} className="w-full py-4 rounded-xl border border-black/20 dark:border-white/20 font-bold text-ink dark:text-white text-center hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+            <a href={`${process.env.NEXT_PUBLIC_APP_URL || "https://app.clarise.my.id"}/sign-up`} className="w-full py-4 rounded-xl border border-black/20 dark:border-white/20 font-bold text-ink dark:text-white text-center hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
               Mulai Gratis
             </a>
           </motion.div>
@@ -80,7 +80,7 @@ export default function PricingPage() {
                 </li>
               ))}
             </ul>
-            <a href={`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/sign-up`} className="w-full py-4 rounded-xl border border-core-blue text-core-blue dark:text-sky font-bold text-center hover:bg-core-blue/10 dark:hover:bg-sky/10 transition-colors">
+            <a href={`${process.env.NEXT_PUBLIC_APP_URL || "https://app.clarise.my.id"}/sign-up`} className="w-full py-4 rounded-xl border border-core-blue text-core-blue dark:text-sky font-bold text-center hover:bg-core-blue/10 dark:hover:bg-sky/10 transition-colors">
               Langganan Bulanan
             </a>
           </motion.div>
@@ -110,7 +110,7 @@ export default function PricingPage() {
                 </li>
               ))}
             </ul>
-            <a href={`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/sign-up`} className="w-full py-4 rounded-xl bg-core-blue text-white font-bold text-center hover:bg-core-blue/90 transition-all shadow-lg shadow-core-blue/20 hover:scale-[1.02] active:scale-95">
+            <a href={`${process.env.NEXT_PUBLIC_APP_URL || "https://app.clarise.my.id"}/sign-up`} className="w-full py-4 rounded-xl bg-core-blue text-white font-bold text-center hover:bg-core-blue/90 transition-all shadow-lg shadow-core-blue/20 hover:scale-[1.02] active:scale-95">
               Paling Hemat
             </a>
           </motion.div>

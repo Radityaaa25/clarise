@@ -20,7 +20,8 @@ export default clerkMiddleware(async (auth, req) => {
     // Keamanan super ketat: Hanya user yang diset "role": "admin" di Clerk Dashboard yang bisa masuk!
     if (user.publicMetadata.role !== "admin") {
       // Jika bukan admin, lempar kembali ke aplikasi utama (LMS)
-      return NextResponse.redirect(new URL('http://localhost:3000/dashboard', req.url));
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.clarise.my.id';
+      return NextResponse.redirect(new URL(`${appUrl}/dashboard`, req.url));
     }
   }
 });

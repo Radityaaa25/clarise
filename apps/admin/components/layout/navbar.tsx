@@ -53,7 +53,7 @@ export function FloatingNavbar() {
 
           {/* Coba Gratis — solid blue with split arrow */}
           <ArrowButton
-            href={`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/sign-up`}
+            href={`${process.env.NEXT_PUBLIC_APP_URL || "https://app.clarise.my.id"}/sign-up`}
             className="px-5 py-2 text-sm"
           >
             Coba Gratis
@@ -86,7 +86,7 @@ export function FloatingNavbar() {
             Berlangganan
           </Link>
           <ArrowButton
-            href={`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/sign-up`}
+            href={`${process.env.NEXT_PUBLIC_APP_URL || "https://app.clarise.my.id"}/sign-up`}
             className="w-full py-3"
           >
             Coba Gratis
