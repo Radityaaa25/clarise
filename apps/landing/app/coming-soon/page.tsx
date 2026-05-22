@@ -22,7 +22,7 @@ export default function ComingSoonPage() {
         </div>
         
         <h1 className="text-4xl sm:text-5xl font-black text-ink dark:text-white mb-6">
-          Fitur Premium Sedang <span className="text-core-blue">Digodok!</span> 🍳
+          Fitur Premium Sedang <span className="text-core-blue">Dikembangkan!</span>
         </h1>
         
         <p className="text-lg text-ink/70 dark:text-white/70 mb-10 leading-relaxed max-w-xl mx-auto">

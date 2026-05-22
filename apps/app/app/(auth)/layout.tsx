@@ -6,7 +6,7 @@ import Image from "next/image";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-canvas overflow-hidden">
+    <div className="relative flex min-h-screen justify-center pt-[8vh] sm:pt-[12vh] bg-canvas overflow-hidden">
       {/* Background for light mode only */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <div className="absolute top-[-20%] left-[-10%] h-[60%] w-[60%] rounded-full bg-core-blue/15 blur-[150px]" />
