@@ -15,7 +15,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
 
       <div className="relative z-10 flex w-full max-w-md flex-col items-center justify-center p-6 sm:p-0 mx-auto">
         {/* Brand / Logo */}
-        <a href={process.env.NEXT_PUBLIC_APP_URL || "/"} className="mb-6 flex justify-center group">
+        <a href={process.env.NEXT_PUBLIC_APP_URL || "/"} className="flex justify-center group relative z-20 -mb-6 translate-y-4">
           <Image src="/logoLM.png" alt="Clarise Logo" width={180} height={60} className="w-[140px] sm:w-[180px] h-auto dark:hidden" />
           <Image src="/logoDM.png" alt="Clarise Logo" width={180} height={60} className="w-[140px] sm:w-[180px] h-auto hidden dark:block" />
         </a>

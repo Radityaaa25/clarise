@@ -2,6 +2,7 @@
 
 import { CheckCircle2, Zap } from "lucide-react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function PricingPage() {
   return (
@@ -80,9 +81,9 @@ export default function PricingPage() {
                 </li>
               ))}
             </ul>
-            <a href={`${process.env.NEXT_PUBLIC_APP_URL || "https://app.clarise.my.id"}/sign-up`} className="w-full py-4 rounded-xl border border-core-blue text-core-blue dark:text-sky font-bold text-center hover:bg-core-blue/10 dark:hover:bg-sky/10 transition-colors">
+            <Link href="/coming-soon" className="w-full py-4 rounded-xl border border-core-blue text-core-blue dark:text-sky font-bold text-center hover:bg-core-blue/10 dark:hover:bg-sky/10 transition-colors block">
               Langganan Bulanan
-            </a>
+            </Link>
           </motion.div>
 
           {/* Premium Tahunan Tier */}
@@ -110,9 +111,9 @@ export default function PricingPage() {
                 </li>
               ))}
             </ul>
-            <a href={`${process.env.NEXT_PUBLIC_APP_URL || "https://app.clarise.my.id"}/sign-up`} className="w-full py-4 rounded-xl bg-core-blue text-white font-bold text-center hover:bg-core-blue/90 transition-all shadow-lg shadow-core-blue/20 hover:scale-[1.02] active:scale-95">
+            <Link href="/coming-soon" className="w-full py-4 rounded-xl bg-core-blue text-white font-bold text-center hover:bg-core-blue/90 transition-all shadow-lg shadow-core-blue/20 hover:scale-[1.02] active:scale-95 block">
               Paling Hemat
-            </a>
+            </Link>
           </motion.div>
         </div>
       </div>
