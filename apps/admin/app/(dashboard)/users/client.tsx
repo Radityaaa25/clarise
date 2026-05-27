@@ -1,10 +1,28 @@
 "use client";
 import { useState } from "react";
-import { MoreHorizontal, ShieldAlert, ShieldCheck } from "lucide-react";
+import { MoreHorizontal, ShieldAlert, ShieldCheck, Trash2 } from "lucide-react";
+import { deleteUser } from "@/app/actions/user";
+import { useRouter } from "next/navigation";
 
 export function UsersClient({ initialUsers }: { initialUsers: any[] }) {
   const [planFilter, setPlanFilter] = useState("All Plans");
   const [statusFilter, setStatusFilter] = useState("All Status");
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+  const router = useRouter();
+
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`Apakah Anda yakin ingin menghapus pengguna ${name || 'ini'} secara permanen dari database dan Clerk?`)) {
+      return;
+    }
+    setLoadingId(id);
+    const res = await deleteUser(id);
+    setLoadingId(null);
+    if (!res.success) {
+      alert(res.error);
+    } else {
+      router.refresh(); // Segarkan data server komponen
+    }
+  };
 
   const users = initialUsers.filter(user => {
     const matchPlan = planFilter === "All Plans" || user.plan === planFilter.toUpperCase();
@@ -86,8 +104,13 @@ export function UsersClient({ initialUsers }: { initialUsers: any[] }) {
                     {user.joined}
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <button className="neo-btn bg-card text-foreground p-2">
-                      <MoreHorizontal className="w-5 h-5" />
+                    <button 
+                      onClick={() => handleDelete(user.id, user.name)}
+                      disabled={loadingId === user.id}
+                      className="neo-btn bg-destructive text-destructive-foreground p-2 disabled:opacity-50"
+                      title="Hapus Pengguna"
+                    >
+                      {loadingId === user.id ? <MoreHorizontal className="w-5 h-5 animate-pulse" /> : <Trash2 className="w-5 h-5" />}
                     </button>
                   </td>
                 </tr>

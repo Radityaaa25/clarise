@@ -77,10 +77,10 @@ export function AdminSidebar() {
       </nav>
 
       <div className="p-4 border-t-2 border-border space-y-2 bg-card">
-        <button className="w-full flex items-center gap-3 px-3 py-3 font-bold border-2 border-transparent text-muted-foreground hover:border-border hover:bg-secondary hover:text-secondary-foreground hover:neo-shadow-sm transition-all">
+        <Link href="/settings" className="w-full flex items-center gap-3 px-3 py-3 font-bold border-2 border-transparent text-muted-foreground hover:border-border hover:bg-secondary hover:text-secondary-foreground hover:neo-shadow-sm transition-all">
           <Settings className="w-5 h-5" />
           Pengaturan
-        </button>
+        </Link>
         <SignOutButton signOutOptions={{ redirectUrl: '/sign-in' }}>
           <button className="neo-btn w-full flex items-center gap-3 px-3 py-3 bg-destructive text-destructive-foreground">
             <LogOut className="w-5 h-5" />

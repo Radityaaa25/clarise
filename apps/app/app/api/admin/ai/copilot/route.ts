@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { corsResponse } from "@/lib/cors";
-import { genAI } from "@/lib/gemini";
+import { genAIAdmin } from "@/lib/gemini";
 import { FunctionDeclaration, SchemaType } from "@google/generative-ai";
 import { ADMIN_KNOWLEDGE } from "@/lib/ai-knowledge";
 import { z } from "zod";
@@ -68,7 +68,7 @@ const copilotTools = [
   },
 ];
 
-const geminiCopilotModel = genAI.getGenerativeModel({
+const geminiCopilotModel = genAIAdmin.getGenerativeModel({
   model: "gemini-flash-latest",
   tools: copilotTools,
   systemInstruction: `Anda adalah AI Copilot khusus untuk Admin di platform Clarise.

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { MoreHorizontal, Plus, Tag, Trash, Power, PowerOff } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
+import { deleteVoucher, deactivateVoucher } from "@/app/actions/voucher";
 
 type Voucher = {
   id: string;
@@ -38,6 +39,8 @@ export default function VouchersPage() {
   // We'll use NEXT_PUBLIC_APP_URL which should point to localhost:3000 in dev
   const apiUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
+  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+
   const fetchVouchers = async () => {
     try {
       const token = await getToken();
@@ -70,6 +73,30 @@ export default function VouchersPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDelete = async (id: string, code: string) => {
+    if (!confirm(`Yakin ingin menghapus voucher ${code}?`)) return;
+    setActionLoadingId(id);
+    const res = await deleteVoucher(id);
+    if (res.success) {
+      await fetchVouchers();
+    } else {
+      alert(res.error);
+    }
+    setActionLoadingId(null);
+  };
+
+  const handleDeactivate = async (id: string, code: string) => {
+    if (!confirm(`Yakin ingin menonaktifkan voucher ${code}?`)) return;
+    setActionLoadingId(id);
+    const res = await deactivateVoucher(id);
+    if (res.success) {
+      await fetchVouchers();
+    } else {
+      alert(res.error);
+    }
+    setActionLoadingId(null);
   };
 
   useEffect(() => {
@@ -282,8 +309,23 @@ export default function VouchersPage() {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end gap-2">
-                      <button className="neo-btn bg-destructive text-destructive-foreground p-2" title="Disable">
-                        <PowerOff className="w-4 h-4" />
+                      {isActive && (
+                        <button 
+                          onClick={() => handleDeactivate(v.id, v.code)}
+                          disabled={actionLoadingId === v.id}
+                          className="neo-btn bg-destructive text-destructive-foreground p-2 disabled:opacity-50" 
+                          title="Disable"
+                        >
+                          <PowerOff className="w-4 h-4" />
+                        </button>
+                      )}
+                      <button 
+                        onClick={() => handleDelete(v.id, v.code)}
+                        disabled={actionLoadingId === v.id}
+                        className="neo-btn bg-destructive text-destructive-foreground p-2 disabled:opacity-50" 
+                        title="Delete"
+                      >
+                        <Trash className="w-4 h-4" />
                       </button>
                     </div>
                   </td>

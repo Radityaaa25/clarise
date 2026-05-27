@@ -50,7 +50,7 @@ export default function GenerateCoursePage() {
               "50 pesan AI Tutor per jam (vs 5 untuk gratis)",
               "Akses unlimited kursus",
             ].map((item, i) => (
-              <li key={i} className="flex items-start gap-3 text-sm text-body dark:text-on-dark-soft">
+              <li key={i} className="flex items-start gap-3 text-sm text-body dark:text-white/90">
                 <CheckCircle2 className="h-5 w-5 text-success shrink-0 mt-0.5" />
                 {item}
               </li>

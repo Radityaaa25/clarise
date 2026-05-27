@@ -1,9 +1,32 @@
 "use client";
 import { CheckCircle2, XCircle, Eye, Trash2, ShieldAlert } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { deleteCourse, toggleCoursePublish } from "@/app/actions/course";
 
 export function CoursesClient({ initialCourses }: { initialCourses: any[] }) {
   const [filter, setFilter] = useState("ALL");
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+  const router = useRouter();
+
+  const apiUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
+  const handleDelete = async (id: string, title: string) => {
+    if (!confirm(`Yakin ingin menghapus kursus "${title}" secara permanen?`)) return;
+    setLoadingId(id);
+    const res = await deleteCourse(id);
+    setLoadingId(null);
+    if (!res.success) alert(res.error);
+    else router.refresh();
+  };
+
+  const handleTogglePublish = async (id: string, isPublished: boolean) => {
+    setLoadingId(id);
+    const res = await toggleCoursePublish(id, isPublished);
+    setLoadingId(null);
+    if (!res.success) alert(res.error);
+    else router.refresh();
+  };
   
   const courses = initialCourses.filter(course => {
     if (filter === "ALL") return true;
@@ -74,20 +97,28 @@ export function CoursesClient({ initialCourses }: { initialCourses: any[] }) {
                 </td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex justify-end gap-3">
-                    <a href={`http://localhost:3000/course/${course.slug}`} target="_blank" rel="noreferrer" className="neo-btn bg-card text-foreground p-2" title="Preview">
+                    <a href={`${apiUrl}/course/${course.slug}`} target="_blank" rel="noreferrer" className="neo-btn bg-card text-foreground p-2 hover:bg-muted" title="Preview">
                       <Eye className="w-4 h-4" />
                     </a>
                     {!course.isPublished && (
                       <>
-                        <button className="neo-btn bg-primary text-primary-foreground p-2" title="Approve">
+                        <button 
+                          onClick={() => handleTogglePublish(course.id, true)}
+                          disabled={loadingId === course.id}
+                          className="neo-btn bg-primary text-primary-foreground p-2 hover:opacity-90 disabled:opacity-50" 
+                          title="Approve"
+                        >
                           <CheckCircle2 className="w-4 h-4" />
                         </button>
-                        <button className="neo-btn bg-destructive text-destructive-foreground p-2" title="Reject">
-                          <XCircle className="w-4 h-4" />
-                        </button>
+                        {/* We could use XCircle for reject, but delete handles it for now */}
                       </>
                     )}
-                    <button className="neo-btn bg-destructive text-destructive-foreground p-2" title="Delete">
+                    <button 
+                      onClick={() => handleDelete(course.id, course.title)}
+                      disabled={loadingId === course.id}
+                      className="neo-btn bg-destructive text-destructive-foreground p-2 hover:opacity-90 disabled:opacity-50" 
+                      title="Delete"
+                    >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
