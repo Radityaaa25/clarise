@@ -75,7 +75,7 @@ export default async function AdminDashboard() {
         <div className="neo-card p-6 min-h-[400px] flex flex-col">
           <h3 className="text-xl font-black text-foreground mb-6 uppercase border-b-2 border-border pb-2">Recent Users</h3>
           <div className="space-y-4 flex-1">
-            {recentUsers.length > 0 ? recentUsers.map((user: typeof recentUsers[number], i) => (
+            {recentUsers.length > 0 ? recentUsers.map((user: typeof recentUsers[number], i: number) => (
               <div key={user.id} className="flex items-center gap-3 bg-background border-2 border-border p-3 neo-shadow-sm">
                 <div className="w-10 h-10 border-2 border-border bg-secondary flex items-center justify-center font-bold text-secondary-foreground">
                   {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
