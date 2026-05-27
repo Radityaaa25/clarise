@@ -18,7 +18,7 @@ export default async function ReportsPage() {
     reporter: report.user?.name || report.user?.email || "Unknown User",
     reason: report.reason,
     status: report.status,
-    date: report.createdAt.toISOString().split('T')[0]
+    date: report.createdAt.toISOString().slice(0, 10)
   }));
 
   return <ReportsClient initialReports={formattedReports} />;

@@ -40,7 +40,7 @@ export default async function AIMonitorPage() {
         context: chat.courseId ? "Course Chat" : "General Chat",
         snippet: "...flagged content detected...",
         status: "FLAGGED",
-        date: chat.updatedAt.toISOString().split('T')[0]
+        date: chat.updatedAt.toISOString().slice(0, 10)
       });
     }
   });

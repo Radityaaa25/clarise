@@ -24,7 +24,7 @@ export default async function UsersPage() {
     email: user.email,
     plan: user.subscription?.plan || "FREE",
     status: user.subscription?.status === "CANCELLED" || user.subscription?.status === "EXPIRED" ? "BANNED" : "ACTIVE", // Simplified status for admin view
-    joined: user.createdAt.toISOString().split('T')[0]
+    joined: user.createdAt.toISOString().slice(0, 10)
   }));
 
   return <UsersClient initialUsers={formattedUsers} />;

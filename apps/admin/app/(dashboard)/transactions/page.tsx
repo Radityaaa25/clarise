@@ -18,7 +18,7 @@ export default async function TransactionsPage() {
     amount: tx.amount,
     status: tx.status,
     method: tx.method,
-    date: tx.createdAt.toISOString().split('T')[0]
+    date: tx.createdAt.toISOString().slice(0, 10)
   }));
 
   // Calculate monthly total for the current month
