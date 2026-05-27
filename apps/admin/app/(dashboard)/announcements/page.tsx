@@ -19,7 +19,7 @@ export default async function AnnouncementsPage() {
       title: ann.title,
       target: ann.target,
       status: status,
-      date: ann.createdAt.toISOString().split('T')[0]
+      date: ann.createdAt.toISOString().slice(0, 10)
     };
   });
 
