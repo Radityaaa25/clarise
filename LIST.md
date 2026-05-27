@@ -6,17 +6,62 @@
 
 ## 📋 Daftar Isi
 
-1. [Phase 1 — Database & Core API](#phase-1--database--core-api)
-2. [Phase 2 — Auth & User Sync](#phase-2--auth--user-sync)
-3. [Phase 3 — AI Integration & Safety](#phase-3--ai-integration--safety)
-4. [Phase 4 — Subscription & Payment (Duitku)](#phase-4--subscription--payment-duitku)
-5. [Phase 5 — Gamification Engine](#phase-5--gamification-engine)
-6. [Phase 6 — Advanced Features](#phase-6--advanced-features)
-7. [Phase 7 — Admin Panel](#phase-7--admin-panel)
-8. [Perbandingan Free vs Premium](#-perbandingan-free-vs-premium)
-9. [Pricing](#-pricing)
-10. [Alur Berlangganan & Data Setelah Expired](#-alur-berlangganan--data-setelah-expired)
-11. [Tambahan dari AI (Rekomendasi)](#-tambahan-dari-ai-rekomendasi)
+1. [Phase 0 — Performance Foundation](#phase-0--performance-foundation)
+2. [Phase 1 — Database & Core API](#phase-1--database--core-api)
+3. [Phase 2 — Auth & User Sync](#phase-2--auth--user-sync)
+4. [Phase 3 — AI Integration & Safety](#phase-3--ai-integration--safety)
+5. [Phase 4 — Subscription & Payment (Duitku)](#phase-4--subscription--payment-duitku)
+6. [Phase 5 — Gamification Engine](#phase-5--gamification-engine)
+7. [Phase 6 — Advanced Features](#phase-6--advanced-features)
+8. [Phase 7 — Admin Panel](#phase-7--admin-panel)
+9. [Perbandingan Free vs Premium](#-perbandingan-free-vs-premium)
+10. [Pricing](#-pricing)
+11. [Alur Berlangganan & Data Setelah Expired](#-alur-berlangganan--data-setelah-expired)
+12. [Tambahan dari AI (Rekomendasi)](#-tambahan-dari-ai-rekomendasi)
+
+---
+
+## Phase 0 — Performance Foundation
+
+> Tujuan: Memastikan web Clarise cepat dari hari pertama.
+> Dikerjakan BERSAMAAN dengan Phase 1, bukan setelahnya.
+
+- [x] Konversi semua gambar di apps/landing/public/ ke format .webp
+      (Dashboard.png, Explore.png, MyCourse.png, Streak.png, CreateCourse.png)
+      — gunakan tool seperti cwebp atau squoosh.app
+- [x] Setup next/font di layout.tsx kedua app untuk load 
+      Darker Grotesque dan DM Sans secara optimal
+- [x] Pastikan SEMUA query Prisma menggunakan select + take
+      — tidak ada query tanpa batasan
+- [x] Setup @next/bundle-analyzer di kedua app untuk audit bundle size
+- [x] Enable Vercel Speed Insights setelah deploy pertama
+- [ ] Aktifkan Supabase connection pooling (port 6543) dari awal
+      — jangan tunggu traffic tinggi
+
+Satu Hal Penting yang Belum Ada di Keduanya
+Font loading — ini yang paling sering bikin web terasa lambat tapi sering diabaikan.
+Di apps/app/app/layout.tsx dan apps/landing/app/layout.tsx, pastikan font diload seperti ini:
+```typescript
+// SALAH (lambat) — jangan pakai @import di CSS
+// @import url('https://fonts.googleapis.com/css2?family=...')
+
+// BENAR (cepat) — pakai next/font
+import { Darker_Grotesque, DM_Sans } from 'next/font/google'
+
+const darkerGrotesque = Darker_Grotesque({
+  subsets: ['latin'],
+  weight: ['700', '900'],
+  display: 'swap',      // teks muncul dulu, font menyusul
+  preload: true,
+})
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  weight: ['300', '400', '500'],
+  display: 'swap',
+  preload: true,
+})
+```
 
 ---
 
@@ -26,7 +71,7 @@
 
 ### 1.1 Prisma Schema Updates
 
-- [ ] Update `prisma/schema.prisma` — tambah/perbarui model sesuai kebutuhan fitur baru:
+- [x] Update `prisma/schema.prisma` — tambah/perbarui model sesuai kebutuhan fitur baru:
   - `User` — tambah field: `onboardingCompleted`, `learningGoal`, `currentLevel`, `dailyHours`, `referralCode`, `referredBy`, `aiPreferences` (JSON), `currentStreak`, `longestStreak`, `lastActiveDate`, `streakProtectionUsed`, `gracePeriodEnd`, `role` (USER/ADMIN)
   - `Subscription` — tambah field: `plan` (FREE/PREMIUM/PREMIUM_YEARLY), `startDate`, `endDate`, `status` (ACTIVE/EXPIRED/CANCELLED), `duitkuReference`
   - `CourseRating` — model baru: `userId`, `courseId`, `rating` (1-5), `review` (text), `createdAt`
@@ -36,25 +81,25 @@
   - `DailyReminder` — model baru: `userId`, `enabled`, `preferredTime`, `channel` (EMAIL/PUSH)
   - `Course` — tambah field: `visibility` (PUBLIC/PRIVATE), `creatorId`, `isAiGenerated`, `language`, `avgRating`, `totalRatings`
   - `Notification` — model baru: `userId`, `type`, `title`, `body`, `isRead`, `createdAt`
-- [ ] **Database Indexing**: Tambahkan `@@index` pada field yang sering di-query agar query tidak lambat saat user banyak:
+- [x] **Database Indexing**: Tambahkan `@@index` pada field yang sering di-query agar query tidak lambat saat user banyak:
   - `@@index([userId, courseId])` pada `UserProgress`
   - `@@index([userId, date])` pada `UserActivity`
   - `@@index([authorId])` pada `Course` (sebagai ganti createdBy)
 - [ ] **Production Environment**: Pastikan `DATABASE_URL` untuk production menggunakan connection pooling (Supabase Transaction mode / port 6543), berbeda dengan URL development.
-- [ ] Jalankan `pnpm db:migrate` untuk membuat migrasi
-- [ ] Buat `prisma/seed.ts` — data awal: categories, sample courses, sample modules, badges
+- [x] Jalankan `pnpm db:migrate` untuk membuat migrasi
+- [x] Buat `prisma/seed.ts` — data awal: categories, sample courses, sample modules, badges
 
 ### 1.2 Core API Routes
 
-- [ ] `GET /api/courses` — list courses dengan filter (category, difficulty, search, pagination)
-- [ ] `GET /api/courses/[slug]` — single course + modules
-- [ ] `POST /api/progress` — mark module complete (dengan XP reward)
-- [ ] `GET /api/progress` — user progress untuk course tertentu
-- [ ] `GET /api/user` — profil user + subscription status
-- [ ] `PATCH /api/user` — update profil user
-- [ ] `GET /api/achievements` — badges + XP + streak data
-- [ ] Semua route harus dilindungi `auth()` dari Clerk
-- [ ] Validasi input dengan **Zod** di semua endpoint
+- [x] `GET /api/courses` — list courses dengan filter (category, difficulty, search, pagination)
+- [x] `GET /api/courses/[slug]` — single course + modules
+- [x] `POST /api/progress` — mark module complete (dengan XP reward)
+- [x] `GET /api/progress` — user progress untuk course tertentu
+- [x] `GET /api/user` — profil user + subscription status
+- [x] `PATCH /api/user` — update profil user
+- [x] `GET /api/achievements` — badges + XP + streak data
+- [x] Semua route harus dilindungi `auth()` dari Clerk
+- [x] Validasi input dengan **Zod** di semua endpoint
 
 ---
 
@@ -64,7 +109,7 @@
 
 ### 2.1 Clerk Webhook
 
-- [ ] `POST /api/webhook/clerk` — handle event `user.created` dan `user.updated`
+- [x] `POST /api/webhook/clerk` — handle event `user.created` dan `user.updated`
   - Verifikasi signature dengan `svix`
   - Buat/update record `User` di Prisma
   - Generate unique `referralCode` saat user baru dibuat
@@ -72,13 +117,13 @@
 
 ### 2.2 Onboarding Quiz
 
-- [ ] Buat halaman UI `/onboarding` di `apps/app`
+- [x] Buat halaman UI `/onboarding` di `apps/app`
   - 3 step wizard: pilih topik → pilih level → pilih jam/hari
-- [ ] `POST /api/onboarding` — simpan jawaban onboarding quiz
+- [x] `POST /api/onboarding` — simpan jawaban onboarding quiz
   - Simpan ke field `learningGoal`, `currentLevel`, `dailyHours` di User
   - Set `onboardingCompleted: true`
   - Return rekomendasi course pertama berdasarkan jawaban
-- [ ] Middleware/guard: otomatis redirect setelah sign up jika `onboardingCompleted: false`
+- [x] Middleware/guard: otomatis redirect setelah sign up jika `onboardingCompleted: false`
 
 ---
 
@@ -88,14 +133,14 @@
 
 ### 3.1 AI Chat Endpoint
 
-- [ ] `POST /api/ai/ask` — endpoint utama AI chat
+- [x] `POST /api/ai/ask` — endpoint utama AI chat
   - Terima: `message`, `courseId` (optional), `moduleId` (optional)
   - Return: AI response sebagai streaming text
   - Simpan ke `AiChatHistory` untuk konteks berkelanjutan
 
 ### 3.2 AI Course Generator (Premium Only)
 
-- [ ] `POST /api/ai/generate-course` — generate kursus dengan AI
+- [x] `POST /api/ai/generate-course` — generate kursus dengan AI
   - Terima: `topic`, `language`, `difficulty`, `visibility` (PUBLIC/PRIVATE)
   - Gemini generate: judul, deskripsi, modul-modul, konten per modul
   - Prioritaskan sumber & video berbahasa Indonesia jika prompt dalam bahasa Indonesia
@@ -142,16 +187,16 @@
 
 #### Lapisan B: Rate Limiting per User (Upstash Redis)
 
-- [ ] **Free user**: Maksimal **10 request AI per hari**
-- [ ] **Premium user**: Maksimal **Unlimited** (tetap ada global rate limit 60 req/menit untuk anti-abuse)
-- [ ] Track usage di Redis dengan key `ai:usage:{userId}:{date}`
-- [ ] Return sisa kuota di response header: `X-AI-Remaining: 7`
-- [ ] Jika kuota habis → return 429 + pesan upgrade ke Premium
+- [x] **Free user**: Maksimal **10 request AI per hari**
+- [x] **Premium user**: Maksimal **Unlimited** (tetap ada global rate limit 60 req/menit untuk anti-abuse)
+- [x] Track usage di Redis dengan key `ai:usage:{userId}:{date}`
+- [x] Return sisa kuota di response header: `X-AI-Remaining: 7`
+- [x] Jika kuota habis → return 429 + pesan upgrade ke Premium
 
 #### Lapisan C: Pemisahan System Prompt dari User Input
 
-- [ ] **JANGAN PERNAH** menggabungkan system prompt dan user input dalam satu string
-- [ ] Gunakan format `messages` array yang terpisah:
+- [x] **JANGAN PERNAH** menggabungkan system prompt dan user input dalam satu string
+- [x] Gunakan format `messages` array yang terpisah:
   ```typescript
   const messages = [
     { role: "system", content: SYSTEM_PROMPT },      // Lapisan 1: Persona
@@ -161,7 +206,7 @@
     { role: "user", content: sanitizedUserInput },    // Input user (sudah disanitasi)
   ];
   ```
-- [ ] System prompt di-hardcode di server, **TIDAK PERNAH** dikirim dari client
+- [x] System prompt di-hardcode di server, **TIDAK PERNAH** dikirim dari client
 - [ ] Implementasi **output validation** — cek response AI terhadap daftar kata/pola terlarang
 
 ### 3.5 🧠 AI yang Belajar dari Kebiasaan User (Premium)
@@ -183,6 +228,31 @@
 ## Phase 4 — Subscription & Payment (Duitku)
 
 > **Tujuan**: Integrasi payment gateway dan manajemen langganan.
+
+### 4.0 🎁 Early Access Program
+
+Sebelum payment gateway live, jalankan program Early Access
+untuk dapat user nyata dan validasi product-market fit.
+
+- [ ] Buat model Voucher dan VoucherRedemption di Prisma schema
+- [ ] POST /api/voucher/redeem — validasi dan aktivasi kode
+- [ ] GET /api/voucher/check — cek apakah kode valid dan 
+      masih ada slot
+- [ ] Logic: set user role PREMIUM + buat Subscription 
+      dengan plan PREMIUM_TRIAL
+- [ ] Email H-7 dan H-1 sebelum trial expired (via Resend)
+- [ ] Email konfirmasi saat kode berhasil diaktifkan
+- [ ] UI: halaman redeem kode setelah sign up
+- [ ] UI: banner "X hari lagi" di dashboard saat trial
+      mau habis
+- [ ] Admin: monitor berapa slot terpakai per kode
+- [ ] Buat kode pertama: EARLYBIRD (200 slots, 30 hari)
+      dan kode event spesifik sesuai kebutuhan
+
+Kode yang disiapkan untuk launch awal:
+- EARLYBIRD    → umum, 200 slots, 30 hari
+- CLARISEBETA  → teman kampus, 30 slots, 30 hari  
+- Kode event   → dibuat per event/presentasi
 
 ### 4.1 💰 Pricing
 
@@ -432,8 +502,8 @@
 ## Phase 7 — Admin Panel
 
 ### 7.1 Setup & Akses
-- [ ] **Lokasi**: Opsi A — subdomain terpisah `admin.clarise.com` di `apps/admin/` dalam monorepo yang sama.
-- [ ] **User model update**: Pastikan field `role UserRole @default(USER)` ada di schema Prisma (sudah ditambahkan sebelumnya).
+- [x] **Lokasi**: Opsi A — subdomain terpisah `admin.clarise.com` di `apps/admin/` dalam monorepo yang sama.
+- [x] **User model update**: Pastikan field `role UserRole @default(USER)` ada di schema Prisma (sudah ditambahkan sebelumnya).
 - [ ] **Set admin manual**: Jalankan langsung di Supabase SQL editor atau Prisma Studio:
   ```sql
   UPDATE "User" SET role = 'ADMIN' WHERE email = 'emaillo@gmail.com';
@@ -459,14 +529,14 @@
   ```
 
 ### 7.2 Halaman & Fitur
-- [ ] **Dashboard Overview (`/admin`)**
+- [x] **Dashboard Overview (`/admin`)**
   - Total user (semua, active bulan ini, baru hari ini)
   - Total revenue bulan ini vs bulan lalu
   - Conversion rate: free → premium
   - Total AI token terpakai bulan ini (+ estimasi biaya)
   - Course terbaru yang di-report
   - Grafik: user growth 30 hari terakhir & revenue 12 bulan terakhir
-- [ ] **User Management (`/admin/users`)**
+- [x] **User Management (`/admin/users`)**
   - Tabel: nama, email, plan, join date, last active, status
   - Filter: by plan (FREE/PREMIUM), by status (active/banned)
   - Search by nama/email
@@ -480,7 +550,7 @@
     - `GET /api/admin/users/[id]`
     - `PATCH /api/admin/users/[id]` — update role/status
     - `POST /api/admin/users/[id]/grant-premium` — manual grant
-- [ ] **Course Moderation (`/admin/courses`)**
+- [x] **Course Moderation (`/admin/courses`)**
   - Tabel: judul, creator, visibility, status, rating, tanggal buat
   - Filter: by status (published/flagged/unpublished), by type (AI-generated/manual)
   - Tab terpisah: "Perlu Review" (course yang di-report)
@@ -494,14 +564,14 @@
     - `GET /api/admin/courses/flagged`
     - `PATCH /api/admin/courses/[id]/status`
     - `DELETE /api/admin/courses/[id]`
-- [ ] **Report Management (`/admin/reports`)**
+- [x] **Report Management (`/admin/reports`)**
   - List report (info: course, pelapor, alasan, tanggal)
   - Status: PENDING / RESOLVED / DISMISSED
   - Aksi: resolve (unpublish course) atau dismiss (abaikan report)
   - *API routes*:
     - `GET /api/admin/reports`
     - `PATCH /api/admin/reports/[id]`
-- [ ] **Transaction Monitor (`/admin/transactions`)**
+- [x] **Transaction Monitor (`/admin/transactions`)**
   - Tabel: user, plan, amount, status, payment method, tanggal
   - Filter: by status (SUCCESS/FAILED/PENDING/EXPIRED), by plan
   - Total revenue dengan range tanggal custom
@@ -509,7 +579,7 @@
   - *API routes*:
     - `GET /api/admin/transactions`
     - `GET /api/admin/transactions/export` — return CSV
-- [ ] **AI Monitor (`/admin/ai`)**
+- [x] **AI Monitor (`/admin/ai`)**
   - Total request hari ini / bulan ini & estimasi biaya
   - Log chat ter-flag (berisi kata kunci mencurigakan)
   - Aksi: review chat log, ban user yang abuse
@@ -517,7 +587,7 @@
     - `GET /api/admin/ai/stats`
     - `GET /api/admin/ai/flagged-chats`
     - `POST /api/admin/ai/flagged-chats/[id]/resolve`
-- [ ] **Announcement (`/admin/announcements`)**
+- [x] **Announcement (`/admin/announcements`)**
   - Buat pengumuman (banner di app user), target: ALL/FREE/PREMIUM
   - Jadwal: publish sekarang atau scheduled
   - *API routes*:
@@ -525,6 +595,25 @@
     - `POST /api/admin/announcements`
     - `PATCH /api/admin/announcements/[id]`
     - `DELETE /api/admin/announcements/[id]`
+- [ ] **Voucher Management (`/admin/vouchers`)**
+  - Tabel: kode, tipe, slot terpakai/total, expired date, status
+  - Buat voucher baru: form dengan field kode, tipe, maxUses, trialDays/discountPct, expiresAt
+  - Nonaktifkan/aktifkan voucher toggle
+  - Lihat detail: siapa saja yang redeem + kapan
+  - Export CSV: data redemption per voucher
+  - *API routes*:
+    - `GET  /api/admin/vouchers`         — list semua voucher
+    - `POST /api/admin/vouchers`         — buat voucher baru
+    - `PATCH /api/admin/vouchers/[id]`   — update/nonaktifkan
+    - `GET  /api/admin/vouchers/[id]/redemptions` — siapa yang redeem
+- [ ] **Admin AI Co-pilot (`/admin/copilot`)**
+  - Chat interface khusus untuk admin dengan Gemini AI (System Prompt: "Clarise Platform Manager")
+  - Function Calling / Tools untuk AI:
+    - `getPlatformStats()`: Akses data revenue, user aktif, konversi
+    - `generateAndSaveCourse()`: Otomatis bikin struktur course, modul, dan konten ke database
+    - `createVoucher()`: Generate kode diskon dan simpan ke database
+  - *API routes*:
+    - `POST /api/admin/ai/copilot` — endpoint khusus AI Admin dengan function calling
 
 ### 7.3 Tech Stack Admin Panel
 - **Framework** → Next.js 16 (sama dengan app lain di monorepo)
@@ -556,6 +645,17 @@
   - Announcement system
   - CSV export
   - Analytics lebih detail
+
+---
+
+## 💅 UI Polish & Minor Fixes (Penting sebelum rilis)
+- [x] **LMS App (`apps/app`)**: Fungsikan tombol notifikasi di halaman dashboard.
+- [x] **LMS App (`apps/app`)**: Fungsikan tab Pengaturan (Keamanan, Notifikasi, Langganan) yang saat ini hanya Profil yang bisa diklik.
+- [x] **LMS App (`apps/app`)**: Ganti logo Clarise saat mode gelap menggunakan `logoDM.png`.
+- [x] **Admin Panel (`apps/admin`)**: Fungsikan tombol lonceng notifikasi.
+- [x] **Admin Panel (`apps/admin`)**: Perbaiki fungsi *filter* di berbagai menu (contoh: menu Users).
+- [x] **Admin Panel (`apps/admin`)**: Tambahkan terjemahan/teks Bahasa Indonesia (opsional: *switch language button*).
+- [x] **Landing Page (`apps/landing`)**: Fungsikan semua tautan/link di bagian *footer*.
 
 ---
 
@@ -631,6 +731,210 @@ Phase 7: Admin Panel
 - [ ] CORS configuration: hanya allow domain sendiri
 - [ ] Audit log untuk transaksi pembayaran dan perubahan subscription
 - [ ] **Error handling & monitoring strategy**: Integrasi Sentry di backend untuk menangkap unhandled exceptions dan error logs
+
+### 🔐 Security Hardening — Perlindungan Menyeluruh
+
+#### A. Serangan Klasik (OWASP Top 10)
+**A1. SQL Injection**
+- [ ] Semua query database WAJIB melalui Prisma ORM — tidak boleh ada
+      raw SQL dari input user sama sekali
+- [ ] Jika terpaksa pakai raw query: gunakan Prisma.$queryRaw dengan
+      tagged template literal (Prisma.$queryRaw`SELECT * FROM "User" 
+      WHERE id = ${userId}`) — BUKAN string concatenation
+- [ ] Audit semua Prisma query: pastikan tidak ada interpolasi string
+      langsung dari request body atau query params
+
+**A2. XSS (Cross-Site Scripting)**
+- [ ] JANGAN pernah gunakan dangerouslySetInnerHTML — jika terpaksa
+      untuk render markdown/HTML, wajib sanitasi dulu dengan DOMPurify
+      atau sanitize-html sebelum di-render
+- [ ] Content Security Policy (CSP) header sudah ada di next.config.ts,
+      pastikan script-src tidak menggunakan 'unsafe-inline' di production
+- [ ] User-generated content (review, nama, deskripsi course): 
+      strip semua HTML tag sebelum disimpan ke database
+- [ ] Output encoding: React sudah handle ini secara default untuk JSX,
+      tapi tetap waspada saat render konten dari database
+
+**A3. CSRF (Cross-Site Request Forgery)**
+- [ ] Next.js Server Actions sudah punya CSRF protection bawaan
+- [ ] Untuk API routes manual: validasi header Origin dan Referer
+- [ ] Pastikan semua cookie sensitif pakai flag: 
+      HttpOnly, Secure, SameSite=Strict
+- [ ] Clerk sudah handle session cookie dengan aman — jangan buat
+      sistem autentikasi sendiri
+
+**A4. Broken Authentication**
+- [x] Jangan pernah simpan password — biarkan Clerk yang handle
+- [ ] Session invalidation: pastikan logout benar-benar invalidate
+      token di Clerk, bukan hanya hapus cookie lokal
+- [ ] Implementasi account lockout: setelah 5x login gagal,
+      lock akun sementara (Clerk sudah punya fitur ini, aktifkan)
+- [ ] Paksa re-auth untuk aksi sensitif: ubah email, hapus akun,
+      ubah subscription
+
+**A5. Sensitive Data Exposure**
+- [ ] API response JANGAN pernah return field sensitif:
+      password hash, internal ID, Clerk secret, API keys
+- [ ] Gunakan Prisma select secara eksplisit — jangan return
+      seluruh object User yang berisi data internal
+- [ ] Log sanitization: pastikan Sentry dan console.log tidak
+      mencatat data sensitif (token, password, nomor kartu)
+- [ ] Semua komunikasi WAJIB HTTPS — Vercel handle ini otomatis,
+      tapi pastikan tidak ada HTTP redirect yang bocor
+
+**A6. IDOR (Insecure Direct Object Reference)**
+- [ ] Setiap request yang akses resource by ID: validasi bahwa
+      resource tersebut milik user yang sedang login
+- [ ] Contoh yang WAJIB dicek:
+      GET /api/progress?courseId=xxx → apakah course ini milik user ini?
+      GET /api/ai/chat-history?id=xxx → apakah history ini milik user ini?
+      PATCH /api/courses/xxx → apakah user adalah creator course ini?
+- [ ] Jangan gunakan sequential integer ID yang mudah di-enumerate
+      — gunakan cuid() atau uuid() (Prisma default cuid sudah benar)
+- [ ] Private course: double-check ownership di SETIAP endpoint,
+      jangan hanya di middleware
+
+**A7. Security Misconfiguration**
+- [ ] Hapus semua debug endpoint sebelum production
+      (misal: /api/debug, /api/test, /api/seed)
+- [ ] Pastikan error message yang dikirim ke client bersifat generic
+      — jangan expose stack trace, nama tabel database, atau path file
+- [ ] Environment variables: audit semua yang pakai prefix 
+      NEXT_PUBLIC_ — hanya expose yang benar-benar dibutuhkan client
+- [ ] Prisma Studio (/api/prisma-studio): pastikan tidak bisa
+      diakses di production environment
+- [x] Disable Next.js powered-by header di next.config.ts:
+      poweredByHeader: false
+
+#### B. Serangan Modern & API-Specific
+**B1. Mass Assignment / Over-Posting**
+- [ ] WAJIB whitelist field yang boleh diupdate via PATCH /api/user
+      Contoh yang DILARANG di-update langsung dari client:
+      role, subscription.status, xp, streak, referralCode
+- [ ] Gunakan Zod schema yang strict untuk setiap endpoint —
+      .strip() untuk hapus field yang tidak dikenali
+      Contoh:
+      const UpdateUserSchema = z.object({
+        name: z.string().max(100).optional(),
+        dailyHours: z.number().min(1).max(24).optional(),
+      }).strict() // tolak field apapun di luar schema ini
+
+**B2. API Abuse & Scraping**
+- [ ] Rate limiting berlapis:
+      - Global: 100 request/menit per IP (Upstash)
+      - Per user: 200 request/menit per userId (Upstash)
+      - AI endpoint: 10/hari free, 60/menit premium (sudah ada)
+      - Auth endpoint: 10 request/15 menit per IP
+      - Payment endpoint: 5 request/jam per userId
+- [ ] Bot detection: tambahkan honeypot field di form sign-up
+      (field tersembunyi yang tidak boleh diisi manusia)
+      Jika field ini terisi → reject request, tandai IP sebagai bot
+- [ ] Proteksi endpoint publik dari scraping massal:
+      GET /api/courses → limit 50 request/jam per IP tanpa auth
+
+**B3. Prototype Pollution**
+- [ ] Jangan merge object dari user input langsung ke object aplikasi
+- [ ] Gunakan JSON.parse() dengan validasi Zod, bukan eval()
+- [ ] Hindari penggunaan lodash merge/extend dengan input tidak terpercaya
+      — gunakan spread operator {...obj} yang aman
+- [ ] Install dan aktifkan eslint-plugin-security untuk deteksi
+      pola berbahaya secara otomatis
+
+**B4. Server-Side Request Forgery (SSRF)**
+- [ ] Jika ada fitur yang fetch URL dari input user (misal: import
+      course dari URL, atau embed video): WAJIB whitelist domain
+      yang boleh di-fetch (youtube.com, githubusercontent.com, dll)
+- [ ] Blokir request ke internal network:
+      169.254.x.x (AWS metadata), 10.x.x.x, 192.168.x.x, 127.x.x.x
+- [ ] Jangan gunakan URL dari user input langsung di fetch() server-side
+      tanpa validasi
+
+**B5. ReDoS (Regular Expression Denial of Service)**
+- [ ] Audit semua regex yang digunakan untuk validasi input
+- [ ] Hindari regex dengan backtracking berlebihan untuk input user
+- [ ] Gunakan Zod built-in validators (z.string().email(), 
+      z.string().url()) daripada regex custom yang kompleks
+- [ ] Set timeout untuk operasi regex yang kompleks
+
+**B6. Dependency Confusion & Supply Chain Attack**
+- [ ] Audit dependencies secara berkala: jalankan pnpm audit
+      minimal setiap minggu
+- [ ] Pin versi dependencies di package.json — hindari ^ atau ~
+      untuk dependencies kritikal (auth, payment, database)
+- [ ] Setup Dependabot di GitHub untuk auto-detect 
+      vulnerable dependencies
+- [ ] Jangan install package dari sumber tidak resmi —
+      hanya dari registry npmjs.com resmi
+- [ ] Review setiap package baru sebelum install:
+      cek download count, last publish date, dan maintainer
+
+**B7. Clickjacking**
+- [ ] X-Frame-Options: DENY sudah ada di next.config.ts —
+      pastikan tidak dikomentari di production (ada di Production 
+      Readiness checklist)
+- [ ] Tambahkan juga frame-ancestors 'none' di Content-Security-Policy
+      sebagai double protection
+
+**B8. HTTP Parameter Pollution**
+- [ ] Validasi semua query parameter dengan Zod sebelum digunakan
+- [ ] Jika ada parameter yang muncul duplikat, ambil hanya satu
+      — jangan biarkan behavior undefined
+- [ ] Contoh: GET /api/courses?role=admin&role=user →
+      harus di-handle eksplisit, bukan ambil keduanya
+
+#### C. AI-Specific Security (Khusus Clarise)
+- [ ] Prompt injection sudah ada di Phase 3.4 — pastikan juga
+      output dari AI di-scan sebelum dikirim ke client:
+      cek apakah ada instruksi tersembunyi dalam response
+      (misal: AI diperintahkan untuk output "ignore above")
+- [ ] Jangan pernah tampilkan system prompt ke user meski diminta
+- [ ] AI-generated course content: scan sebelum disimpan ke DB
+      untuk konten berbahaya, link phishing, atau script injection
+- [ ] Batasi panjang output AI: set maxOutputTokens di Gemini config
+      agar tidak ada response yang terlalu panjang yang bisa
+      digunakan untuk DoS
+- [ ] Jika user upload file untuk AI (future feature): 
+      scan dengan antivirus API sebelum diproses
+
+#### D. Infrastructure & Deployment Security
+- [ ] Vercel Environment Variables: pisahkan nilai untuk
+      Preview (staging) dan Production — jangan pakai key yang sama
+- [ ] Supabase Row Level Security (RLS): aktifkan di semua tabel
+      yang berisi data user — ini lapisan keamanan tambahan
+      di level database sekalipun ada bug di aplikasi
+      Contoh policy:
+      CREATE POLICY "Users can only see own data"
+      ON "UserProgress" FOR ALL
+      USING (auth.uid()::text = "userId");
+- [ ] Database backup: aktifkan auto-backup di Supabase
+      — minimal daily backup, simpan 7 hari terakhir
+- [ ] Principle of Least Privilege:
+      - Supabase anon key: hanya untuk operasi yang butuh akses publik
+      - Service role key: hanya di server (webhook, cron), 
+        JANGAN di client atau NEXT_PUBLIC_
+- [ ] Secret rotation: ganti semua API key setiap 90 hari
+      (Gemini, Clerk, Upstash, Sentry)
+- [ ] GitHub repo: pastikan tidak ada secret yang ter-commit
+      Install git-secrets atau trufflehog untuk deteksi otomatis
+
+#### E. Monitoring & Incident Response
+- [ ] Setup alert di Sentry untuk:
+      - Error rate > 5% dalam 5 menit
+      - Response time > 3 detik
+      - 100+ failed auth attempts dalam 1 jam
+      - Unusual spike di AI token usage
+- [ ] Upstash rate limit logging: simpan log setiap kali
+      rate limit tercapai — ini indikasi serangan
+- [ ] Buat incident response plan sederhana:
+      1. Detect (Sentry alert)
+      2. Contain (block IP via Vercel firewall, disable endpoint)  
+      3. Investigate (review logs)
+      4. Recover (deploy fix)
+      5. Document (catat apa yang terjadi)
+- [ ] Security audit berkala:
+      - Mingguan: pnpm audit + review Sentry issues
+      - Bulanan: review access logs Supabase
+      - Per 3 bulan: rotate secrets + full dependency audit
 
 ---
 

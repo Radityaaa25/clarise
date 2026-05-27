@@ -35,7 +35,7 @@ export default function GenerateCoursePage() {
           <h1 className="text-3xl font-black font-heading text-ink dark:text-white mb-3">
             Fitur Premium
           </h1>
-          <p className="text-lg text-muted leading-relaxed">
+          <p className="text-lg text-muted dark:text-white/90 leading-relaxed">
             AI Course Generator hanya tersedia untuk pengguna Premium. Buat kursus khusus dari topik apapun, di-generate oleh AI dari berbagai sumber terpercaya.
           </p>
         </div>
@@ -76,7 +76,7 @@ export default function GenerateCoursePage() {
           <Wand2 className="h-8 w-8 text-spark" />
           AI Course Generator
         </h1>
-        <p className="text-muted">
+        <p className="text-muted dark:text-white/90">
           Deskripsikan topik yang ingin kamu pelajari, dan AI akan membuatkan kursus lengkap untukmu.
         </p>
       </div>
@@ -95,7 +95,7 @@ export default function GenerateCoursePage() {
             placeholder="Contoh: Belajar TypeScript untuk React Developer"
             className="w-full h-12 rounded-lg border border-hairline bg-surface-soft dark:bg-void px-4 text-sm text-ink dark:text-white placeholder:text-muted-soft focus:border-core-blue focus:ring-2 focus:ring-core-blue/20 outline-none transition-all"
           />
-          <p className="text-xs text-muted-soft mt-1.5">Semakin spesifik topikmu, semakin baik hasilnya.</p>
+          <p className="text-xs text-muted-soft dark:text-white/70 mt-1.5">Semakin spesifik topikmu, semakin baik hasilnya.</p>
         </div>
 
         {/* Category */}
@@ -151,7 +151,7 @@ export default function GenerateCoursePage() {
             onChange={(e) => setModuleCount(Number(e.target.value))}
             className="w-full accent-core-blue"
           />
-          <div className="flex justify-between text-xs text-muted-soft mt-1">
+          <div className="flex justify-between text-xs text-muted-soft dark:text-white/70 mt-1">
             <span>3 modul</span>
             <span>15 modul</span>
           </div>
@@ -179,7 +179,7 @@ export default function GenerateCoursePage() {
 
       {/* Privacy Notice */}
       <div className="rounded-lg border border-hairline bg-surface-soft dark:bg-void-elevated p-4">
-        <p className="text-xs text-muted leading-relaxed">
+        <p className="text-xs text-muted dark:text-white/90 leading-relaxed">
           🔒 <strong>Privasi:</strong> Kursus yang kamu buat akan tersimpan secara <strong>pribadi</strong> dan hanya bisa diakses oleh kamu sendiri. Tidak ada data pribadi yang dikirim ke pihak ketiga — hanya topik dan konteks materi yang diproses oleh AI.
         </p>
       </div>

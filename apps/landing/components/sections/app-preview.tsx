@@ -6,40 +6,40 @@ const features = [
   { 
     id: "dashboard", 
     label: "Dashboard", 
-    fileLM: "/DashboardLM.png",
-    fileDM: "/DashboardDM.png", 
+    fileLM: "/DashboardLM.webp",
+    fileDM: "/DashboardDM.webp", 
     desc: "Pantau progress, XP, dan pertahankan learning streak harianmu dengan mudah. Ringkasan performa divisualisasikan dengan elegan.",
     badge: "Overview"
   },
   { 
     id: "explore", 
     label: "Explore", 
-    fileLM: "/ExploreLM.png",
-    fileDM: "/ExploreDM.png", 
+    fileLM: "/ExploreLM.webp",
+    fileDM: "/ExploreDM.webp", 
     desc: "Temukan ratusan kursus dari berbagai kategori. Discover your next skill dengan modul pembelajaran terstruktur yang disesuaikan.",
     badge: "Library"
   },
   { 
     id: "mycourse", 
     label: "My Courses", 
-    fileLM: "/MyCourseLM.png",
-    fileDM: "/MyCourseDM.png", 
+    fileLM: "/MyCourseLM.webp",
+    fileDM: "/MyCourseDM.webp", 
     desc: "Kelola dan lanjutkan kursus aktifmu kapan saja. Seamless learning experience yang membuat kamu selalu ingin kembali.",
     badge: "Learning"
   },
   { 
     id: "streak", 
     label: "Achievements", 
-    fileLM: "/AchievmentLM.png",
-    fileDM: "/AchievmentDM.png", 
+    fileLM: "/AchievmentLM.webp",
+    fileDM: "/AchievmentDM.webp", 
     desc: "Kumpulkan berbagai badge eksklusif dan tingkatkan levelmu. Gamified for you agar perjalanan belajarmu tidak pernah membosankan.",
     badge: "Gamification"
   },
   { 
     id: "create", 
     label: "AI Course Builder", 
-    fileLM: "/CreateCourseLM.png",
-    fileDM: "/CreateCourseDm.png", 
+    fileLM: "/CreateCourseLM.webp",
+    fileDM: "/CreateCourseDm.webp", 
     desc: "Buat kursus kustom secara instan dengan bantuan AI. Your personal course creator yang memahami materi spesifik keinginanmu.",
     badge: "Premium"
   },

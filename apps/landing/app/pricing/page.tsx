@@ -1,10 +1,71 @@
 "use client";
 
-import { CheckCircle2, Zap } from "lucide-react";
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { CheckCircle2, Zap, X, Ticket, Loader2, ArrowRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://app.clarise.my.id";
+
 export default function PricingPage() {
+  const [showVoucherModal, setShowVoucherModal] = useState(false);
+  const [voucherCode, setVoucherCode] = useState("");
+  const [voucherStatus, setVoucherStatus] = useState<
+    "idle" | "loading" | "valid" | "invalid"
+  >("idle");
+  const [voucherMessage, setVoucherMessage] = useState("");
+  const [voucherTrialDays, setVoucherTrialDays] = useState(0);
+  const [isVoucherEnabled, setIsVoucherEnabled] = useState(true);
+
+  useEffect(() => {
+    fetch(`${APP_URL}/api/settings/voucher-popup`)
+      .then((res) => res.json())
+      .then((data) => setIsVoucherEnabled(data.enabled))
+      .catch(() => setIsVoucherEnabled(true));
+  }, []);
+
+  async function handleCheckVoucher() {
+    if (!voucherCode.trim()) return;
+    setVoucherStatus("loading");
+    setVoucherMessage("");
+
+    try {
+      const res = await fetch(
+        `${APP_URL}/api/voucher/check/${encodeURIComponent(voucherCode.trim().toUpperCase())}`
+      );
+      const data = await res.json();
+
+      if (res.ok && data.isValid) {
+        setVoucherStatus("valid");
+        setVoucherTrialDays(data.trialDays || 30);
+        setVoucherMessage(
+          `Kode valid! Kamu akan mendapatkan akses Premium gratis selama ${data.trialDays || 30} hari.`
+        );
+      } else {
+        setVoucherStatus("invalid");
+        setVoucherMessage(
+          data.error || "Kode voucher tidak valid atau sudah habis masa berlakunya."
+        );
+      }
+    } catch {
+      setVoucherStatus("invalid");
+      setVoucherMessage("Gagal memverifikasi kode. Coba lagi nanti.");
+    }
+  }
+
+  function handleRedeem() {
+    // Redirect to app sign-up with voucher code pre-filled
+    const code = voucherCode.trim().toUpperCase();
+    window.location.href = `${APP_URL}/sign-up?voucher=${encodeURIComponent(code)}`;
+  }
+
+  function closeModal() {
+    setShowVoucherModal(false);
+    setVoucherCode("");
+    setVoucherStatus("idle");
+    setVoucherMessage("");
+  }
+
   return (
     <main className="min-h-screen bg-canvas text-ink dark:bg-void dark:text-frost font-body overflow-hidden pt-32 pb-24">
       {/* Background Effects */}
@@ -55,12 +116,12 @@ export default function PricingPage() {
                 </li>
               ))}
             </ul>
-            <a href={`${process.env.NEXT_PUBLIC_APP_URL || "https://app.clarise.my.id"}/sign-up`} className="w-full py-4 rounded-xl border border-black/20 dark:border-white/20 font-bold text-ink dark:text-white text-center hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+            <a href={`${APP_URL}/sign-up`} className="w-full py-4 rounded-xl border border-black/20 dark:border-white/20 font-bold text-ink dark:text-white text-center hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
               Mulai Gratis
             </a>
           </motion.div>
 
-          {/* Premium Bulanan Tier */}
+          {/* Premium Bulanan Tier — dengan Voucher Pop-up */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -81,9 +142,18 @@ export default function PricingPage() {
                 </li>
               ))}
             </ul>
-            <Link href="/coming-soon" className="w-full py-4 rounded-xl border border-core-blue text-core-blue dark:text-sky font-bold text-center hover:bg-core-blue/10 dark:hover:bg-sky/10 transition-colors block">
+            <button
+              onClick={() => {
+                if (isVoucherEnabled) {
+                  setShowVoucherModal(true);
+                } else {
+                  window.location.href = `${APP_URL}/sign-up?plan=premium`;
+                }
+              }}
+              className="w-full py-4 rounded-xl border border-core-blue text-core-blue dark:text-sky font-bold text-center hover:bg-core-blue/10 dark:hover:bg-sky/10 transition-colors cursor-pointer"
+            >
               Langganan Bulanan
-            </Link>
+            </button>
           </motion.div>
 
           {/* Premium Tahunan Tier */}
@@ -117,6 +187,143 @@ export default function PricingPage() {
           </motion.div>
         </div>
       </div>
+
+      {/* ── VOUCHER MODAL ── */}
+      <AnimatePresence>
+        {showVoucherModal && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+              onClick={closeModal}
+            />
+
+            {/* Modal */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div
+                className="relative w-full max-w-md rounded-3xl border border-black/10 dark:border-white/10 bg-white dark:bg-void-elevated p-8 shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Close button */}
+                <button
+                  onClick={closeModal}
+                  className="absolute top-4 right-4 p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-body dark:text-frost/60"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+
+                {/* Header */}
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 rounded-2xl bg-core-blue/10 dark:bg-core-blue/20 flex items-center justify-center">
+                    <Ticket className="h-6 w-6 text-core-blue dark:text-sky" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold font-heading text-ink dark:text-white">
+                      Punya Kode Voucher?
+                    </h2>
+                    <p className="text-sm text-body dark:text-frost/50">
+                      Masukkan kode untuk akses Premium gratis
+                    </p>
+                  </div>
+                </div>
+
+                {/* Input */}
+                <div className="mb-4">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={voucherCode}
+                      onChange={(e) => {
+                        setVoucherCode(e.target.value.toUpperCase());
+                        if (voucherStatus !== "idle") {
+                          setVoucherStatus("idle");
+                          setVoucherMessage("");
+                        }
+                      }}
+                      onKeyDown={(e) => e.key === "Enter" && handleCheckVoucher()}
+                      placeholder="Contoh: EARLYBIRD"
+                      maxLength={30}
+                      className="w-full px-4 py-3.5 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/5 text-ink dark:text-white placeholder:text-muted-soft font-mono text-lg tracking-wider focus:outline-none focus:ring-2 focus:ring-core-blue/50 focus:border-core-blue transition-all"
+                      disabled={voucherStatus === "loading"}
+                      autoFocus
+                    />
+                  </div>
+                </div>
+
+                {/* Status message */}
+                <AnimatePresence mode="wait">
+                  {voucherMessage && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      className={`mb-4 px-4 py-3 rounded-xl text-sm font-medium ${
+                        voucherStatus === "valid"
+                          ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20"
+                          : "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20"
+                      }`}
+                    >
+                      {voucherMessage}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Buttons */}
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      window.location.href = `${APP_URL}/sign-up?plan=premium`;
+                    }}
+                    className="flex-1 py-3.5 rounded-xl border border-black/10 dark:border-white/10 font-bold text-body dark:text-frost/60 hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+                  >
+                    Tidak punya
+                  </button>
+
+                  {voucherStatus === "valid" ? (
+                    <button
+                      onClick={handleRedeem}
+                      className="flex-1 py-3.5 rounded-xl bg-core-blue text-white font-bold hover:bg-core-blue/90 transition-all shadow-lg shadow-core-blue/20 flex items-center justify-center gap-2"
+                    >
+                      Daftar & Aktifkan
+                      <ArrowRight className="h-4 w-4" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleCheckVoucher}
+                      disabled={!voucherCode.trim() || voucherStatus === "loading"}
+                      className="flex-1 py-3.5 rounded-xl bg-core-blue text-white font-bold hover:bg-core-blue/90 transition-all shadow-lg shadow-core-blue/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      {voucherStatus === "loading" ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Mengecek...
+                        </>
+                      ) : (
+                        "Cek Kode"
+                      )}
+                    </button>
+                  )}
+                </div>
+
+                {/* Footer hint */}
+                <p className="mt-4 text-center text-xs text-muted dark:text-frost/30">
+                  Kode voucher bisa didapatkan melalui event atau promosi Clarise.
+                </p>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </main>
   );
 }

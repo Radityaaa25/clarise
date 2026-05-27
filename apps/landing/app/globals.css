@@ -48,6 +48,10 @@
   border-color: theme(--color-hairline);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 html.dark body {
   background-color: var(--color-void);
   color: var(--color-frost);

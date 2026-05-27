@@ -1,12 +1,11 @@
-import Link from "next/link";
+"use client";
+
+import { useRouter } from "next/navigation";
 import { Ghost, ArrowLeft } from "lucide-react";
 
-export const metadata = {
-  title: "404 - Halaman Tidak Ditemukan",
-  description: "Halaman yang Anda cari tidak dapat ditemukan.",
-};
-
 export default function NotFound() {
+  const router = useRouter();
+  
   return (
     <div className="min-h-screen flex items-center justify-center bg-canvas relative overflow-hidden">
       {/* Aesthetic Background */}
@@ -31,13 +30,13 @@ export default function NotFound() {
           Halaman yang Anda tuju sepertinya sudah dihapus, dipindahkan, atau memang tidak pernah ada. Jangan khawatir, mari kembali ke jalan yang benar!
         </p>
 
-        <Link 
-          href="/dashboard" 
+        <button 
+          onClick={() => router.back()}
           className="px-8 py-4 rounded-xl bg-core-blue text-white font-bold hover:bg-core-blue/90 transition-all shadow-lg shadow-core-blue/20 flex items-center gap-2 hover:-translate-y-1"
         >
           <ArrowLeft className="w-5 h-5" />
-          Kembali ke Dashboard
-        </Link>
+          Kembali ke Halaman Sebelumnya
+        </button>
       </div>
     </div>
   );

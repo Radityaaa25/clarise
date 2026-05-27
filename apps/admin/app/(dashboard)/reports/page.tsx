@@ -1,4 +1,4 @@
-import { Flag, CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, XCircle } from "lucide-react";
 
 export default function ReportsPage() {
   const reports = [

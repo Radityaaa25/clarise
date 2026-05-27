@@ -30,11 +30,7 @@ enum SubscriptionPlan {
   FREE
   PREMIUM
   PREMIUM_YEARLY
-}
-
-enum CourseVisibility {
-  PUBLIC
-  PRIVATE
+  PREMIUM_TRIAL
 }
 
 enum SubscriptionStatus {
@@ -42,6 +38,25 @@ enum SubscriptionStatus {
   EXPIRED
   CANCELLED
   PENDING
+}
+
+enum CourseVisibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum UserActivityType {
+  COURSE_VIEW
+  MODULE_COMPLETE
+  AI_CHAT
+  LOGIN
+}
+
+enum NotificationType {
+  STREAK_REMINDER
+  SUBSCRIPTION_EXPIRING
+  BADGE_EARNED
+  ANNOUNCEMENT
 }
 
 enum SourceType {
@@ -57,39 +72,41 @@ enum SourceType {
 // ──────────────────────────────────────────────
 
 model User {
-  id           String   @id @default(cuid())
-  clerkId      String   @unique
-  email        String   @unique
-  name         String?
+  id                   String      @id @default(cuid())
+  clerkId              String      @unique
+  email                String      @unique
+  name                 String?
   imageUrl             String?
-  role                 UserRole   @default(USER)
-  onboardingCompleted  Boolean    @default(false)
+  role                 UserRole    @default(USER)
+  onboardingCompleted  Boolean     @default(false)
   learningGoal         String?
   currentLevel         Difficulty?
   dailyHours           Int?
-  referralCode         String?    @unique
+  referralCode         String?     @unique
   referredBy           String?
   aiPreferences        Json?
-  xp                   Int        @default(0)
-  level                Int        @default(1)
-  currentStreak        Int        @default(0)
-  longestStreak        Int        @default(0)
-  streakProtectionUsed Int        @default(0)
+  xp                   Int         @default(0)
+  level                Int         @default(1)
+  currentStreak        Int         @default(0)
+  longestStreak        Int         @default(0)
+  streakProtectionUsed Int         @default(0)
   lastActiveDate       DateTime?
   gracePeriodEnd       DateTime?
-  createdAt            DateTime   @default(now())
-  updatedAt            DateTime   @updatedAt
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
 
-  progress      UserProgress[]
-  badges        UserBadge[]
-  subscription  Subscription?
-  ratings       CourseRating[]
-  createdCourses Course[]      @relation("CourseAuthor")
-  notifications Notification[]
-  activities    UserActivity[]
-  referralLogs  ReferralLog[]  @relation("Referrer")
-  aiChatHistory AiChatHistory[]
-  dailyReminder DailyReminder?
+  progress           UserProgress[]
+  badges             UserBadge[]
+  subscription       Subscription?
+  ratings            CourseRating[]
+  createdCourses     Course[]             @relation("CourseAuthor")
+  notifications      Notification[]
+  activities         UserActivity[]
+  referrerLogs       ReferralLog[]        @relation("ReferrerLogs")
+  referredLogs       ReferralLog[]        @relation("ReferredLogs")
+  aiChatHistory      AiChatHistory[]
+  dailyReminder      DailyReminder?
+  voucherRedemption  VoucherRedemption?
 
   @@index([clerkId])
   @@index([email])
@@ -111,24 +128,25 @@ model Category {
 }
 
 model Course {
-  id             String     @id @default(cuid())
-  title          String
-  slug           String     @unique
-  description    String?
-  categoryId     String
-  difficulty     Difficulty @default(BEGINNER)
-  totalModules   Int        @default(0)
+  id              String           @id @default(cuid())
+  title           String
+  slug            String           @unique
+  description     String?
+  categoryId      String
+  difficulty      Difficulty       @default(BEGINNER)
+  totalModules    Int              @default(0)
   isUserGenerated Boolean          @default(false)
-  isPrivate      Boolean           @default(false)
-  visibility     CourseVisibility  @default(PUBLIC)
-  language       String            @default("id")
-  isPublished    Boolean           @default(false)
-  isPremium      Boolean           @default(false)
-  authorId       String?
-  rating         Float             @default(0)
-  ratingCount    Int        @default(0)
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  isPrivate       Boolean          @default(false)
+  visibility      CourseVisibility  @default(PUBLIC)
+  language        String           @default("id")
+  isPublished     Boolean          @default(false)
+  isPremium       Boolean          @default(false)
+  authorId        String?
+  rating          Float            @default(0)
+  ratingCount     Int              @default(0)
+  isAiGenerated   Boolean          @default(false)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 
   category Category        @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   author   User?           @relation("CourseAuthor", fields: [authorId], references: [id], onDelete: SetNull)
@@ -139,6 +157,7 @@ model Course {
   @@index([slug])
   @@index([categoryId])
   @@index([authorId])
+  @@index([visibility])
 }
 
 model Module {
@@ -148,6 +167,7 @@ model Module {
   courseId   String
   order     Int      @default(0)
   xpReward  Int      @default(10)
+  content   String?  @db.Text
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -164,7 +184,7 @@ model Slide {
   moduleId String
   order    Int    @default(0)
   title    String
-  content  Json   // {type: "text"|"code"|"formula"|"image", body: "...", language?: "js", tooltips?: [{token, explanation}]}
+  content  Json
 
   module  Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   sources Source[]
@@ -207,9 +227,10 @@ model CourseRating {
   id        String   @id @default(cuid())
   userId    String
   courseId   String
-  rating    Int      // 1-5
-  review    String?
+  rating    Int
+  review    String?  @db.Text
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
@@ -244,7 +265,7 @@ model UserBadge {
 model Subscription {
   id              String             @id @default(cuid())
   userId          String             @unique
-  status          SubscriptionStatus @default(PENDING)
+  status          SubscriptionStatus @default(ACTIVE)
   plan            SubscriptionPlan   @default(FREE)
   duitkuReference String?
   startDate       DateTime?
@@ -258,42 +279,32 @@ model Subscription {
 }
 
 model Notification {
-  id        String   @id @default(cuid())
+  id        String           @id @default(cuid())
   userId    String
-  type      String   // STREAK_REMINDER, SUBSCRIPTION_EXPIRING, BADGE_EARNED, dll
+  type      NotificationType
   title     String
   body      String
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
 }
 
 model UserActivity {
-  id        String   @id @default(cuid())
-  userId    String
-  type      String   // COURSE_VIEW, MODULE_COMPLETE, AI_CHAT, LOGIN
-  metadata  Json?
-  date      DateTime @default(now())
-  duration  Int?     // in seconds
+  id       String           @id @default(cuid())
+  userId   String
+  type     UserActivityType
+  metadata Json?
+  date     DateTime         @default(now())
+  duration Int?
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
   @@index([userId, date])
-}
-
-model Announcement {
-  id        String   @id @default(cuid())
-  title     String
-  body      String
-  target    String   @default("ALL") // ALL/FREE/PREMIUM
-  isActive  Boolean  @default(true)
-  startAt   DateTime
-  endAt     DateTime?
-  createdAt DateTime @default(now())
+  @@index([userId, type])
 }
 
 model ReferralLog {
@@ -303,31 +314,74 @@ model ReferralLog {
   rewardGiven Boolean  @default(false)
   createdAt   DateTime @default(now())
 
-  referrer    User     @relation("Referrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  referrer User @relation("ReferrerLogs", fields: [referrerId], references: [id], onDelete: Cascade)
+  referred User @relation("ReferredLogs", fields: [referredId], references: [id], onDelete: Cascade)
 
+  @@unique([referrerId, referredId])
   @@index([referrerId])
 }
 
 model AiChatHistory {
   id        String   @id @default(cuid())
   userId    String
-  courseId  String?
+  courseId   String?
   moduleId  String?
-  messages  Json     // Array of {role: "user"|"ai", content: "..."}
+  messages  Json
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([userId, courseId])
 }
 
 model DailyReminder {
   id            String   @id @default(cuid())
   userId        String   @unique
   enabled       Boolean  @default(false)
-  preferredTime String   @default("08:00") // format HH:mm
-  channel       String   @default("EMAIL") // EMAIL/PUSH
+  preferredTime String   @default("08:00")
+  channel       String   @default("EMAIL")
+  createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Voucher {
+  id          String              @id @default(cuid())
+  code        String              @unique
+  type        String
+  discountPct Int                 @default(0)
+  trialDays   Int                 @default(0)
+  maxUses     Int
+  usedCount   Int                 @default(0)
+  expiresAt   DateTime
+  createdAt   DateTime            @default(now())
+
+  redemptions VoucherRedemption[]
+}
+
+model VoucherRedemption {
+  id         String   @id @default(cuid())
+  voucherId  String
+  userId     String   @unique
+  redeemedAt DateTime @default(now())
+
+  voucher Voucher @relation(fields: [voucherId], references: [id])
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([voucherId, userId])
+}
+
+model Announcement {
+  id        String    @id @default(cuid())
+  title     String
+  body      String    @db.Text
+  target    String    @default("ALL")
+  isActive  Boolean   @default(true)
+  startAt   DateTime
+  endAt     DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }

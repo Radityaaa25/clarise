@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, use } from "react";
 import { ChevronLeft, ChevronRight, CheckCircle2, Circle, BookOpen, Star, MessageSquare, Trophy } from "lucide-react";
 import Link from "next/link";
 import { AIChatFAB } from "@/components/ai/ai-chat-fab";
@@ -255,7 +255,9 @@ function SourceBadge({ type }: { type: string }) {
   );
 }
 
-export default function CoursePage({ params }: { params: { slug: string } }) {
+export default function CoursePage({ params }: { params: Promise<{ slug: string }> }) {
+  const resolvedParams = use(params);
+  const { slug } = resolvedParams;
   const [activeModuleIdx, setActiveModuleIdx] = useState(0);
   const [activeSlideIdx, setActiveSlideIdx] = useState(0);
   const [showChat, setShowChat] = useState(false);

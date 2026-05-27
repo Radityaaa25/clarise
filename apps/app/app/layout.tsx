@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { Darker_Grotesque, Jost } from "next/font/google";
+import { Darker_Grotesque, Jost, DM_Sans } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "next-themes";
 import { ErrorBoundary } from "@/components/layout/error-boundary";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 const darkerGrotesque = Darker_Grotesque({
@@ -16,6 +17,13 @@ const jost = Jost({
   subsets: ["latin"],
   weight: ["300", "400", "500", "700"],
   variable: "--font-body",
+  display: "swap",
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  variable: "--font-dm-sans",
   display: "swap",
 });
 
@@ -74,7 +82,7 @@ export default function RootLayout({
       <html
         lang="id"
         suppressHydrationWarning
-        className={`${darkerGrotesque.variable} ${jost.variable}`}
+        className={`${darkerGrotesque.variable} ${jost.variable} ${dmSans.variable}`}
       >
         <head>
           <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -88,6 +96,7 @@ export default function RootLayout({
               disableTransitionOnChange
             >
               {children}
+              <SpeedInsights />
             </ThemeProvider>
           </ErrorBoundary>
         </body>

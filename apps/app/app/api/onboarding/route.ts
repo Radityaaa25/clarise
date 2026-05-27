@@ -1,44 +1,66 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { Difficulty } from "@prisma/client";
 
-const onboardingSchema = z.object({
-  learningGoal: z.string().min(1),
-  currentLevel: z.enum(["BEGINNER", "INTERMEDIATE", "ADVANCED"]),
-  dailyHours: z.number().min(1).max(24),
-});
+const GOAL_TO_CATEGORY: Record<string, string> = {
+  Pemrograman: "pemrograman",
+  Matematika: "matematika",
+  Sains: "sains",
+  Desain: "desain",
+  Bahasa: "bahasa",
+  "Data Science": "data-science",
+};
 
-export async function POST(req: NextRequest) {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+const LEVEL_MAP: Record<string, Difficulty> = {
+  Pemula: "BEGINNER",
+  Menengah: "INTERMEDIATE",
+  Lanjutan: "ADVANCED",
+};
 
-    const body = await req.json();
-    const result = onboardingSchema.safeParse(body);
+const onboardingSchema = z
+  .object({
+    learningGoal: z.enum(["Pemrograman", "Matematika", "Sains", "Desain", "Bahasa", "Data Science"]),
+    currentLevel: z.enum(["Pemula", "Menengah", "Lanjutan"]),
+    dailyHours: z.number().min(1).max(12),
+  })
+  .strict();
 
-    if (!result.success) {
-      return NextResponse.json({ error: "Invalid data", details: result.error }, { status: 400 });
-    }
+export async function POST(req: Request) {
+  const { userId: clerkId } = await auth();
+  if (!clerkId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { learningGoal, currentLevel, dailyHours } = result.data;
+  const body = await req.json();
+  const parsed = onboardingSchema.safeParse(body);
+  if (!parsed.success) return NextResponse.json({ error: "Invalid data" }, { status: 400 });
 
-    // Update user in database
-    const user = await prisma.user.update({
-      where: { clerkId: userId },
-      data: {
-        learningGoal,
-        currentLevel,
-        dailyHours,
-        onboardingCompleted: true,
-      },
-    });
+  const { learningGoal, currentLevel, dailyHours } = parsed.data;
+  const difficulty = LEVEL_MAP[currentLevel];
+  const categorySlug = GOAL_TO_CATEGORY[learningGoal];
 
-    return NextResponse.json({ success: true, user });
-  } catch (error) {
-    console.error("Onboarding error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
-  }
+  await prisma.user.update({
+    where: { clerkId },
+    data: {
+      learningGoal,
+      currentLevel: difficulty,
+      dailyHours,
+      onboardingCompleted: true,
+    },
+  });
+
+  // Recommend courses
+  const recommendedCourses = await prisma.course.findMany({
+    where: {
+      visibility: "PUBLIC",
+      isPublished: true,
+      difficulty,
+      category: { slug: categorySlug },
+    },
+    orderBy: { rating: "desc" },
+    take: 3,
+    select: { id: true, title: true, slug: true, description: true, difficulty: true },
+  });
+
+  return NextResponse.json({ success: true, recommendedCourses });
 }

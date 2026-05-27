@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { AdminHeader } from "@/components/layout/admin-header";
+import { AdminCopilotFAB } from "@/components/ai/admin-copilot-fab";
 
 export const metadata: Metadata = {
   title: "Clarise Admin Panel",
@@ -25,7 +26,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="flex w-full h-full">
+    <div className="flex w-full h-full relative">
       <AdminSidebar />
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         <AdminHeader />
@@ -33,6 +34,7 @@ export default function DashboardLayout({
           {children}
         </main>
       </div>
+      <AdminCopilotFAB />
     </div>
   );
 }

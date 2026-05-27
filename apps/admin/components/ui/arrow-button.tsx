@@ -8,7 +8,7 @@ export function ArrowButton({ children, onClick, href, className = "", disabled 
   className?: string
   disabled?: boolean
 }) {
-  const Tag = (href ? "a" : "button") as any
+  const Tag = (href ? "a" : "button") as React.ElementType
   return (
     <Tag href={href} onClick={onClick} disabled={disabled} className={`ab ${className} ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}>
       {/* Arrow ada PERTAMA dan di-absolute ke tengah button */}

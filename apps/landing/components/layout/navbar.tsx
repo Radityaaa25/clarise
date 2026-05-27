@@ -1,14 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowRight, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { ArrowButton } from "@/components/ui/arrow-button";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 export function FloatingNavbar() {
+  const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -19,6 +21,11 @@ export function FloatingNavbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Sembunyikan navbar di halaman tertentu
+  if (["/careers", "/privacy", "/about"].includes(pathname)) {
+    return null;
+  }
 
   return (
     <header
@@ -53,7 +60,7 @@ export function FloatingNavbar() {
 
           {/* Coba Gratis — solid blue with split arrow */}
           <ArrowButton
-            href={`${process.env.NEXT_PUBLIC_APP_URL || "https://app.clarise.my.id"}/sign-up`}
+            href={`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/sign-up`}
             className="px-5 py-2 text-sm"
           >
             Coba Gratis
@@ -86,7 +93,7 @@ export function FloatingNavbar() {
             Berlangganan
           </Link>
           <ArrowButton
-            href={`${process.env.NEXT_PUBLIC_APP_URL || "https://app.clarise.my.id"}/sign-up`}
+            href={`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/sign-up`}
             className="w-full py-3"
           >
             Coba Gratis

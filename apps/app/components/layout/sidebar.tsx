@@ -13,6 +13,8 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
+  MessageCircle,
+  Mail,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -53,6 +55,8 @@ export function Sidebar({
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-expanded={!collapsed}
           className={`hidden lg:flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
             collapsed 
               ? "bg-sky text-white hover:bg-sky/90 shadow-sm" 
@@ -64,13 +68,15 @@ export function Sidebar({
       </div>
 
       {/* Main Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto" aria-label="Main Navigation">
         {navItems.map((item) => {
           const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
           return (
             <Link
               key={item.href}
               href={item.href}
+              aria-label={collapsed ? item.label : undefined}
+              title={collapsed ? item.label : undefined}
               className={cn(
                 "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
                 isActive
@@ -95,6 +101,8 @@ export function Sidebar({
         {/* Generate Course (Premium) */}
         <Link
           href="/generate"
+          aria-label={collapsed ? "Buat Kursus AI" : undefined}
+          title={collapsed ? "Buat Kursus AI" : undefined}
           className={cn(
             "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
             pathname === "/generate"
@@ -125,6 +133,8 @@ export function Sidebar({
             <Link
               key={item.href}
               href={item.href}
+              aria-label={collapsed ? item.label : undefined}
+              title={collapsed ? item.label : undefined}
               className={cn(
                 "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
                 isActive
@@ -142,6 +152,42 @@ export function Sidebar({
             </Link>
           );
         })}
+
+        {/* Social Links */}
+        {!collapsed && (
+          <div className="pt-4 mt-2 border-t border-hairline/50 flex items-center justify-center gap-4">
+            <a href="https://instagram.com/clariseofficial_" target="_blank" rel="noreferrer" className="text-muted hover:text-core-blue dark:hover:text-sky transition-colors" aria-label="Instagram Clarise">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+                <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+              </svg>
+            </a>
+            <a href="#" className="text-muted hover:text-green-500 dark:hover:text-green-400 transition-colors">
+              <MessageCircle className="h-5 w-5" />
+            </a>
+            <a href="mailto:support@clarise.com" className="text-muted hover:text-core-blue dark:hover:text-sky transition-colors">
+              <Mail className="h-5 w-5" />
+            </a>
+          </div>
+        )}
+        {collapsed && (
+          <div className="pt-4 mt-2 border-t border-hairline/50 flex flex-col items-center justify-center gap-4">
+            <a href="https://instagram.com/clariseofficial_" target="_blank" rel="noreferrer" className="text-muted hover:text-core-blue dark:hover:text-sky transition-colors" aria-label="Instagram Clarise">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+                <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+              </svg>
+            </a>
+            <a href="#" className="text-muted hover:text-green-500 dark:hover:text-green-400 transition-colors">
+              <MessageCircle className="h-5 w-5" />
+            </a>
+            <a href="mailto:support@clarise.com" className="text-muted hover:text-core-blue dark:hover:text-sky transition-colors">
+              <Mail className="h-5 w-5" />
+            </a>
+          </div>
+        )}
       </div>
     </aside>
   );

@@ -1,96 +1,114 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { z } from "zod";
+import { awardXP } from "@/lib/gamification";
 
-// POST /api/courses/[slug]/rate — Submit a course rating
+const rateSchema = z.object({
+  rating: z.number().min(1).max(5),
+  review: z.string().max(1000).optional(),
+}).strict();
+
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const { userId: clerkId } = await auth();
-    if (!clerkId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    if (!clerkId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const user = await prisma.user.findUnique({ where: { clerkId } });
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    const { slug } = await params;
     const body = await req.json();
-    const { rating, review } = body;
-
-    // Validate rating
-    if (!rating || typeof rating !== "number" || rating < 1 || rating > 5) {
-      return NextResponse.json({ error: "Rating must be between 1 and 5" }, { status: 400 });
+    const parsed = rateSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid data" }, { status: 400 });
     }
 
-    // Validate review length
-    if (review && typeof review === "string" && review.length > 500) {
-      return NextResponse.json({ error: "Review max 500 characters" }, { status: 400 });
-    }
+    const { rating, review } = parsed.data;
+    const { slug } = await params;
 
-    // Find the course
-    const course = await prisma.course.findUnique({ where: { slug } });
-    if (!course) {
-      return NextResponse.json({ error: "Course not found" }, { status: 404 });
-    }
+    const user = await prisma.user.findUnique({
+      where: { clerkId },
+      select: { id: true }
+    });
+    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-    // Check user has completed at least 50% of modules
-    const totalModules = await prisma.module.count({ where: { courseId: course.id } });
+    const course = await prisma.course.findUnique({
+      where: { slug },
+      select: { id: true, totalModules: true }
+    });
+    if (!course) return NextResponse.json({ error: "Course not found" }, { status: 404 });
+
+    // Validate progress >= 50%
     const completedModules = await prisma.userProgress.count({
-      where: {
-        userId: user.id,
-        courseId: course.id,
-        completedAt: { not: null },
-      },
+      where: { userId: user.id, courseId: course.id, completedAt: { not: null } }
     });
 
-    if (totalModules > 0 && completedModules / totalModules < 0.5) {
-      return NextResponse.json(
-        { error: "Selesaikan minimal 50% modul sebelum memberikan rating." },
-        { status: 403 }
-      );
+    const progressPercent = course.totalModules > 0 
+      ? (completedModules / course.totalModules) * 100 
+      : 0;
+
+    if (progressPercent < 50) {
+      return NextResponse.json({ 
+        error: "Selesaikan minimal 50% modul untuk memberikan ulasan." 
+      }, { status: 403 });
     }
 
-    // Upsert rating (1 per user per course)
+    // Upsert rating
+    const existingRating = await prisma.courseRating.findUnique({
+      where: { userId_courseId: { userId: user.id, courseId: course.id } }
+    });
+
+    // Sanitasi review text sederhana (strip html)
+    const sanitizedReview = review ? review.replace(/<[^>]*>?/gm, '') : undefined;
+
     await prisma.courseRating.upsert({
-      where: {
-        userId_courseId: { userId: user.id, courseId: course.id },
-      },
-      update: { rating, review: review || null },
+      where: { userId_courseId: { userId: user.id, courseId: course.id } },
       create: {
         userId: user.id,
         courseId: course.id,
         rating,
-        review: review || null,
+        review: sanitizedReview,
       },
+      update: {
+        rating,
+        review: sanitizedReview,
+      }
     });
 
-    // Recalculate course average rating
-    const aggregation = await prisma.courseRating.aggregate({
+    // Update aggregate
+    const allRatings = await prisma.courseRating.aggregate({
       where: { courseId: course.id },
       _avg: { rating: true },
-      _count: { rating: true },
+      _count: { rating: true }
     });
+
+    const avg = allRatings._avg.rating || 0;
+    const count = allRatings._count.rating || 0;
 
     await prisma.course.update({
       where: { id: course.id },
       data: {
-        rating: aggregation._avg.rating || 0,
-        ratingCount: aggregation._count.rating || 0,
-      },
+        rating: avg,
+        ratingCount: count
+      }
     });
 
-    return NextResponse.json({
-      message: "Rating submitted successfully",
-      averageRating: aggregation._avg.rating,
-      totalRatings: aggregation._count.rating,
+    let xpEarned = 0;
+    if (!existingRating) {
+      // First time rating -> award XP
+      const xpResult = await awardXP(user.id, 15); // +15 XP for rating
+      xpEarned = 15;
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      avgRating: avg, 
+      ratingCount: count,
+      xpEarned 
     });
-  } catch (error) {
-    console.error("[POST /api/courses/[slug]/rate]", error);
+
+  } catch (error: any) {
+    console.error("[COURSE_RATE]", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

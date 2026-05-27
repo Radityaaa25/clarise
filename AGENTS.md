@@ -1,5 +1,7 @@
 # AGENTS.md — Clarise
 
+> **NOTED**: Saat mengerjakan task, harap JANGAN LUPA untuk selalu menggunakan skill yang sudah disiapkan di dalam folder `.agents/skills/` sesuai konteks pekerjaan.
+
 ## Project Overview
 
 Turborepo monorepo (pnpm) for **Clarise**, a learning management system.
@@ -83,85 +85,85 @@ Required env vars for **apps/app**:
 ### 🎨 Frontend (apps/app)
 
 #### UI Foundation
-- [ ] Install shadcn/ui CLI and initialize (`pnpm dlx shadcn@latest init` in apps/app)
+- [x] Install shadcn/ui CLI and initialize (`pnpm dlx shadcn@latest init` in apps/app)
 - [ ] Add base shadcn components: Button, Card, Input, Badge, Avatar, Dialog, DropdownMenu, Progress, Separator, Tooltip, Skeleton
-- [ ] Create `components/ui/` with shadcn components using DESIGN.md tokens
-- [ ] Create `lib/utils.ts` with `cn()` helper (clsx + tailwind-merge)
+- [x] Create `components/ui/` with shadcn components using DESIGN.md tokens
+- [x] Create `lib/utils.ts` with `cn()` helper (clsx + tailwind-merge)
 
 #### Layout Components (`components/layout/`)
-- [ ] `sidebar.tsx` — Dashboard sidebar navigation (Dashboard, Explore, Achievements, AI Assistant)
-- [ ] `header.tsx` — Top bar with user avatar (Clerk UserButton), search, notifications
-- [ ] `mobile-nav.tsx` — Responsive bottom/hamburger navigation
-- [ ] `dashboard-layout.tsx` — Wrapper layout for `(dashboard)` route group
-- [ ] `course-layout.tsx` — Wrapper layout for `(course)` route group
+- [x] `sidebar.tsx` — Dashboard sidebar navigation (Dashboard, Explore, Achievements, AI Assistant)
+- [x] `header.tsx` — Top bar with user avatar (Clerk UserButton), search, notifications
+- [x] `mobile-nav.tsx` — Responsive bottom/hamburger navigation
+- [x] `dashboard-layout.tsx` — Wrapper layout for `(dashboard)` route group
+- [x] `course-layout.tsx` — Wrapper layout for `(course)` route group
 
 #### Auth Pages (`app/(auth)/`)
-- [ ] Delete empty `sign-in` and `sign-up` files (they are 0-byte files, not directories)
-- [ ] Create `app/(auth)/sign-in/[[...sign-in]]/page.tsx` with Clerk `<SignIn />` component
-- [ ] Create `app/(auth)/sign-up/[[...sign-up]]/page.tsx` with Clerk `<SignUp />` component
-- [ ] Create `app/(auth)/layout.tsx` — centered auth layout with branding
+- [x] Delete empty `sign-in` and `sign-up` files (they are 0-byte files, not directories)
+- [x] Create `app/(auth)/sign-in/[[...sign-in]]/page.tsx` with Clerk `<SignIn />` component
+- [x] Create `app/(auth)/sign-up/[[...sign-up]]/page.tsx` with Clerk `<SignUp />` component
+- [x] Create `app/(auth)/layout.tsx` — centered auth layout with branding
 
 #### Dashboard Page (`app/(dashboard)/dashboard/`)
-- [ ] Build dashboard with: welcome card, learning streak, XP/level progress bar
-- [ ] "Continue Learning" section — show in-progress courses
-- [ ] "Recent Achievements" section — latest badges earned
-- [ ] Stats cards: courses completed, total XP, current streak, level
+- [x] Build dashboard with: welcome card, learning streak, XP/level progress bar
+- [x] "Continue Learning" section — show in-progress courses
+- [x] "Recent Achievements" section — latest badges earned
+- [x] Stats cards: courses completed, total XP, current streak, level
 
 #### Explore Page (`app/(dashboard)/explore/`)
-- [ ] Create `app/(dashboard)/explore/page.tsx`
-- [ ] Category filter/tabs (from Category model)
-- [ ] Course grid cards: title, description, difficulty badge, module count, progress indicator
-- [ ] Search input with debounced filtering
-- [ ] Difficulty filter (Beginner/Intermediate/Advanced)
+- [x] Create `app/(dashboard)/explore/page.tsx`
+- [x] Category filter/tabs (from Category model)
+- [x] Course grid cards: title, description, difficulty badge, module count, progress indicator
+- [x] Search input with debounced filtering
+- [x] Difficulty filter (Beginner/Intermediate/Advanced)
 
 #### Achievement Page (`app/(dashboard)/achievment/`)
-- [ ] Create `app/(dashboard)/achievment/page.tsx`
-- [ ] Badge grid: earned vs locked badges with icons
-- [ ] XP progress bar and level display
-- [ ] Streak calendar/heatmap
+- [x] Create `app/(dashboard)/achievment/page.tsx`
+- [x] Badge grid: earned vs locked badges with icons
+- [x] XP progress bar and level display
+- [x] Streak calendar/heatmap
 - [ ] Leaderboard (optional, future)
 
 #### Course Page (`app/(course)/course/[slug]/`)
-- [ ] Create `app/(course)/course/[slug]/page.tsx`
-- [ ] Course header: title, description, difficulty, progress bar
-- [ ] Module list/sidebar with completion checkmarks
-- [ ] Module content viewer (markdown/rich text)
-- [ ] "Mark as Complete" button per module
-- [ ] **Validation Quiz**: Add a mini-quiz at the end of each module to validate learning before marking as complete (must pass to complete).
-- [ ] Next/Previous module navigation
+- [x] Create `app/(course)/course/[slug]/page.tsx`
+- [x] Course header: title, description, difficulty, progress bar
+- [x] Module list/sidebar with completion checkmarks
+- [x] Module content viewer (markdown/rich text)
+- [x] "Mark as Complete" button per module
+- [x] **Validation Quiz**: Add a mini-quiz at the end of each module to validate learning before marking as complete (must pass to complete).
+- [x] Next/Previous module navigation
 
 #### AI Assistant Components (`components/ai/`)
-- [ ] `ai-chat-dialog.tsx` — Floating chat dialog (Radix Dialog)
-- [ ] `ai-message.tsx` — Chat message bubble (user/AI)
-- [ ] `ai-input.tsx` — Input with send button and loading state
-- [ ] `ai-fab.tsx` — Floating action button to open AI chat
+- [x] `ai-chat-dialog.tsx` — Floating chat dialog (Radix Dialog)
+- [x] `ai-message.tsx` — Chat message bubble (user/AI)
+- [x] `ai-input.tsx` — Input with send button and loading state
+- [x] `ai-fab.tsx` — Floating action button to open AI chat
 
 #### Course Components (`components/course/`)
-- [ ] `course-card.tsx` — Card for explore grid
-- [ ] `module-list.tsx` — Sidebar module navigation
-- [ ] `module-content.tsx` — Content renderer
-- [ ] `progress-indicator.tsx` — Course progress ring/bar
+- [x] `course-card.tsx` — Card for explore grid
+- [x] `module-list.tsx` — Sidebar module navigation
+- [x] `module-content.tsx` — Content renderer
+- [x] `progress-indicator.tsx` — Course progress ring/bar
 
 #### Dashboard Components (`components/dashboard/`)
-- [ ] `stats-card.tsx` — Stat display card (icon, value, label)
-- [ ] `streak-display.tsx` — Current streak with fire icon
-- [ ] `xp-bar.tsx` — XP progress toward next level
-- [ ] `continue-learning.tsx` — In-progress course cards
+- [x] `stats-card.tsx` — Stat display card (icon, value, label)
+- [x] `streak-display.tsx` — Current streak with fire icon
+- [x] `xp-bar.tsx` — XP progress toward next level
+- [x] `continue-learning.tsx` — In-progress course cards
 
 #### Custom Hooks (`hooks/`)
-- [ ] `use-user-progress.ts` — Fetch/mutate user progress
-- [ ] `use-courses.ts` — Fetch courses with filters
-- [ ] `use-ai-chat.ts` — AI chat state management (messages, send, loading)
-- [ ] `use-achievements.ts` — Fetch badges and XP data
+- [x] `use-user-progress.ts` — Fetch/mutate user progress
+- [x] `use-courses.ts` — Fetch courses with filters
+- [x] `use-ai-chat.ts` — AI chat state management (messages, send, loading)
+- [x] `use-achievements.ts` — Fetch badges and XP data
 
 #### TypeScript Types (`types/`)
-- [ ] `index.ts` — Shared types: Course, Module, UserProgress, Badge, etc.
-- [ ] API response types for all endpoints
+- [x] `index.ts` — Shared types: Course, Module, UserProgress, Badge, etc.
+- [x] API response types for all endpoints
 
 #### Accessibility & Quality (use `.agents/skills/accessibility`, `best-practices`)
-- [ ] Ensure all interactive elements have proper ARIA labels
+- [x] Ensure all interactive elements have proper ARIA labels
 - [ ] Keyboard navigation for sidebar, course modules, AI chat
-- [ ] Focus management on dialog open/close
+- [x] Focus management on dialog open/close
 - [ ] Color contrast compliance (WCAG AA minimum)
 - [ ] Skip-to-content link
 
@@ -171,14 +173,88 @@ Required env vars for **apps/app**:
 - [ ] Image optimization with `next/image` where applicable
 - [ ] Suspense boundaries for streaming server components
 
+#### Data Fetching Strategy (Jangan ambil semua data sekaligus)
+- [x] Semua list data (courses, users, notifications) WAJIB pakai pagination
+      — default limit: 12 items per halaman, jangan pernah fetch semua sekaligus
+- [x] Gunakan cursor-based pagination bukan offset untuk performa lebih baik
+      di tabel besar (UserProgress, AiChatHistory, UserActivity)
+- [x] Explore page: implementasi infinite scroll atau "Load More" 
+      — jangan load semua course dalam satu request
+- [x] AI Chat history: ambil maksimal 10 pesan terakhir per session sebagai
+      konteks, bukan seluruh history
+- [x] Dashboard: gunakan parallel data fetching (Promise.all) — fetch stats,
+      courses, badges secara bersamaan bukan sequential
+- [x] Gunakan React Query atau SWR untuk client-side data fetching 
+      agar ada caching otomatis dan tidak re-fetch data yang sama berulang kali
+- [x] Select hanya field yang dibutuhkan di Prisma query — jangan pernah
+      pakai findMany tanpa select atau take
+
+#### Image Optimization (Render gambar lebih cepat)
+- [ ] WAJIB gunakan next/image untuk SEMUA gambar — bukan <img> tag biasa
+- [ ] Set width dan height eksplisit di setiap next/image agar tidak ada
+      layout shift (CLS score bagus)
+- [x] Screenshot app preview di landing (Dashboard.png, Explore.png, dll):
+      konversi ke format .webp terlebih dahulu — ukuran file bisa 70% lebih kecil
+- [ ] Tambahkan priority={true} hanya pada gambar yang above-the-fold 
+      (hero image, logo) — sisanya biarkan lazy load
+- [ ] Konfigurasi next/image di next.config.ts: set deviceSizes dan imageSizes
+      agar Next.js generate ukuran gambar yang tepat per device
+- [ ] Untuk avatar user dari Clerk: gunakan sizes prop yang sesuai
+      (misal: sizes="40px") agar tidak load gambar 1000px untuk avatar 40px
+
+#### Caching Strategy
+- [ ] Gunakan React cache() untuk server-side data fetching yang dipanggil
+      berkali-kali dalam satu request (misal: getUser() dipanggil di layout
+      dan page sekaligus)
+- [ ] Route segments yang bersifat statis (landing page, halaman pricing):
+      set revalidate = 3600 (1 jam) atau false untuk full static
+- [ ] AI response yang identik (pertanyaan umum yang sering ditanya):
+      cache di Upstash Redis dengan TTL 24 jam — hemat token sekaligus
+      respons lebih cepat
+- [ ] Gunakan unstable_cache dari Next.js untuk cache hasil query Prisma
+      yang jarang berubah (list categories, list badges)
+
+#### Bundle Size & Code Splitting
+- [x] Audit bundle size sebelum deploy: jalankan next build lalu cek
+      .next/analyze (aktifkan @next/bundle-analyzer)
+- [ ] Recharts, react-pdf, dan library besar lainnya: WAJIB di-import
+      dengan next/dynamic + ssr: false agar tidak masuk bundle utama
+- [ ] Hapus semua import yang tidak terpakai — gunakan ESLint rule
+      no-unused-vars dan no-unused-imports
+- [ ] Tree-shaking: import hanya fungsi yang dipakai dari lodash, 
+      jangan import seluruh library (import { debounce } from 'lodash'
+      bukan import _ from 'lodash')
+
+#### Core Web Vitals Target
+- [x] LCP (Largest Contentful Paint): target < 2.5 detik
+      → preload font Darker Grotesque dan DM Sans di layout.tsx
+      → font-display: swap agar teks muncul sebelum font selesai load
+- [ ] CLS (Cumulative Layout Shift): target < 0.1
+      → set eksplisit width/height di semua gambar dan avatar
+      → gunakan skeleton dengan ukuran yang sama persis dengan konten asli
+- [ ] FID/INP (Interaction to Next Paint): target < 200ms
+      → hindari blocking JavaScript di main thread
+      → operasi berat (sorting, filtering besar): pindah ke server component
+- [x] Gunakan next/font untuk load Google Fonts (Darker Grotesque, DM Sans)
+      — jangan pakai @import di CSS karena lebih lambat
+
+#### Production Performance Checklist
+- [x] Enable Vercel Speed Insights untuk monitoring Core Web Vitals real users
+- [ ] Enable Turbopack untuk development (sudah aktif) — pastikan
+      tidak dimatikan di turbo.json
+- [ ] Pastikan semua Server Components tidak ada "use client" yang tidak perlu
+      — client component = bundle lebih besar
+- [ ] Gunakan Server Actions untuk form submission, bukan API routes biasa
+      — lebih efisien untuk operasi sederhana
+
 ### 🎨 Frontend (apps/landing)
 
-- [ ] Add responsive navbar with logo and CTA button
-- [ ] Add "How it works" section (3-step process)
+- [x] Add responsive navbar with logo and CTA button
+- [x] Add "How it works" section (3-step process)
 - [ ] Add testimonials/social proof section
-- [ ] Add pricing section (Free vs Premium comparison)
+- [x] Add pricing section (Free vs Premium comparison)
 - [ ] Add FAQ accordion section
-- [ ] SEO optimization (use `.agents/skills/seo`): structured data, meta tags, OG images
+- [x] SEO optimization (use `.agents/skills/seo`): structured data, meta tags, OG images
 - [ ] Performance audit (use `.agents/skills/web-perf`, `core-web-vitals`)
 
 ---
@@ -186,26 +262,48 @@ Required env vars for **apps/app**:
 ### ⚙️ Backend (apps/app)
 
 #### API Routes
-- [ ] `app/api/ai/ask/route.ts` — Implement Gemini chat endpoint (POST: message → AI response, rate-limited, user context-aware)
+- [x] `app/api/ai/ask/route.ts` — Implement Gemini chat endpoint (POST: message → AI response, rate-limited, user context-aware)
 - [ ] `app/api/webhook/duitku/route.ts` — Implement Duitku payment webhook (verify signature, update Subscription status)
 - [ ] **Payments:** Implement Idempotency Key (Hash `userId` + `planId` + `timestamp`) when generating Duitku checkout URL to prevent double charges.
-- [ ] `app/api/courses/route.ts` — GET courses list (with category/difficulty filters, pagination)
-- [ ] `app/api/courses/[slug]/route.ts` — GET single course with modules
-- [ ] `app/api/progress/route.ts` — POST mark module complete, GET user progress
-- [ ] `app/api/user/route.ts` — GET/PATCH user profile, sync Clerk user to DB
-- [ ] `app/api/achievements/route.ts` — GET user badges and XP
+- [x] `app/api/courses/route.ts` — GET courses list (with category/difficulty filters, pagination)
+- [x] `app/api/courses/[slug]/route.ts` — GET single course with modules
+- [x] `app/api/progress/route.ts` — POST mark module complete, GET user progress
+- [x] `app/api/user/route.ts` — GET/PATCH user profile, sync Clerk user to DB
+- [x] `app/api/achievements/route.ts` — GET user badges and XP
+
+#### Admin AI Copilot
+- [x] POST /api/admin/ai/copilot
+      - Endpoint khusus Admin AI
+      - Integrasi Gemini dengan Function Calling (getPlatformStats, generateAndSaveCourse, createVoucher)
+
+#### Voucher & Early Access
+- [x] POST /api/voucher/redeem
+      Body: { code: string }
+      - Validasi kode: exists, belum expired, masih ada slot
+      - Validasi user: belum pernah redeem kode ini
+      - Jika valid: update user role ke PREMIUM,
+        buat Subscription (PREMIUM_TRIAL, +30 hari),
+        increment voucher usedCount
+      - Return: success message + expiry date
+- [x] GET /api/voucher/[code]
+      - Return: isValid, remainingSlots, trialDays
+      - Untuk preview sebelum user redeem
+- [x] GET /api/admin/vouchers
+      - List semua voucher + stats penggunaan
+- [x] POST /api/admin/vouchers
+      - Buat voucher baru (admin only)
 
 #### Clerk Webhook (User Sync)
-- [ ] `app/api/webhook/clerk/route.ts` — Sync Clerk user creation/update to Prisma User model
-- [ ] Verify Clerk webhook signature (svix)
+- [x] `app/api/webhook/clerk/route.ts` — Sync Clerk user creation/update to Prisma User model
+- [x] Verify Clerk webhook signature (svix)
 
 #### Database
-- [ ] Run `prisma db push` to sync schema to Supabase
+- [x] Run `prisma db push` to sync schema to Supabase
 - [ ] Create seed script (`prisma/seed.ts`) with sample categories, courses, modules, badges
 - [ ] Add `"prisma": { "seed": "tsx prisma/seed.ts" }` to package.json
 
 #### AI Integration
-- [ ] System prompt for Gemini: context-aware tutor (knows current course/module)
+- [x] System prompt for Gemini: context-aware tutor (knows current course/module)
 - [ ] Conversation history management (per-session or stored)
 - [ ] Input validation and sanitization (Zod schema)
 
@@ -220,6 +318,23 @@ Required env vars for **apps/app**:
 - [ ] Rate limiting on AI endpoint (already configured in lib)
 - [ ] Webhook signature verification (Duitku + Clerk)
 - [ ] RLS policies on Supabase tables (if using Supabase direct access)
+
+#### Extended Security (Modern Attacks)
+- [ ] IDOR protection: validasi ownership resource di setiap endpoint
+      — jangan hanya di middleware
+- [ ] Mass assignment protection: gunakan Zod .strict() di semua
+      PATCH/POST endpoint — strip field yang tidak dikenali
+- [ ] Bot protection: honeypot field di sign-up form
+- [ ] API abuse: rate limiting berlapis (IP + userId + per-feature)
+- [ ] SSRF prevention: whitelist domain untuk semua external fetch
+- [ ] Supply chain: setup Dependabot + jalankan pnpm audit mingguan
+- [ ] Supabase RLS: aktifkan di semua tabel user data
+- [ ] Service role key: JANGAN pernah expose di NEXT_PUBLIC_ atau client
+- [ ] AI output scanning: scan response Gemini sebelum kirim ke client
+- [x] poweredByHeader: false di next.config.ts (jangan beritahu attacker
+      tech stack yang digunakan)
+- [ ] Use skill `.agents/skills/owasp-security` dan 
+      `.agents/skills/supabase-pentest` sebelum security audit
 
 ---
 
@@ -266,10 +381,22 @@ Required env vars for **apps/app**:
 ### 🚀 Production Readiness (Pre-Flight Checklist)
 
 Sebelum melakukan *deploy* ke production (misalnya Vercel), pastikan hal-hal berikut sudah dikembalikan/diubah:
-- [ ] **Security Headers (X-Frame-Options)**: Hapus komentar (`//`) pada baris `{ key: "X-Frame-Options", value: "DENY" }` di dalam file `apps/app/next.config.ts` dan `apps/landing/next.config.ts`. Ini wajib dinyalakan di production untuk mencegah serangan *Clickjacking*. (Saat ini dimatikan untuk kebutuhan *testing Mobile Simulator*).
+- [x] **Security Headers (X-Frame-Options)**: Hapus komentar (`//`) pada baris `{ key: "X-Frame-Options", value: "DENY" }` di dalam file `apps/app/next.config.ts` dan `apps/landing/next.config.ts`. Ini wajib dinyalakan di production untuk mencegah serangan *Clickjacking*. (Saat ini dimatikan untuk kebutuhan *testing Mobile Simulator*).
 - [ ] **Environment Variables**: Pastikan `NEXT_PUBLIC_APP_URL` di Vercel (atau *hosting* Anda) diisi dengan domain *production* yang sebenarnya (contoh: `https://app.clarise.com`). Tanpa ini, *link* akan kembali ke mode *fallback* lokal (`http://localhost:3000`).
 - [ ] **API Keys & Database**: Pastikan kunci Clerk (`CLERK_SECRET_KEY`, dsb) dan Supabase mengarah ke lingkungan (*environment*) *Production*, bukan *Development*.
 - [ ] **Webhook URLs**: Ubah URL *webhook* di Clerk dan Duitku agar mengarah ke domain *production* Anda, bukan lagi URL dari Ngrok atau Localhost.
+- [x] **Admin Role Middleware**: Hapus kondisi *bypass* khusus *development* (`process.env.NODE_ENV === "production"`) di file `apps/admin/middleware.ts` agar hanya user dengan role `admin` di *Clerk Public Metadata* yang bisa login ke *Admin Panel*.
+
+---
+
+### 💅 UI Polish & Minor Fixes
+- [x] **LMS App (`apps/app`)**: Fungsikan tombol notifikasi di halaman dashboard.
+- [x] **LMS App (`apps/app`)**: Fungsikan tab Pengaturan (Keamanan, Notifikasi, Langganan) yang saat ini hanya Profil yang bisa diklik.
+- [x] **LMS App (`apps/app`)**: Ganti logo Clarise saat mode gelap menggunakan `logoDM.png`.
+- [x] **Admin Panel (`apps/admin`)**: Fungsikan tombol lonceng notifikasi.
+- [x] **Admin Panel (`apps/admin`)**: Perbaiki fungsi *filter* di berbagai menu (contoh: menu Users).
+- [x] **Admin Panel (`apps/admin`)**: Tambahkan terjemahan/teks Bahasa Indonesia (opsional: *switch language button*).
+- [x] **Landing Page (`apps/landing`)**: Fungsikan semua tautan/link di bagian *footer*.
 
 ---
 
@@ -279,12 +406,12 @@ Sebelum melakukan *deploy* ke production (misalnya Vercel), pastikan hal-hal ber
 - [ ] Set up test framework (Vitest + React Testing Library)
 - [ ] Add Prettier config and format all files
 - [ ] Configure Husky + lint-staged for pre-commit hooks
-- [ ] Add `loading.tsx` and `error.tsx` for each route group (Pending UI Polishing)
-- [ ] Add `not-found.tsx` custom 404 page
+- [x] Add `loading.tsx` and `error.tsx` for each route group (Pending UI Polishing)
+- [x] Add `not-found.tsx` custom 404 page
 - [ ] Remove unused `@repo/ui` package or repurpose it
 - [ ] Implement Empty States for data-fetching pages (Pending UI Polishing)
 - [ ] Implement Global Error Toast/Notification component (Pending UI Polishing)
-- [ ] Build `/settings` and `/pricing` pages in apps/app (Pending UI Polishing)
+- [x] Build `/settings` and `/pricing` pages in apps/app (Pending UI Polishing)
 
 ---
 

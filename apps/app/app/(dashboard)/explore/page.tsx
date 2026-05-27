@@ -5,80 +5,9 @@ import { Search, BookOpen, Star, Filter } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { EnrollModal } from "@/components/course/enroll-modal";
-
-// Placeholder data — will be replaced with real API calls
-const categories = [
-  { name: "Semua", slug: "all" },
-  { name: "Pemrograman", slug: "pemrograman" },
-  { name: "Matematika", slug: "matematika" },
-  { name: "Sains", slug: "sains" },
-  { name: "Bahasa", slug: "bahasa" },
-  { name: "Desain", slug: "desain" },
-  { name: "Bisnis", slug: "bisnis" },
-];
-
-const allCourses = [
-  {
-    title: "JavaScript Dasar",
-    description: "Pelajari dasar-dasar bahasa pemrograman paling populer di dunia. Dari variabel hingga async/await.",
-    difficulty: "BEGINNER",
-    modules: 8,
-    slug: "javascript-dasar",
-    category: "pemrograman",
-    rating: 4.8,
-    isPremium: false,
-  },
-  {
-    title: "React.js Modern",
-    description: "Bangun antarmuka web modern dengan React hooks, context, dan server components.",
-    difficulty: "INTERMEDIATE",
-    modules: 12,
-    slug: "reactjs-modern",
-    category: "pemrograman",
-    rating: 4.9,
-    isPremium: false,
-  },
-  {
-    title: "Python untuk Data Science",
-    description: "Dari pandas hingga matplotlib. Kuasai analisis data dengan Python.",
-    difficulty: "BEGINNER",
-    modules: 10,
-    slug: "python-data-science",
-    category: "pemrograman",
-    rating: 4.7,
-    isPremium: true,
-  },
-  {
-    title: "Aljabar Linear",
-    description: "Vektor, matriks, transformasi linear — fondasi esensial untuk machine learning.",
-    difficulty: "INTERMEDIATE",
-    modules: 8,
-    slug: "aljabar-linear",
-    category: "matematika",
-    rating: 4.5,
-    isPremium: false,
-  },
-  {
-    title: "Kalkulus I",
-    description: "Limit, turunan, dan integral. Pengantar kalkulus untuk pemula.",
-    difficulty: "BEGINNER",
-    modules: 10,
-    slug: "kalkulus-1",
-    category: "matematika",
-    rating: 4.6,
-    isPremium: false,
-  },
-  {
-    title: "Fisika Dasar",
-    description: "Mekanika Newton, energi, dan gelombang. Fondasi fisika yang kokoh.",
-    difficulty: "BEGINNER",
-    modules: 9,
-    slug: "fisika-dasar",
-    category: "sains",
-    rating: 4.4,
-    isPremium: true,
-  },
-];
+import { useCourses } from "@/hooks/use-courses";
+import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 
 function difficultyBadge(difficulty: string) {
   const map: Record<string, { label: string; classes: string }> = {
@@ -97,6 +26,34 @@ function difficultyBadge(difficulty: string) {
 export default function ExplorePage() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Fetch courses via SWR
+  const { courses, nextCursor, isLoading: isCoursesLoading } = useCourses({
+    category: activeCategory !== "all" ? activeCategory : null,
+    search: debouncedSearch || null,
+    limit: 12,
+  });
+
+  // Derived arrays
+  const categoriesList = [
+    { name: "Semua", slug: "all" },
+    { name: "Pemrograman", slug: "pemrograman" },
+    { name: "Matematika", slug: "matematika" },
+    { name: "Sains", slug: "sains" },
+    { name: "Bahasa", slug: "bahasa" },
+    { name: "Desain", slug: "desain" },
+    { name: "Bisnis", slug: "bisnis" },
+  ];
+
   
   // Enroll Modal State
   const [modalOpen, setModalOpen] = useState(false);
@@ -126,14 +83,7 @@ export default function ExplorePage() {
     }, 1000);
   };
 
-  const filteredCourses = allCourses.filter((c) => {
-    const matchesCategory = activeCategory === "all" || c.category === activeCategory;
-    const matchesSearch =
-      searchQuery === "" ||
-      c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  const filteredCourses = courses || [];
 
   return (
     <div className="space-y-8 max-w-6xl">
@@ -164,7 +114,7 @@ export default function ExplorePage() {
       {/* Category Pills (Mobile horizontal scroll) */}
       <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:pb-0">
         <div className="flex gap-2 w-max sm:w-auto">
-          {categories.map((cat) => (
+          {categoriesList.map((cat) => (
             <button
               key={cat.slug}
               onClick={() => setActiveCategory(cat.slug)}
@@ -181,9 +131,13 @@ export default function ExplorePage() {
       </div>
 
       {/* Course Grid (1 col on mobile) */}
-      {filteredCourses.length > 0 ? (
+      {isCoursesLoading ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-core-blue" />
+        </div>
+      ) : filteredCourses.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredCourses.map((course) => (
+          {filteredCourses.map((course: any) => (
             <button
               key={course.slug}
               onClick={(e) => handleCourseClick(e, course)}
@@ -198,7 +152,7 @@ export default function ExplorePage() {
               )}
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-xs font-medium text-muted bg-surface-soft dark:bg-white/5 px-2 py-0.5 rounded-full capitalize">
-                  {course.category}
+                  {typeof course.category === 'object' ? course.category.name : course.category}
                 </span>
                 {difficultyBadge(course.difficulty)}
               </div>
@@ -211,11 +165,11 @@ export default function ExplorePage() {
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-1 text-muted">
                   <BookOpen className="h-4 w-4" />
-                  <span>{course.modules} modul</span>
+                  <span>{course.totalModules || 0} modul</span>
                 </div>
                 <div className="flex items-center gap-1 text-spark">
                   <Star className="h-4 w-4 fill-current" />
-                  <span className="font-medium">{course.rating}</span>
+                  <span className="font-medium">{course.rating?.toFixed(1) || "5.0"}</span>
                 </div>
               </div>
             </button>
@@ -226,6 +180,15 @@ export default function ExplorePage() {
           <Search className="h-12 w-12 text-muted-soft mx-auto mb-4" />
           <h3 className="text-lg font-bold text-ink dark:text-white mb-2">Tidak ditemukan</h3>
           <p className="text-muted">Coba ubah kata kunci atau kategori pencarianmu.</p>
+        </div>
+      )}
+
+      {/* Load More Button (If has cursor) */}
+      {!isCoursesLoading && nextCursor && (
+        <div className="flex justify-center pt-4">
+          <button className="px-6 py-2.5 rounded-full border border-hairline bg-canvas dark:bg-void-elevated text-sm font-bold text-ink dark:text-white hover:border-core-blue hover:text-core-blue transition-colors">
+            Muat Lebih Banyak
+          </button>
         </div>
       )}
 
