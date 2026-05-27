@@ -16,8 +16,7 @@ export default async function CoursesPage() {
     }
   });
 
-  type CourseRow = Awaited<ReturnType<typeof prisma.course.findMany>>[number];
-  const formattedCourses = courses.map((course: CourseRow) => ({
+  const formattedCourses = courses.map((course: typeof courses[number]) => ({
     id: course.id,
     title: course.title,
     slug: course.slug,

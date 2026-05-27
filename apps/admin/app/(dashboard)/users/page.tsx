@@ -18,7 +18,7 @@ export default async function UsersPage() {
     }
   });
 
-  const formattedUsers = users.map(user => ({
+  const formattedUsers = users.map((user: typeof users[number]) => ({
     id: user.id,
     name: user.name,
     email: user.email,
