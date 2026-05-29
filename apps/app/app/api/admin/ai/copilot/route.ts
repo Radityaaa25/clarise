@@ -7,6 +7,7 @@ import { ADMIN_KNOWLEDGE } from "@/lib/ai-knowledge";
 import { z } from "zod";
 import { stripHtml, detectPromptInjection } from "@/lib/sanitize";
 import { redis } from "@/lib/ratelimit";
+import { checkApiAdmin } from "@/lib/admin-auth";
 
 const copilotInputSchema = z
   .object({
@@ -81,22 +82,14 @@ const copilotTools = [
 export async function POST(req: Request) {
   const origin = req.headers.get("origin");
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return corsResponse({ error: "Unauthorized" }, 401, origin);
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { clerkId: userId },
-      select: { role: true },
-    });
-
-    if (user?.role !== "ADMIN") {
-      return corsResponse(
-        { error: "Forbidden: Admin access required" },
-        403,
-        origin,
-      );
+    const guard = await checkApiAdmin();
+    if (!guard.ok) {
+      const status = guard.error === "UNAUTHORIZED" ? 401 : 403;
+      const message =
+        guard.error === "UNAUTHORIZED"
+          ? "Unauthorized"
+          : "Forbidden: Admin access required";
+      return corsResponse({ error: message }, status, origin);
     }
 
     const body = await req.json();

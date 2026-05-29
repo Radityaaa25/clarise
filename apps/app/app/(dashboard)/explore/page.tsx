@@ -99,7 +99,7 @@ export default function ExplorePage() {
   // User State
   const { user } = useUser();
   const isFreeUser = user?.subscription?.plan === "FREE" || !user?.subscription;
-  const hasReachedLimit = activeCourses.length >= 1; // 1 course limit for free tier
+  const hasReachedLimit = activeCourses.length >= 2; // Free tier: max 2 kursus (1 free + 1 premium, atau 2 free)
 
   const handleCourseClick = (e: React.MouseEvent, course: any) => {
     e.preventDefault();

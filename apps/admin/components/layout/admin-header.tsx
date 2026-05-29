@@ -8,16 +8,13 @@ import useSWR from "swr";
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export function AdminHeader() {
-  const { data, mutate } = useSWR(
-    "http://localhost:3000/api/notifications",
-    fetcher,
-  );
+  const { data, mutate } = useSWR("/api/notifications", fetcher);
   const notifications = data?.notifications || [];
   const unreadCount = data?.unreadCount || 0;
 
   const handleMarkAllRead = async () => {
     if (unreadCount === 0) return;
-    await fetch("http://localhost:3000/api/notifications", { method: "PATCH" });
+    await fetch("/api/notifications", { method: "PATCH" });
     mutate(); // Refresh notifications
   };
 

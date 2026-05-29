@@ -112,7 +112,7 @@ export function EnrollModal({
               <strong className="text-ink dark:text-white">{courseName}</strong>
               .
               {isFreeUser &&
-                " Anda yakin ingin mengambil course ini? Anda hanya dapat memilih 1 course pada free tier, berlangganan untuk mengakses lebih banyak."}
+                " Sebagai pengguna gratis, kamu bisa mengambil maksimal 2 kursus (1 di antaranya boleh Premium). Berlangganan untuk akses tanpa batas."}
             </p>
             <div className="flex flex-col gap-3 w-full">
               <ArrowButton

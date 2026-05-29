@@ -4,7 +4,7 @@ import type { SubscriptionPlan } from "@prisma/client";
 
 export const PLAN_LIMITS = {
   FREE: {
-    maxActiveCourses: 1,
+    maxActiveCourses: 2,
     aiRequestsPerDay: 10,
     canCreateCourse: false,
     canDownloadPdf: false,

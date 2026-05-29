@@ -13,28 +13,31 @@ function generateReferralCode(): string {
 }
 
 /**
- * Pastikan user baru dapat welcome notification (idempotent).
+ * Pastikan user baru dapat welcome notification — TRULY idempotent
+ * dengan atomic database-level claim.
  *
- * Cek dulu apakah notif welcome sudah ada untuk user ini. Kalau belum,
- * baru buat. Hal ini mencegah duplikasi notif kalau Clerk webhook
- * di-retry, atau kalau user di-bootstrap lewat dua jalur (webhook + auto-create).
+ * Pakai `updateMany` dengan WHERE `welcomeNotifSent = false` sebagai
+ * gate atomic. Hanya satu caller yang akan dapat `count = 1` (winning
+ * the race), sisanya dapat `count = 0` dan exit early.
  *
- * Kalau gagal, log error tapi jangan throw — user creation lebih penting,
- * notif boleh tertinggal dan diperbaiki lewat path lain di kemudian hari.
+ * Ini menghindari race condition dimana webhook Clerk dan endpoint
+ * `/api/user` dipanggil bersamaan saat user signup — sebelumnya
+ * dua-duanya bisa lolos `findFirst` dan create notif duplikat.
+ *
+ * Kalau create notification gagal setelah claim, kita TIDAK rollback
+ * flag — accept the rare lost notif daripada complicate code dengan
+ * 2-phase commit. Error tetap di-log untuk monitoring.
  */
 export async function ensureWelcomeNotification(userId: string): Promise<void> {
+  // Atomic claim: hanya 1 caller yang berhasil set flag dari false → true
+  const claim = await prisma.user.updateMany({
+    where: { id: userId, welcomeNotifSent: false },
+    data: { welcomeNotifSent: true },
+  });
+
+  if (claim.count === 0) return; // Kalah race / sudah pernah dibuat
+
   try {
-    const existing = await prisma.notification.findFirst({
-      where: {
-        userId,
-        type: "ANNOUNCEMENT",
-        title: WELCOME_NOTIFICATION_TITLE,
-      },
-      select: { id: true },
-    });
-
-    if (existing) return;
-
     await prisma.notification.create({
       data: {
         userId,
@@ -44,8 +47,10 @@ export async function ensureWelcomeNotification(userId: string): Promise<void> {
       },
     });
   } catch (err) {
+    // Don't rollback flag — accept rare lost notif. Better than risking
+    // duplicate notifs from rollback race.
     console.error(
-      "[USER_BOOTSTRAP] Failed to create welcome notification:",
+      "[USER_BOOTSTRAP] Failed to create welcome notification after claim:",
       err,
     );
   }

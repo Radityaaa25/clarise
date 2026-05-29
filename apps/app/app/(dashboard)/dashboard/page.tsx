@@ -4,6 +4,7 @@ import { useUser } from "@/hooks/use-user";
 import useSWR from "swr";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
+import { WelcomePopup } from "@/components/onboarding/welcome-popup";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -18,6 +19,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6 md:space-y-8 max-w-6xl mx-auto">
+      <WelcomePopup />
       {/* Hero Greeting Card */}
       <div className="rounded-2xl border border-hairline bg-canvas dark:bg-void-elevated p-5 md:p-8 shadow-sm flex flex-col md:flex-row gap-6 items-center justify-between transition-colors">
         <div>

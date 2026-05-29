@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { awardXP } from "@/lib/gamification";
+import { awardXP, evaluateBadges } from "@/lib/gamification";
 
 const rateSchema = z
   .object({
@@ -113,6 +113,8 @@ export async function POST(
       // First time rating -> award XP
       const xpResult = await awardXP(user.id, 15); // +15 XP for rating
       xpEarned = 15;
+      // Eval badges (RATING_10 trigger setelah 10 ratings)
+      await evaluateBadges(user.id);
     }
 
     return NextResponse.json({

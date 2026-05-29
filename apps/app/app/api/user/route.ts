@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { xpToNextLevel } from "@/lib/gamification";
-import { bootstrapUser, ensureWelcomeNotification, ensureFreeSubscription } from "@/lib/user-bootstrap";
+import { xpToNextLevel, updateStreak, evaluateBadges } from "@/lib/gamification";
+import { bootstrapUser, ensureFreeSubscription } from "@/lib/user-bootstrap";
 
 const updateUserSchema = z
   .object({
@@ -14,6 +14,22 @@ const updateUserSchema = z
   })
   .strict();
 
+const userSelect = {
+  id: true,
+  name: true,
+  email: true,
+  imageUrl: true,
+  role: true,
+  xp: true,
+  level: true,
+  currentStreak: true,
+  longestStreak: true,
+  onboardingCompleted: true,
+  welcomePopupShown: true,
+  lastActiveDate: true,
+  subscription: { select: { plan: true, status: true, endDate: true } },
+} as const;
+
 export async function GET() {
   const { userId: clerkId } = await auth();
   if (!clerkId)
@@ -21,20 +37,7 @@ export async function GET() {
 
   let user = await prisma.user.findUnique({
     where: { clerkId },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      imageUrl: true,
-      role: true,
-      xp: true,
-      level: true,
-      currentStreak: true,
-      longestStreak: true,
-      onboardingCompleted: true,
-      lastActiveDate: true,
-      subscription: { select: { plan: true, status: true, endDate: true } },
-    },
+    select: userSelect,
   });
 
   // Fallback bootstrap kalau user belum ada di DB.
@@ -55,20 +58,7 @@ export async function GET() {
 
     user = await prisma.user.findUnique({
       where: { clerkId },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        imageUrl: true,
-        role: true,
-        xp: true,
-        level: true,
-        currentStreak: true,
-        longestStreak: true,
-        onboardingCompleted: true,
-        lastActiveDate: true,
-        subscription: { select: { plan: true, status: true, endDate: true } },
-      },
+      select: userSelect,
     });
 
     if (!user) {
@@ -77,24 +67,54 @@ export async function GET() {
         { status: 500 },
       );
     }
-  } else {
-    // Self-heal untuk user existing yang dibuat sebelum bootstrap helper
-    // ada (misal: dibuat lewat fallback lama yang belum punya subscription
-    // / welcome notif). Idempotent — kalau sudah ada, tidak dibuat ulang.
-    if (!user.subscription) {
-      await ensureFreeSubscription(user.id);
-    }
-    await ensureWelcomeNotification(user.id);
+  } else if (!user.subscription) {
+    // Self-heal untuk user lama yang dibuat sebelum bootstrap helper ada
+    // dan belum punya subscription. Tidak menyentuh welcome notif di sini
+    // — itu hanya untuk user yang baru dibuat di blok `if (!user)` di atas.
+    await ensureFreeSubscription(user.id);
   }
 
-  // Record LOGIN activity if first request today
+  // Daily activity tracking — dijalankan kalau user belum aktif hari ini.
+  // Tujuannya:
+  // 1. Catat LOGIN activity (untuk analytics)
+  // 2. Update streak (login harian counts as activity)
+  // 3. Re-evaluate badges (mungkin sudah hit STREAK_7 / STREAK_30)
+  //
+  // Setelah updateStreak, kita re-fetch user agar response berisi streak terbaru.
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  if (!user.lastActiveDate || new Date(user.lastActiveDate) < today) {
-    await prisma.userActivity.create({
-      data: { userId: user.id, type: "LOGIN" },
+  const lastActiveDay = user.lastActiveDate
+    ? new Date(user.lastActiveDate)
+    : null;
+  if (lastActiveDay) lastActiveDay.setHours(0, 0, 0, 0);
+
+  const wasActiveToday =
+    lastActiveDay && lastActiveDay.getTime() === today.getTime();
+
+  if (!wasActiveToday) {
+    // Catat aktivitas login dan update streak secara paralel
+    await Promise.all([
+      prisma.userActivity.create({
+        data: { userId: user.id, type: "LOGIN" },
+      }),
+      updateStreak(user.id),
+    ]);
+
+    // Streak mungkin baru saja naik → cek badge yang berhubungan
+    await evaluateBadges(user.id);
+
+    // Re-fetch user dengan streak terbaru
+    const refreshed = await prisma.user.findUnique({
+      where: { clerkId },
+      select: userSelect,
     });
+    if (refreshed) user = refreshed;
   }
+
+  // Hitung jumlah modul yang sudah diselesaikan user (untuk stat dashboard)
+  const completedModules = await prisma.userProgress.count({
+    where: { userId: user.id, completedAt: { not: null } },
+  });
 
   return NextResponse.json({
     id: user.id,
@@ -107,7 +127,9 @@ export async function GET() {
     xpToNextLevel: xpToNextLevel(user.xp),
     currentStreak: user.currentStreak,
     longestStreak: user.longestStreak,
+    completedModules,
     onboardingCompleted: user.onboardingCompleted,
+    welcomePopupShown: user.welcomePopupShown,
     subscription: user.subscription ?? {
       plan: "FREE",
       status: "ACTIVE",

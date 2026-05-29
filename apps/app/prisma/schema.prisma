@@ -79,6 +79,8 @@ model User {
   imageUrl             String?
   role                 UserRole    @default(USER)
   onboardingCompleted  Boolean     @default(false)
+  welcomeNotifSent     Boolean     @default(false)
+  welcomePopupShown    Boolean     @default(false)
   learningGoal         String?
   currentLevel         Difficulty?
   dailyHours           Int?

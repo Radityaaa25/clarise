@@ -235,6 +235,17 @@ export default function CoursePage({
   const [isRatingSubmitted, setIsRatingSubmitted] = useState<boolean>(false);
   const [isSubmittingRating, setIsSubmittingRating] = useState<boolean>(false);
 
+  // Course-completion rating state (popup terpisah saat semua modul selesai)
+  const [isCourseCompletedNow, setIsCourseCompletedNow] =
+    useState<boolean>(false);
+  const [courseRating, setCourseRating] = useState<number>(0);
+  const [courseHoverRating, setCourseHoverRating] = useState<number>(0);
+  const [courseReview, setCourseReview] = useState<string>("");
+  const [isSubmittingCourseRating, setIsSubmittingCourseRating] =
+    useState<boolean>(false);
+  const [isCourseRatingSubmitted, setIsCourseRatingSubmitted] =
+    useState<boolean>(false);
+
   const { data: courseData, isLoading: isCourseLoading } = useSWR(
     `/api/courses/${slug}`,
     fetcher,
@@ -1019,7 +1030,12 @@ export default function CoursePage({
                 } else {
                   try {
                     setIsMarking(true);
-                    await markComplete(activeModule.id);
+                    const result = await markComplete(activeModule.id);
+                    // Kalau ini modul terakhir → set flag agar modal kasih
+                    // course rating, bukan module rating.
+                    if (result?.courseCompleted) {
+                      setIsCourseCompletedNow(true);
+                    }
                     setShowSuccessModal(true);
                   } catch (e) {
                     toast.error("Gagal menyimpan progres.");
@@ -1049,8 +1065,9 @@ export default function CoursePage({
         </div>
       </div>
 
-      {/* Success Modal Overlay */}
-      {showSuccessModal && (
+      {/* Success Modal Overlay — bercabang antara module rating (default)
+          dan course rating (saat semua modul selesai) */}
+      {showSuccessModal && !isCourseCompletedNow && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div
             className="absolute inset-0 bg-[#0C1F3D]/60 backdrop-blur-sm transition-opacity"
@@ -1086,7 +1103,7 @@ export default function CoursePage({
                           setRating(star);
                           setIsSubmittingRating(true);
                           try {
-                            await fetch("/api/progress/rate", {
+                            const res = await fetch("/api/progress/rate", {
                               method: "PATCH",
                               headers: { "Content-Type": "application/json" },
                               body: JSON.stringify({
@@ -1094,9 +1111,20 @@ export default function CoursePage({
                                 rating: star,
                               }),
                             });
+                            if (!res.ok) {
+                              const data = await res.json().catch(() => ({}));
+                              throw new Error(
+                                data.error || "Gagal menyimpan rating",
+                              );
+                            }
                             setIsRatingSubmitted(true);
                           } catch (error) {
                             console.error("Failed to submit rating", error);
+                            toast.error(
+                              error instanceof Error
+                                ? error.message
+                                : "Gagal menyimpan rating",
+                            );
                           } finally {
                             setIsSubmittingRating(false);
                           }
@@ -1158,6 +1186,181 @@ export default function CoursePage({
                 className="btn-outline w-full justify-center"
               >
                 Kembali ke Dashboard
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Course Completion Modal — muncul saat user complete modul terakhir.
+          Kasih hadiah XP info + course-level rating + optional review. */}
+      {showSuccessModal && isCourseCompletedNow && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-[#0C1F3D]/70 backdrop-blur-sm transition-opacity"
+            onClick={() => {
+              // Disable backdrop close kalau belum submit rating — supaya
+              // gak gampang ke-skip. User bisa klik tombol "Skip" eksplisit
+              // di bawah kalau gak mau rate.
+            }}
+          />
+          <div className="relative bg-white dark:bg-void-elevated rounded-2xl p-6 md:p-8 max-w-md w-full text-center shadow-[0_24px_60px_rgba(12,31,61,0.2)] animate-in zoom-in-95 fade-in duration-300 ease-out">
+            <div className="w-16 h-16 bg-spark/10 text-spark rounded-full flex items-center justify-center mx-auto mb-4">
+              <Trophy className="h-8 w-8" />
+            </div>
+            <h3 className="text-2xl md:text-3xl font-bold font-heading text-ink dark:text-white mb-2">
+              🎉 Course Selesai!
+            </h3>
+            <p className="text-body dark:text-white/70 mb-6 text-sm">
+              Selamat! Kamu sudah menyelesaikan{" "}
+              <strong className="text-ink dark:text-white">
+                {courseData?.title}
+              </strong>
+              . Bantu pengguna lain dengan memberi rating dan review untuk
+              course ini.
+            </p>
+
+            {!isCourseRatingSubmitted ? (
+              <div className="space-y-4 mb-6">
+                <div>
+                  <p className="text-sm font-bold text-ink dark:text-white mb-3">
+                    Rating untuk course ini
+                  </p>
+                  <div className="flex items-center justify-center gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        disabled={isSubmittingCourseRating}
+                        onMouseEnter={() => setCourseHoverRating(star)}
+                        onMouseLeave={() => setCourseHoverRating(0)}
+                        onClick={() => setCourseRating(star)}
+                        aria-label={`Beri ${star} bintang`}
+                        className={`transition-all ${
+                          isSubmittingCourseRating
+                            ? "opacity-50 cursor-not-allowed"
+                            : "hover:scale-110"
+                        }`}
+                      >
+                        <Star
+                          className={`h-9 w-9 ${
+                            (courseHoverRating || courseRating) >= star
+                              ? "fill-yellow-400 text-yellow-400"
+                              : "fill-transparent text-muted-soft dark:text-white/20"
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="text-left">
+                  <label
+                    htmlFor="course-review"
+                    className="block text-sm font-bold text-ink dark:text-white mb-2"
+                  >
+                    Review (opsional)
+                  </label>
+                  <textarea
+                    id="course-review"
+                    value={courseReview}
+                    onChange={(e) => setCourseReview(e.target.value)}
+                    rows={3}
+                    maxLength={1000}
+                    placeholder="Apa yang kamu suka dari course ini? Apa yang bisa diperbaiki?"
+                    disabled={isSubmittingCourseRating}
+                    className="w-full rounded-lg border border-hairline bg-canvas dark:bg-void px-3 py-2 text-sm text-ink dark:text-white placeholder:text-muted-soft focus:border-core-blue focus:ring-2 focus:ring-core-blue/20 outline-none resize-none disabled:opacity-50"
+                  />
+                  <div className="text-[11px] text-muted-soft mt-1 text-right">
+                    {courseReview.length}/1000
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center p-5 bg-emerald-500/10 rounded-xl border border-emerald-500/20 animate-in zoom-in duration-300 mb-6">
+                <span className="text-3xl mb-2">⭐</span>
+                <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                  Terima kasih atas review-mu!
+                </p>
+                <p className="text-xs text-muted dark:text-frost/70 mt-1">
+                  +15 XP untuk review pertama 🎁
+                </p>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-3">
+              {!isCourseRatingSubmitted && (
+                <button
+                  disabled={courseRating === 0 || isSubmittingCourseRating}
+                  onClick={async () => {
+                    if (courseRating === 0) return;
+                    setIsSubmittingCourseRating(true);
+                    try {
+                      const res = await fetch(
+                        `/api/courses/${slug}/rate`,
+                        {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify({
+                            rating: courseRating,
+                            ...(courseReview.trim()
+                              ? { review: courseReview.trim() }
+                              : {}),
+                          }),
+                        },
+                      );
+                      const data = await res.json();
+                      if (!res.ok) {
+                        throw new Error(
+                          data.error || "Gagal mengirim rating",
+                        );
+                      }
+                      setIsCourseRatingSubmitted(true);
+                    } catch (error) {
+                      console.error("Failed to submit course rating", error);
+                      toast.error(
+                        error instanceof Error
+                          ? error.message
+                          : "Gagal mengirim rating course",
+                      );
+                    } finally {
+                      setIsSubmittingCourseRating(false);
+                    }
+                  }}
+                  className={`flex w-full items-center justify-center rounded-full px-6 py-2.5 text-sm font-bold text-white transition-all ${
+                    courseRating > 0 && !isSubmittingCourseRating
+                      ? "bg-core-blue hover:bg-core-blue/90 hover:shadow-[0_4px_14px_0_rgba(26,127,204,0.39)] hover:-translate-y-0.5"
+                      : "bg-muted-soft cursor-not-allowed"
+                  }`}
+                >
+                  {isSubmittingCourseRating ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Mengirim...
+                    </>
+                  ) : (
+                    "Kirim Rating"
+                  )}
+                </button>
+              )}
+              <Link
+                href="/dashboard"
+                onClick={() => {
+                  setShowSuccessModal(false);
+                  setIsCourseCompletedNow(false);
+                  setCourseRating(0);
+                  setCourseHoverRating(0);
+                  setCourseReview("");
+                  setIsCourseRatingSubmitted(false);
+                }}
+                className={
+                  isCourseRatingSubmitted
+                    ? "flex w-full items-center justify-center rounded-full bg-core-blue px-6 py-2.5 text-sm font-bold text-white transition-all hover:bg-core-blue/90 hover:shadow-[0_4px_14px_0_rgba(26,127,204,0.39)] hover:-translate-y-0.5"
+                    : "btn-outline w-full justify-center"
+                }
+              >
+                {isCourseRatingSubmitted ? "Kembali ke Dashboard" : "Lewati"}
               </Link>
             </div>
           </div>

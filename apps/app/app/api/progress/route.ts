@@ -152,6 +152,7 @@ export async function POST(req: NextRequest) {
     xpEarned: xpAmount,
     newLevel: xpResult.newLevel,
     leveledUp: xpResult.leveledUp,
+    courseCompleted: courseComplete,
     badgesEarned: badges.map((b) => ({ name: b.name, icon: b.icon })),
   });
 }

@@ -1,63 +1,42 @@
 "use client";
 
-import { Trophy, Zap, Flame, Target, Lock, Star } from "lucide-react";
+import { Zap, Flame, Lock } from "lucide-react";
+import { useAchievements } from "@/hooks/use-achievements";
+import { useUser } from "@/hooks/use-user";
+import { Skeleton } from "@/components/ui/skeleton";
 
-// Placeholder data
-const xpData = { current: 0, nextLevel: 100, level: 1 };
-
-const badges = [
-  {
-    name: "Petualang Baru",
-    description: "Selesaikan kursus pertamamu",
-    icon: "🚀",
-    earned: false,
-  },
-  {
-    name: "Streak 7 Hari",
-    description: "Belajar 7 hari berturut-turut",
-    icon: "🔥",
-    earned: false,
-  },
-  {
-    name: "Pemahaman Mendalam",
-    description: "Jawab 10 pertanyaan ke AI Tutor",
-    icon: "🧠",
-    earned: false,
-  },
-  {
-    name: "Speed Learner",
-    description: "Selesaikan 1 modul dalam 1 hari",
-    icon: "⚡",
-    earned: false,
-  },
-  {
-    name: "Kurator Konten",
-    description: "Buat kursus pertamamu (Premium)",
-    icon: "✨",
-    earned: false,
-  },
-  {
-    name: "Bintang 5",
-    description: "Berikan rating pertamamu",
-    icon: "⭐",
-    earned: false,
-  },
-  {
-    name: "Konsisten",
-    description: "Belajar 30 hari berturut-turut",
-    icon: "💎",
-    earned: false,
-  },
-  {
-    name: "Guru Sejati",
-    description: "Selesaikan 10 kursus",
-    icon: "🎓",
-    earned: false,
-  },
-];
+type Badge = {
+  id: string;
+  name: string;
+  description: string | null;
+  icon: string | null;
+  earned: boolean;
+  earnedAt: string | null;
+};
 
 export default function AchievementPage() {
-  const xpPercentage = (xpData.current / xpData.nextLevel) * 100;
+  // Pakai 2 hook supaya data konsisten dengan dashboard:
+  // - useUser() → xp, level, streak (sama source dengan dashboard)
+  // - useAchievements() → badges + xpToNextLevel
+  const { user, isLoading: isUserLoading } = useUser();
+  const { achievements, isLoading: isBadgesLoading } = useAchievements();
+
+  const badges: Badge[] = achievements;
+
+  // Currently the API returns xpToNextLevel separately; combine for progress bar.
+  // Fallback while loading.
+  const xp = user?.xp ?? 0;
+  const level = user?.level ?? 1;
+  const xpToNext = user?.xpToNextLevel ?? 100;
+  // xp progres dalam level saat ini = total xp di level - sisa ke level berikutnya
+  // Tapi karena kita gak punya base level threshold di client, simplify dengan persentase
+  // dari (xp / (xp + xpToNextLevel)) — untuk level max, xpToNextLevel=0 → 100%.
+  const totalToReach = xp + xpToNext;
+  const xpPercentage =
+    xpToNext === 0 ? 100 : Math.min(100, Math.round((xp / totalToReach) * 100));
+
+  const currentStreak = user?.currentStreak ?? 0;
+  const longestStreak = user?.longestStreak ?? 0;
 
   return (
     <div className="space-y-8 max-w-6xl">
@@ -81,24 +60,35 @@ export default function AchievementPage() {
             </div>
             <div>
               <div className="text-sm text-muted dark:text-frost/80">
-                Level {xpData.level}
+                Level {isUserLoading ? "..." : level}
               </div>
               <div className="text-2xl font-black font-heading text-ink dark:text-white">
-                {xpData.current} XP
+                {isUserLoading ? (
+                  <Skeleton className="h-8 w-24" />
+                ) : (
+                  <>{xp.toLocaleString()} XP</>
+                )}
               </div>
             </div>
           </div>
           <div className="space-y-2">
             <div className="flex justify-between text-sm text-muted dark:text-frost/80">
-              <span>Progres ke Level {xpData.level + 1}</span>
               <span>
-                {xpData.current}/{xpData.nextLevel} XP
+                {xpToNext === 0
+                  ? "Level Maksimum tercapai!"
+                  : `Progres ke Level ${level + 1}`}
+              </span>
+              <span>
+                {xpToNext === 0
+                  ? "MAX"
+                  : `${xpToNext.toLocaleString()} XP lagi`}
               </span>
             </div>
             <div className="h-3 w-full bg-surface-soft rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-spark to-yellow-400 rounded-full transition-all duration-500"
                 style={{ width: `${xpPercentage}%` }}
+                aria-label={`${xpPercentage}% menuju level berikutnya`}
               />
             </div>
           </div>
@@ -110,46 +100,84 @@ export default function AchievementPage() {
             <Flame className="h-7 w-7 text-error" />
           </div>
           <div className="text-3xl font-black font-heading text-ink dark:text-white">
-            0
+            {isUserLoading ? "..." : currentStreak}
           </div>
           <div className="text-sm text-muted dark:text-frost/80">
             Hari Streak
           </div>
+          {longestStreak > 0 && longestStreak !== currentStreak && (
+            <div className="text-[11px] text-muted-soft mt-1">
+              Rekor: {longestStreak} hari
+            </div>
+          )}
         </div>
       </div>
 
       {/* Badges Grid */}
       <section>
-        <h2 className="text-xl font-bold font-heading text-ink dark:text-white mb-5">
-          Lencana
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-          {badges.map((badge) => (
-            <div
-              key={badge.name}
-              className={`relative rounded-xl border p-4 md:p-5 text-center transition-all duration-300 flex flex-col items-center justify-center ${
-                badge.earned
-                  ? "border-spark/30 bg-spark/5 dark:bg-spark/10 shadow-md"
-                  : "border-hairline bg-canvas dark:bg-void-elevated opacity-60 grayscale"
-              }`}
-            >
-              {!badge.earned && (
-                <div className="absolute top-2 right-2">
-                  <Lock className="h-3.5 w-3.5 text-muted-soft" />
-                </div>
-              )}
-              <div className="text-3xl md:text-4xl mb-2 md:mb-3">
-                {badge.icon}
-              </div>
-              <h4 className="text-xs md:text-sm font-bold text-ink dark:text-white mb-1 leading-tight">
-                {badge.name}
-              </h4>
-              <p className="text-[10px] md:text-xs text-muted dark:text-frost/70 leading-relaxed line-clamp-2 md:line-clamp-none">
-                {badge.description}
-              </p>
-            </div>
-          ))}
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-xl font-bold font-heading text-ink dark:text-white">
+            Lencana
+          </h2>
+          {!isBadgesLoading && badges.length > 0 && (
+            <span className="text-xs text-muted dark:text-frost/70 font-bold">
+              {badges.filter((b) => b.earned).length} / {badges.length} earned
+            </span>
+          )}
         </div>
+
+        {isBadgesLoading ? (
+          // Skeleton loading
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={i} className="h-32 rounded-xl" />
+            ))}
+          </div>
+        ) : badges.length === 0 ? (
+          <div className="rounded-xl border border-hairline border-dashed p-8 text-center bg-canvas dark:bg-void-elevated">
+            <p className="text-sm text-muted dark:text-frost/70">
+              Belum ada lencana yang tersedia. Hubungi admin untuk seeding
+              badge.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            {badges.map((badge) => (
+              <div
+                key={badge.id}
+                className={`relative rounded-xl border p-4 md:p-5 text-center transition-all duration-300 flex flex-col items-center justify-center ${
+                  badge.earned
+                    ? "border-spark/30 bg-spark/5 dark:bg-spark/10 shadow-md"
+                    : "border-hairline bg-canvas dark:bg-void-elevated opacity-60 grayscale"
+                }`}
+              >
+                {!badge.earned && (
+                  <div className="absolute top-2 right-2">
+                    <Lock className="h-3.5 w-3.5 text-muted-soft" />
+                  </div>
+                )}
+                <div className="text-3xl md:text-4xl mb-2 md:mb-3">
+                  {badge.icon || "🏆"}
+                </div>
+                <h4 className="text-xs md:text-sm font-bold text-ink dark:text-white mb-1 leading-tight">
+                  {badge.name}
+                </h4>
+                <p className="text-[10px] md:text-xs text-muted dark:text-frost/70 leading-relaxed line-clamp-3">
+                  {badge.description ?? ""}
+                </p>
+                {badge.earned && badge.earnedAt && (
+                  <p className="text-[9px] text-spark font-bold mt-2">
+                    {new Date(badge.earnedAt).toLocaleDateString("id-ID", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

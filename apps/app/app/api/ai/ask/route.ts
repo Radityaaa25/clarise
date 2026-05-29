@@ -241,6 +241,13 @@ export async function POST(req: Request) {
     await prisma.aiChatHistory.create({
       data: { userId: user.id, courseId, moduleId, messages: newMessages },
     });
+    // Sesi chat baru — re-evaluasi badge (AI_CHAT_50 tergantung jumlah sesi)
+    try {
+      const { evaluateBadges } = await import("@/lib/gamification");
+      await evaluateBadges(user.id);
+    } catch (err) {
+      console.error("[AI_ASK] Failed to evaluate badges:", err);
+    }
   }
 
   return NextResponse.json(

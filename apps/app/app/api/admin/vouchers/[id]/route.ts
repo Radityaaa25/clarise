@@ -1,15 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-
-async function requireAdmin(clerkId: string) {
-  const user = await prisma.user.findUnique({
-    where: { clerkId },
-    select: { role: true },
-  });
-  return user?.role === "ADMIN";
-}
+import { checkApiAdmin } from "@/lib/admin-auth";
 
 const updateSchema = z
   .object({
@@ -24,11 +16,14 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const { userId: clerkId } = await auth();
-  if (!clerkId)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!(await requireAdmin(clerkId)))
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+  const guard = await checkApiAdmin();
+  if (!guard.ok) {
+    const status = guard.error === "UNAUTHORIZED" ? 401 : 403;
+    const message =
+      guard.error === "UNAUTHORIZED" ? "Unauthorized" : "Forbidden";
+    return NextResponse.json({ error: message }, { status });
+  }
 
   const body = await req.json();
   const parsed = updateSchema.safeParse(body);
@@ -39,7 +34,7 @@ export async function PATCH(
   if (!existing)
     return NextResponse.json({ error: "Voucher not found" }, { status: 404 });
 
-  const updateData: any = {};
+  const updateData: Record<string, unknown> = {};
   if (parsed.data.maxUses !== undefined)
     updateData.maxUses = parsed.data.maxUses;
   if (parsed.data.expiresAt !== undefined)
