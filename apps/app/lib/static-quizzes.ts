@@ -327,7 +327,7 @@ export function getRandomStaticQuizzes(
 
   if (!pool || pool.length < count) {
     // Fallback to default + merge if needed to ensure enough questions
-    pool = [...(pool || []), ...STATIC_QUIZ_POOL["default"]];
+    pool = [...(pool || []), ...(STATIC_QUIZ_POOL["default"] || [])];
   }
 
   // Shuffle and slice

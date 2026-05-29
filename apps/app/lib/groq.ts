@@ -6,8 +6,12 @@ const parseKeys = (envVar: string | undefined): string[] => {
     .filter(Boolean);
 };
 
-const getRandomKey = (keys: string[]) =>
-  keys[Math.floor(Math.random() * keys.length)];
+const getRandomKey = (keys: string[]) => {
+  if (keys.length === 0) throw new Error("No API keys provided");
+  const key = keys[Math.floor(Math.random() * keys.length)];
+  if (!key) throw new Error("Key is undefined");
+  return key;
+};
 
 const getGroqKeys = () => {
   const keys = parseKeys(process.env.GROQ_API_KEY);

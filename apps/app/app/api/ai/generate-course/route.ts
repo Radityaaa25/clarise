@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { Ratelimit } from "@upstash/ratelimit";
 import { redis } from "@/lib/ratelimit";
-import { genAI } from "@/lib/gemini";
 import { getGroqApiKey } from "@/lib/groq";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";

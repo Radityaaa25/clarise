@@ -9,7 +9,9 @@ const parseKeys = (envVar: string | undefined): string[] => {
 };
 
 const getRandomKey = (keys: string[]) => {
+  if (keys.length === 0) throw new Error("No API keys provided");
   const key = keys[Math.floor(Math.random() * keys.length)];
+  if (!key) throw new Error("Key is undefined");
   const maskedKey = key.substring(0, 8) + "..." + key.substring(key.length - 4);
   console.log(`[AI_POOL] Using API Key: ${maskedKey}`);
   return key;
