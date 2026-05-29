@@ -1,6 +1,18 @@
 /* eslint-env node */
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async redirects() {
+    return [
+      // Admin dashboard sebenarnya ada di "/" (route group "(dashboard)").
+      // Kalau ada yang akses /dashboard langsung (misal dari link lama atau
+      // konfigurasi Clerk default), redirect ke root admin.
+      {
+        source: "/dashboard",
+        destination: "/",
+        permanent: false,
+      },
+    ];
+  },
   async headers() {
     return [
       {

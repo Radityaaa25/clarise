@@ -26,6 +26,8 @@ export default function AdminSignInPage() {
 
         <SignIn
           path="/sign-in"
+          fallbackRedirectUrl="/"
+          signUpFallbackRedirectUrl="/"
           appearance={{
             elements: {
               card: "border-2 border-border shadow-none rounded-none w-full neo-shadow-md bg-card",
