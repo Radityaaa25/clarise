@@ -3,6 +3,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { xpToNextLevel } from "@/lib/gamification";
+import { bootstrapUser, ensureWelcomeNotification, ensureFreeSubscription } from "@/lib/user-bootstrap";
 
 const updateUserSchema = z
   .object({
@@ -36,19 +37,24 @@ export async function GET() {
     },
   });
 
-  // Upsert if not found
+  // Fallback bootstrap kalau user belum ada di DB.
+  // Skenario: webhook Clerk gagal/belum ke-deliver, user login pertama kali.
+  // Kita pakai helper yang sama dengan webhook supaya welcome notif &
+  // FREE subscription tetap dibuat di sini.
   if (!user) {
     const clerk = await currentUser();
     if (!clerk)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    user = await prisma.user.create({
-      data: {
-        clerkId,
-        email: clerk.emailAddresses[0]?.emailAddress ?? "",
-        name: `${clerk.firstName ?? ""} ${clerk.lastName ?? ""}`.trim() || null,
-        imageUrl: clerk.imageUrl,
-      },
+    await bootstrapUser({
+      clerkId,
+      email: clerk.emailAddresses[0]?.emailAddress ?? "",
+      name: `${clerk.firstName ?? ""} ${clerk.lastName ?? ""}`.trim() || null,
+      imageUrl: clerk.imageUrl,
+    });
+
+    user = await prisma.user.findUnique({
+      where: { clerkId },
       select: {
         id: true,
         name: true,
@@ -64,6 +70,21 @@ export async function GET() {
         subscription: { select: { plan: true, status: true, endDate: true } },
       },
     });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Failed to bootstrap user" },
+        { status: 500 },
+      );
+    }
+  } else {
+    // Self-heal untuk user existing yang dibuat sebelum bootstrap helper
+    // ada (misal: dibuat lewat fallback lama yang belum punya subscription
+    // / welcome notif). Idempotent — kalau sudah ada, tidak dibuat ulang.
+    if (!user.subscription) {
+      await ensureFreeSubscription(user.id);
+    }
+    await ensureWelcomeNotification(user.id);
   }
 
   // Record LOGIN activity if first request today

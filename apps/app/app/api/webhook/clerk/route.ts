@@ -2,19 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { Webhook } from "svix";
 import { WebhookEvent } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { bootstrapUser } from "@/lib/user-bootstrap";
 
 export async function POST(req: NextRequest) {
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
 
   if (!WEBHOOK_SECRET) {
-    console.error("Missing CLERK_WEBHOOK_SECRET");
+    console.error("[CLERK_WEBHOOK] Missing CLERK_WEBHOOK_SECRET");
     return NextResponse.json(
       { error: "Server misconfigured" },
       { status: 500 },
     );
   }
 
-  // Get headers
+  // Verifikasi svix headers
   const svix_id = req.headers.get("svix-id");
   const svix_timestamp = req.headers.get("svix-timestamp");
   const svix_signature = req.headers.get("svix-signature");
@@ -26,11 +27,10 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Get body
   const payload = await req.json();
   const body = JSON.stringify(payload);
 
-  // Verify webhook signature
+  // Verifikasi signature (svix juga mengecek timestamp untuk replay protection)
   const wh = new Webhook(WEBHOOK_SECRET);
   let evt: WebhookEvent;
 
@@ -41,72 +41,55 @@ export async function POST(req: NextRequest) {
       "svix-signature": svix_signature,
     }) as WebhookEvent;
   } catch (err) {
-    console.error("Webhook verification failed:", err);
+    console.error("[CLERK_WEBHOOK] Verification failed:", err);
     return NextResponse.json({ error: "Verification failed" }, { status: 400 });
   }
 
   const eventType = evt.type;
 
-  if (eventType === "user.created" || eventType === "user.updated") {
-    const { id, email_addresses, first_name, last_name, image_url } = evt.data;
+  try {
+    if (eventType === "user.created" || eventType === "user.updated") {
+      const { id, email_addresses, first_name, last_name, image_url } =
+        evt.data;
 
-    const primaryEmail = email_addresses?.[0]?.email_address;
-    if (!primaryEmail) {
-      return NextResponse.json({ error: "No email found" }, { status: 400 });
+      const primaryEmail = email_addresses?.[0]?.email_address;
+      if (!primaryEmail) {
+        return NextResponse.json({ error: "No email found" }, { status: 400 });
+      }
+
+      const name = [first_name, last_name].filter(Boolean).join(" ") || null;
+
+      // Bootstrap user — idempotent, aman dipanggil berulang kali oleh
+      // webhook retry. Welcome notif hanya dibuat kalau user benar-benar
+      // baru di database (isNewUser=true di dalam bootstrap).
+      await bootstrapUser({
+        clerkId: id,
+        email: primaryEmail,
+        name,
+        imageUrl: image_url || null,
+      });
+    } else if (eventType === "user.deleted") {
+      const { id } = evt.data;
+      if (id) {
+        // deleteMany tidak error kalau user tidak ditemukan (idempotent)
+        await prisma.user.deleteMany({
+          where: { clerkId: id },
+        });
+      }
     }
 
-    const name = [first_name, last_name].filter(Boolean).join(" ") || null;
-    const referralCode = Math.random()
-      .toString(36)
-      .substring(2, 10)
-      .toUpperCase();
-
-    if (eventType === "user.created") {
-      const newUser = await prisma.user.create({
-        data: {
-          clerkId: id,
-          email: primaryEmail,
-          name,
-          imageUrl: image_url || null,
-          referralCode,
-          subscription: {
-            create: {
-              status: "ACTIVE",
-              plan: "FREE",
-              startDate: new Date(),
-            },
-          },
-        },
-      });
-
-      await prisma.notification.create({
-        data: {
-          userId: newUser.id,
-          type: "ANNOUNCEMENT",
-          title: "Selamat datang di Clarise! 🎉",
-          body: "Sebagai pengguna baru, Anda berhak mengklaim 2 kursus GRATIS (maks. 1 Kursus Premium). Kunjungi halaman Explore untuk memilih materi Anda!",
-        },
-      });
-    } else {
-      await prisma.user.update({
-        where: { clerkId: id },
-        data: {
-          email: primaryEmail,
-          name,
-          imageUrl: image_url || null,
-        },
-      });
-    }
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    // Catch-all error handling. Return 500 supaya Clerk retry — tapi pastikan
+    // semua operasi DB di atas sudah idempotent agar retry tidak menimbulkan
+    // duplikat data.
+    console.error(
+      `[CLERK_WEBHOOK] Failed to process event ${eventType}:`,
+      err,
+    );
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
   }
-
-  if (eventType === "user.deleted") {
-    const { id } = evt.data;
-    if (id) {
-      await prisma.user.deleteMany({
-        where: { clerkId: id },
-      });
-    }
-  }
-
-  return NextResponse.json({ success: true });
 }
