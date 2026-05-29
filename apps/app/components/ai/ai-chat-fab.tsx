@@ -1,7 +1,15 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Sparkles, X, Send, Maximize2, Minimize2, Loader2, User } from "lucide-react";
+import {
+  Sparkles,
+  X,
+  Send,
+  Maximize2,
+  Minimize2,
+  Loader2,
+  User,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAiChat } from "@/hooks/use-ai-chat";
 import ReactMarkdown from "react-markdown";
@@ -9,7 +17,7 @@ import ReactMarkdown from "react-markdown";
 export function AIChatFAB() {
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  
+
   const { messages, input, setInput, isLoading, sendMessage } = useAiChat();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -38,9 +46,9 @@ export function AIChatFAB() {
       aria-modal="true"
       className={cn(
         "fixed z-50 flex flex-col overflow-hidden border border-hairline bg-canvas dark:bg-void-elevated shadow-2xl transition-all duration-300",
-        isExpanded 
-          ? "bottom-0 right-0 w-full h-[100dvh] md:w-[calc(100vw-320px)] md:rounded-tl-2xl rounded-none" 
-          : "bottom-24 right-6 w-[350px] h-[500px] rounded-2xl"
+        isExpanded
+          ? "bottom-0 right-0 w-full h-[100dvh] md:w-[calc(100vw-320px)] md:rounded-tl-2xl rounded-none"
+          : "bottom-24 right-6 w-[350px] h-[500px] rounded-2xl",
       )}
     >
       {/* Header */}
@@ -50,8 +58,12 @@ export function AIChatFAB() {
             <Sparkles className="h-4 w-4" />
           </div>
           <div>
-            <h3 className="font-bold font-heading text-ink dark:text-white leading-none">Clarise AI</h3>
-            <span className="text-[10px] text-sky font-bold uppercase tracking-wider">Tutor Pintar</span>
+            <h3 className="font-bold font-heading text-ink dark:text-white leading-none">
+              Clarise AI
+            </h3>
+            <span className="text-[10px] text-sky font-bold uppercase tracking-wider">
+              Tutor Pintar
+            </span>
           </div>
         </div>
         <div className="flex items-center gap-1">
@@ -60,7 +72,11 @@ export function AIChatFAB() {
             aria-label={isExpanded ? "Perkecil chat" : "Perbesar chat"}
             className="flex h-8 w-8 items-center justify-center rounded-full text-muted hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
           >
-            {isExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+            {isExpanded ? (
+              <Minimize2 className="h-4 w-4" />
+            ) : (
+              <Maximize2 className="h-4 w-4" />
+            )}
           </button>
           <button
             onClick={() => setIsOpen(false)}
@@ -80,33 +96,52 @@ export function AIChatFAB() {
             <Sparkles className="h-4 w-4" />
           </div>
           <div className="rounded-2xl rounded-tl-sm bg-surface-soft dark:bg-white/5 p-3 text-sm text-ink dark:text-white">
-            Halo! Gue Clarise AI. Ada materi yang bikin lo bingung? Tanya aja, gue siap bantu! 🚀
+            Halo! Gue Clarise AI. Ada materi yang bikin lo bingung? Tanya aja,
+            gue siap bantu! 🚀
           </div>
         </div>
 
         {/* Messages */}
-        {messages.filter(m => m.role !== "system").map((msg, i) => (
-          <div key={i} className={cn("flex gap-3", msg.role === "user" ? "flex-row-reverse" : "flex-row")}>
-            <div className={cn(
-              "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg mt-1",
-              msg.role === "user" ? "bg-primary text-white" : "bg-sky text-white"
-            )}>
-              {msg.role === "user" ? <User className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
-            </div>
-            <div className={cn(
-              "rounded-2xl p-3 text-sm",
-              msg.role === "user" 
-                ? "rounded-tr-sm bg-primary text-white" 
-                : "rounded-tl-sm bg-surface-soft dark:bg-white/5 text-ink dark:text-white prose prose-sm dark:prose-invert max-w-full"
-            )}>
-              {msg.role === "user" ? (
-                msg.content
-              ) : (
-                <ReactMarkdown>{msg.content}</ReactMarkdown>
+        {messages
+          .filter((m) => m.role !== "system")
+          .map((msg, i) => (
+            <div
+              key={i}
+              className={cn(
+                "flex gap-3",
+                msg.role === "user" ? "flex-row-reverse" : "flex-row",
               )}
+            >
+              <div
+                className={cn(
+                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg mt-1",
+                  msg.role === "user"
+                    ? "bg-core-blue text-white"
+                    : "bg-sky text-white",
+                )}
+              >
+                {msg.role === "user" ? (
+                  <User className="h-4 w-4" />
+                ) : (
+                  <Sparkles className="h-4 w-4" />
+                )}
+              </div>
+              <div
+                className={cn(
+                  "rounded-2xl p-3 text-sm",
+                  msg.role === "user"
+                    ? "rounded-tr-sm bg-core-blue text-white"
+                    : "rounded-tl-sm bg-surface-soft dark:bg-white/5 text-ink dark:text-white prose prose-sm dark:prose-invert max-w-full",
+                )}
+              >
+                {msg.role === "user" ? (
+                  msg.content
+                ) : (
+                  <ReactMarkdown>{msg.content}</ReactMarkdown>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
 
         {/* Loading Indicator */}
         {isLoading && (
@@ -126,7 +161,7 @@ export function AIChatFAB() {
 
       {/* Input Area */}
       <div className="border-t border-hairline p-4">
-        <form 
+        <form
           className="relative flex items-center"
           onSubmit={(e) => {
             e.preventDefault();
@@ -148,7 +183,11 @@ export function AIChatFAB() {
             aria-label="Kirim pesan"
             className="absolute right-2 flex h-8 w-8 items-center justify-center rounded-full bg-sky text-white transition-all hover:bg-sky/90 disabled:opacity-50 disabled:hover:bg-sky"
           >
-            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4 ml-0.5" />}
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="h-4 w-4 ml-0.5" />
+            )}
           </button>
         </form>
       </div>

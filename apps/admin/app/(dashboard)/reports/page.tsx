@@ -5,20 +5,20 @@ export const dynamic = "force-dynamic";
 
 export default async function ReportsPage() {
   const reportsData = await prisma.report.findMany({
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: "desc" },
     include: {
       course: { select: { title: true } },
       user: { select: { name: true, email: true } },
-    }
+    },
   });
 
-  const formattedReports = reportsData.map(report => ({
+  const formattedReports = reportsData.map((report) => ({
     id: report.id,
     course: report.course?.title || "Unknown Course",
     reporter: report.user?.name || report.user?.email || "Unknown User",
     reason: report.reason,
     status: report.status,
-    date: report.createdAt.toISOString().slice(0, 10)
+    date: report.createdAt.toISOString().slice(0, 10),
   }));
 
   return <ReportsClient initialReports={formattedReports} />;

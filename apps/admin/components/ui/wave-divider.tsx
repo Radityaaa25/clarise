@@ -1,14 +1,14 @@
-export function WaveDivider({ 
-  fromColor, 
+export function WaveDivider({
+  fromColor,
   toColor,
-  flip = false 
-}: { 
-  fromColor: string
-  toColor: string
-  flip?: boolean 
+  flip = false,
+}: {
+  fromColor: string;
+  toColor: string;
+  flip?: boolean;
 }) {
   return (
-    <div 
+    <div
       className={`relative h-16 w-full overflow-hidden ${flip ? "rotate-180" : ""}`}
       style={{ background: fromColor }}
     >
@@ -24,5 +24,5 @@ export function WaveDivider({
         />
       </svg>
     </div>
-  )
+  );
 }

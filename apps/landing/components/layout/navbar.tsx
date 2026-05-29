@@ -31,7 +31,7 @@ export function FloatingNavbar() {
     <header
       className={cn(
         "fixed top-0 inset-x-0 z-50 flex justify-center px-4 md:px-4 transition-all duration-300",
-        isScrolled ? "pt-2 md:pt-4" : "pt-4 md:pt-8"
+        isScrolled ? "pt-2 md:pt-4" : "pt-4 md:pt-8",
       )}
     >
       <div
@@ -39,13 +39,25 @@ export function FloatingNavbar() {
           "flex w-full max-w-5xl items-center justify-between rounded-full border px-4 md:px-6 py-2 md:py-3 transition-all duration-300 h-[56px] md:h-[64px]",
           isScrolled
             ? "border-black/5 dark:border-white/10 bg-white/70 dark:bg-void/80 shadow-lg backdrop-blur-md"
-            : "border-transparent bg-transparent"
+            : "border-transparent bg-transparent",
         )}
       >
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <Image src="/logoLM.png" alt="Clarise Logo" width={80} height={26} className="w-[60px] md:w-[80px] h-auto dark:hidden" />
-          <Image src="/logoDM.png" alt="Clarise Logo" width={80} height={26} className="w-[60px] md:w-[80px] h-auto hidden dark:block" />
+          <Image
+            src="/logoLM.png"
+            alt="Clarise Logo"
+            width={80}
+            height={26}
+            className="w-[60px] md:w-[80px] h-auto dark:hidden"
+          />
+          <Image
+            src="/logoDM.png"
+            alt="Clarise Logo"
+            width={80}
+            height={26}
+            className="w-[60px] md:w-[80px] h-auto hidden dark:block"
+          />
         </Link>
 
         {/* Desktop Navigation & Actions */}
@@ -73,7 +85,7 @@ export function FloatingNavbar() {
         {/* Mobile Actions */}
         <div className="flex items-center gap-2 md:hidden">
           <ThemeToggle />
-          <button 
+          <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="p-2 -mr-2 text-ink dark:text-white"
           >

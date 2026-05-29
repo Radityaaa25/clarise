@@ -211,10 +211,11 @@ model UserProgress {
   id          String    @id @default(cuid())
   userId      String
   moduleId    String
-  courseId     String
+  courseId    String
   completedAt DateTime?
   enrolledAt  DateTime  @default(now())
   activeSlide Int       @default(0)
+  rating      Int?
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   module Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)

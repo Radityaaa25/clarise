@@ -8,6 +8,7 @@ description: Test if user signup is open and identify potential abuse vectors in
 > 🔴 **CRITICAL: PROGRESSIVE FILE UPDATES REQUIRED**
 >
 > You MUST write to context files **AS YOU GO**, not just at the end.
+>
 > - Write to `.sb-pentest-context.json` **IMMEDIATELY after each test completed**
 > - Log to `.sb-pentest-audit.log` **BEFORE and AFTER each test**
 > - **DO NOT** wait until the skill completes to update files
@@ -33,24 +34,24 @@ This skill tests the user registration flow for security issues and misconfigura
 
 Open signup can lead to:
 
-| Risk | Description |
-|------|-------------|
-| Spam accounts | Bots creating fake accounts |
-| Resource abuse | Free tier exploitation |
-| Email spam | Using your service to send emails |
-| Data pollution | Fake data in your database |
+| Risk           | Description                         |
+| -------------- | ----------------------------------- |
+| Spam accounts  | Bots creating fake accounts         |
+| Resource abuse | Free tier exploitation              |
+| Email spam     | Using your service to send emails   |
+| Data pollution | Fake data in your database          |
 | Attack surface | More accounts = more attack vectors |
 
 ## Tests Performed
 
-| Test | Purpose |
-|------|---------|
-| Signup availability | Is registration open? |
-| Email validation | Does it accept invalid emails? |
-| Rate limiting | Can we create many accounts? |
-| Disposable emails | Are temp emails blocked? |
-| Password policy | What passwords are accepted? |
-| Response information | What info is leaked? |
+| Test                 | Purpose                        |
+| -------------------- | ------------------------------ |
+| Signup availability  | Is registration open?          |
+| Email validation     | Does it accept invalid emails? |
+| Rate limiting        | Can we create many accounts?   |
+| Disposable emails    | Are temp emails blocked?       |
+| Password policy      | What passwords are accepted?   |
+| Response information | What info is leaked?           |
 
 ## Usage
 
@@ -213,6 +214,7 @@ Test if disposable emails are blocked for signup
 ### Disposable Email Detection
 
 Common disposable email domains tested:
+
 - mailinator.com
 - tempmail.com
 - guerrillamail.com
@@ -222,6 +224,7 @@ Common disposable email domains tested:
 ### Weak Password List
 
 Common passwords tested:
+
 - password, password123
 - 123456, 12345678
 - qwerty, qwerty123
@@ -288,10 +291,10 @@ Attempt 4: 429 Too Many Requests
 
 ```typescript
 // In your signup handler or Edge Function
-import { isDisposable } from 'email-validator-package';
+import { isDisposable } from "email-validator-package";
 
 if (isDisposable(email)) {
-  throw new Error('Please use a permanent email address');
+  throw new Error("Please use a permanent email address");
 }
 ```
 
@@ -318,7 +321,7 @@ async function signup(email, password) {
   } catch (error) {
     // Don't reveal if email exists
   }
-  return { message: 'Check your email to continue' };
+  return { message: "Check your email to continue" };
 }
 ```
 
@@ -328,14 +331,13 @@ If signup should be invite-only:
 
 ```typescript
 // Use admin API to invite users
-const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(
-  'user@example.com'
-);
+const { data, error } =
+  await supabaseAdmin.auth.admin.inviteUserByEmail("user@example.com");
 
 // Or disable signup in dashboard and use:
 const { data, error } = await supabaseAdmin.auth.admin.createUser({
-  email: 'user@example.com',
-  email_confirm: true
+  email: "user@example.com",
+  email_confirm: true,
 });
 ```
 
@@ -356,6 +358,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 ### Required Actions (Progressive)
 
 1. **Update `.sb-pentest-context.json`** with results:
+
    ```json
    {
      "signup_audit": {
@@ -368,6 +371,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
    ```
 
 2. **Log to `.sb-pentest-audit.log`**:
+
    ```
    [TIMESTAMP] [supabase-audit-auth-signup] [START] Testing signup security
    [TIMESTAMP] [supabase-audit-auth-signup] [FINDING] P2: Weak passwords accepted
@@ -384,12 +388,12 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 
 ### Evidence Files to Create
 
-| File | Content |
-|------|---------|
-| `signup-tests/open-signup.json` | Signup availability test |
-| `signup-tests/weak-password.json` | Weak password acceptance test |
-| `signup-tests/disposable-email.json` | Disposable email test |
-| `signup-tests/rate-limit.json` | Rate limiting test |
+| File                                 | Content                       |
+| ------------------------------------ | ----------------------------- |
+| `signup-tests/open-signup.json`      | Signup availability test      |
+| `signup-tests/weak-password.json`    | Weak password acceptance test |
+| `signup-tests/disposable-email.json` | Disposable email test         |
+| `signup-tests/rate-limit.json`       | Rate limiting test            |
 
 ### Evidence Format
 
@@ -407,7 +411,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
       "request": {
         "method": "POST",
         "url": "https://abc123def.supabase.co/auth/v1/signup",
-        "body": {"email": "test@example.com", "password": "123456"},
+        "body": { "email": "test@example.com", "password": "123456" },
         "curl_command": "curl -X POST '$URL/auth/v1/signup' -H 'apikey: $ANON_KEY' -H 'Content-Type: application/json' -d '{\"email\": \"test@example.com\", \"password\": \"123456\"}'"
       },
       "response": {
@@ -421,7 +425,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
       "test_name": "disposable_email",
       "severity": "P2",
       "request": {
-        "body": {"email": "test@mailinator.com", "password": "Test123456!"}
+        "body": { "email": "test@mailinator.com", "password": "Test123456!" }
       },
       "response": {
         "status": 200,

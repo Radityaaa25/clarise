@@ -51,11 +51,12 @@ const GRACE_PERIOD_DAYS = 3;
 
 export async function getUserSubscription(userId: string) {
   const cacheKey = `sub:${userId}`;
-  const cached = await redis.get<string>(cacheKey);
-  if (cached) return JSON.parse(cached) as Awaited<ReturnType<typeof fetchSub>>;
+  const cached =
+    await redis.get<Awaited<ReturnType<typeof fetchSub>>>(cacheKey);
+  if (cached) return cached;
 
   const sub = await fetchSub(userId);
-  if (sub) await redis.set(cacheKey, JSON.stringify(sub), { ex: 300 });
+  if (sub) await redis.set(cacheKey, sub, { ex: 300 });
   return sub;
 }
 
@@ -80,18 +81,21 @@ export async function isSubscriptionActive(userId: string): Promise<boolean> {
 
 export async function checkFeatureAccess(
   userId: string,
-  feature: PlanFeature
+  feature: PlanFeature,
 ): Promise<{ allowed: boolean; reason?: string }> {
   const sub = await getUserSubscription(userId);
-  const plan: SubscriptionPlan = sub?.status === "ACTIVE" || (await isSubscriptionActive(userId))
-    ? (sub?.plan ?? "FREE")
-    : "FREE";
+  const plan: SubscriptionPlan =
+    sub?.status === "ACTIVE" || (await isSubscriptionActive(userId))
+      ? (sub?.plan ?? "FREE")
+      : "FREE";
 
   const limits = PLAN_LIMITS[plan];
   const value = limits[feature];
 
   if (typeof value === "boolean") {
-    return value ? { allowed: true } : { allowed: false, reason: "Fitur ini hanya untuk Premium" };
+    return value
+      ? { allowed: true }
+      : { allowed: false, reason: "Fitur ini hanya untuk Premium" };
   }
   if (typeof value === "number" && value === 0) {
     return { allowed: false, reason: "Fitur ini hanya untuk Premium" };

@@ -4,10 +4,15 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
   const { userId: clerkId } = await auth();
-  if (!clerkId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!clerkId)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const user = await prisma.user.findUnique({ where: { clerkId }, select: { id: true } });
-  if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+  const user = await prisma.user.findUnique({
+    where: { clerkId },
+    select: { id: true },
+  });
+  if (!user)
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
 
   const { searchParams } = new URL(req.url);
   const limit = Math.min(Number(searchParams.get("limit")) || 10, 20);
@@ -20,7 +25,14 @@ export async function GET(req: NextRequest) {
       where,
       take: limit,
       orderBy: { createdAt: "desc" },
-      select: { id: true, type: true, title: true, body: true, isRead: true, createdAt: true },
+      select: {
+        id: true,
+        type: true,
+        title: true,
+        body: true,
+        isRead: true,
+        createdAt: true,
+      },
     }),
     prisma.notification.count({ where: { userId: user.id, isRead: false } }),
   ]);
@@ -30,14 +42,16 @@ export async function GET(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   const { userId: clerkId } = await auth();
-  if (!clerkId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!clerkId)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const user = await prisma.user.findUnique({
     where: { clerkId },
     select: { id: true },
   });
-  
-  if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+
+  if (!user)
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
 
   // Mark all as read
   await prisma.notification.updateMany({

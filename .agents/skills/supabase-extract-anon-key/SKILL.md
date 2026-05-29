@@ -8,6 +8,7 @@ description: Extract the Supabase anon/public API key from client-side code. Thi
 > 🔴 **CRITICAL: PROGRESSIVE FILE UPDATES REQUIRED**
 >
 > You MUST write to context files **AS YOU GO**, not just at the end.
+>
 > - Write to `.sb-pentest-context.json` **IMMEDIATELY after each discovery**
 > - Log to `.sb-pentest-audit.log` **BEFORE and AFTER each action**
 > - **DO NOT** wait until the skill completes to update files
@@ -46,6 +47,7 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFiYzEyMyI
 ```
 
 Key characteristics:
+
 - Starts with `eyJ` (base64 encoded `{"alg":`)
 - Contains `"role":"anon"` in payload
 - Project reference in `"ref"` claim
@@ -57,24 +59,24 @@ The skill searches for:
 ### 1. Direct Key Assignment
 
 ```javascript
-const SUPABASE_KEY = 'eyJhbGci...'
-const SUPABASE_ANON_KEY = 'eyJhbGci...'
+const SUPABASE_KEY = "eyJhbGci...";
+const SUPABASE_ANON_KEY = "eyJhbGci...";
 ```
 
 ### 2. Client Initialization
 
 ```javascript
-createClient(url, 'eyJhbGci...')
-createClient(url, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+createClient(url, "eyJhbGci...");
+createClient(url, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 ```
 
 ### 3. Environment Variable Patterns
 
 ```javascript
-NEXT_PUBLIC_SUPABASE_ANON_KEY
-VITE_SUPABASE_ANON_KEY
-REACT_APP_SUPABASE_KEY
-SUPABASE_KEY
+NEXT_PUBLIC_SUPABASE_ANON_KEY;
+VITE_SUPABASE_ANON_KEY;
+REACT_APP_SUPABASE_KEY;
+SUPABASE_KEY;
 ```
 
 ## Usage
@@ -187,17 +189,18 @@ Saved to `.sb-pentest-context.json`:
 
 ## Security Assessment
 
-| Finding | Severity | Description |
-|---------|----------|-------------|
-| Anon key in client | ℹ️ Info | Expected, but test RLS |
-| Anon key expired | ⚠️ P2 | Key should be rotated |
-| Multiple anon keys | ⚠️ P2 | May indicate key rotation issues |
-| Role is not "anon" | 🔴 P0 | Wrong key type exposed! |
+| Finding            | Severity | Description                      |
+| ------------------ | -------- | -------------------------------- |
+| Anon key in client | ℹ️ Info  | Expected, but test RLS           |
+| Anon key expired   | ⚠️ P2    | Key should be rotated            |
+| Multiple anon keys | ⚠️ P2    | May indicate key rotation issues |
+| Role is not "anon" | 🔴 P0    | Wrong key type exposed!          |
 
 ## Common Issues
 
 ❌ **Problem:** Key found but won't decode
 ✅ **Solution:** May be obfuscated or split. Try:
+
 ```
 Extract anon key with deobfuscation from https://myapp.example.com
 ```
@@ -207,6 +210,7 @@ Extract anon key with deobfuscation from https://myapp.example.com
 
 ❌ **Problem:** No key found but Supabase detected
 ✅ **Solution:** Key may be fetched at runtime. Check network requests:
+
 ```
 Monitor network for anon key on https://myapp.example.com
 ```
@@ -237,6 +241,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 ### Required Actions (Progressive)
 
 1. **Update `.sb-pentest-context.json`** with extracted data:
+
    ```json
    {
      "supabase": {
@@ -248,6 +253,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
    ```
 
 2. **Log to `.sb-pentest-audit.log`**:
+
    ```
    [TIMESTAMP] [supabase-extract-anon-key] [START] Beginning anon key extraction
    [TIMESTAMP] [supabase-extract-anon-key] [SUCCESS] Anon key extracted
@@ -264,8 +270,8 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 
 ### Evidence Files to Create
 
-| File | Content |
-|------|---------|
+| File                      | Content                           |
+| ------------------------- | --------------------------------- |
 | `extracted-anon-key.json` | Anon key with decoded JWT payload |
 
 ### Evidence Format

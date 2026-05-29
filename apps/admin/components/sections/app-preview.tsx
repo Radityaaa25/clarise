@@ -1,44 +1,44 @@
-"use client"
+"use client";
 
-import Image from "next/image"
+import Image from "next/image";
 
 const features = [
-  { 
-    id: "dashboard", 
-    label: "Dashboard", 
-    file: "/Dashboard.png", 
+  {
+    id: "dashboard",
+    label: "Dashboard",
+    file: "/Dashboard.png",
     desc: "Pantau progress, XP, dan pertahankan learning streak harianmu dengan mudah.",
-    badge: "Overview"
+    badge: "Overview",
   },
-  { 
-    id: "explore", 
-    label: "Explore", 
-    file: "/Explore.png", 
+  {
+    id: "explore",
+    label: "Explore",
+    file: "/Explore.png",
     desc: "Temukan ratusan kursus dari berbagai kategori. Discover your next skill.",
-    badge: "Library"
+    badge: "Library",
   },
-  { 
-    id: "mycourse", 
-    label: "My Courses", 
-    file: "/MyCourse.png", 
+  {
+    id: "mycourse",
+    label: "My Courses",
+    file: "/MyCourse.png",
     desc: "Kelola dan lanjutkan kursus aktifmu kapan saja. Seamless learning experience.",
-    badge: "Learning"
+    badge: "Learning",
   },
-  { 
-    id: "streak", 
-    label: "Achievements", 
-    file: "/Streak.png", 
+  {
+    id: "streak",
+    label: "Achievements",
+    file: "/Streak.png",
     desc: "Kumpulkan berbagai badge eksklusif dan tingkatkan levelmu. Gamified for you.",
-    badge: "Gamification"
+    badge: "Gamification",
   },
-  { 
-    id: "create", 
-    label: "AI Course Builder", 
-    file: "/CreateCourse.png", 
+  {
+    id: "create",
+    label: "AI Course Builder",
+    file: "/CreateCourse.png",
     desc: "Buat kursus kustom secara instan dengan bantuan AI. Your personal course creator.",
-    badge: "Premium"
+    badge: "Premium",
   },
-]
+];
 
 export function AppPreview() {
   return (
@@ -46,8 +46,10 @@ export function AppPreview() {
       {features.map((feature, idx) => {
         const isEven = idx % 2 === 0;
         return (
-          <div key={feature.id} className={`flex flex-col md:flex-row items-center gap-12 lg:gap-24 ${isEven ? "" : "md:flex-row-reverse"}`}>
-            
+          <div
+            key={feature.id}
+            className={`flex flex-col md:flex-row items-center gap-12 lg:gap-24 ${isEven ? "" : "md:flex-row-reverse"}`}
+          >
             {/* Text Content */}
             <div className="flex-1 space-y-6 text-center md:text-left relative z-10">
               <div className="inline-flex items-center gap-2 rounded-full border border-core-blue/20 bg-core-blue/5 dark:bg-core-blue/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-core-blue dark:text-sky">
@@ -65,7 +67,7 @@ export function AppPreview() {
             <div className="flex-1 w-full max-w-[800px] relative group">
               {/* Glow background behind image */}
               <div className="absolute inset-0 bg-gradient-to-r from-core-blue/10 to-sky/10 dark:from-core-blue/20 dark:to-sky/20 rounded-2xl md:rounded-[32px] blur-3xl group-hover:blur-[60px] transition-all duration-700 -z-10" />
-              
+
               <div className="rounded-2xl md:rounded-[32px] border border-hairline bg-canvas dark:bg-void-elevated p-2 md:p-3 shadow-2xl transition-transform duration-500 hover:-translate-y-2">
                 <div className="w-full overflow-hidden rounded-xl md:rounded-[20px] border border-hairline bg-slate-50 dark:bg-void">
                   <Image
@@ -79,10 +81,9 @@ export function AppPreview() {
                 </div>
               </div>
             </div>
-
           </div>
         );
       })}
     </div>
-  )
+  );
 }

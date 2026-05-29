@@ -8,6 +8,7 @@ description: Identify storage buckets that are publicly accessible and may conta
 > 🔴 **CRITICAL: PROGRESSIVE FILE UPDATES REQUIRED**
 >
 > You MUST write to context files **AS YOU GO**, not just at the end.
+>
 > - Write to `.sb-pentest-context.json` **IMMEDIATELY after each bucket analyzed**
 > - Log to `.sb-pentest-audit.log` **BEFORE and AFTER each test**
 > - **DO NOT** wait until the skill completes to update files
@@ -32,12 +33,12 @@ This skill specifically focuses on identifying misconfigured public buckets and 
 
 Public buckets allow:
 
-| Access Type | Description |
-|-------------|-------------|
-| Direct URL | Anyone with the URL can download |
-| Enumeration | File listing may be possible |
-| No Auth | No authentication required |
-| Caching | CDN may cache sensitive files |
+| Access Type | Description                      |
+| ----------- | -------------------------------- |
+| Direct URL  | Anyone with the URL can download |
+| Enumeration | File listing may be possible     |
+| No Auth     | No authentication required       |
+| Caching     | CDN may cache sensitive files    |
 
 ## Common Misconfiguration Scenarios
 
@@ -62,7 +63,7 @@ Deep scan public buckets for sensitive content
 
 ## Output Format
 
-```
+````
 ═══════════════════════════════════════════════════════════
  PUBLIC BUCKET SECURITY AUDIT
 ═══════════════════════════════════════════════════════════
@@ -126,83 +127,84 @@ Deep scan public buckets for sensitive content
      bucket_id = 'uploads'
      AND auth.uid()::text = (storage.foldername(name))[1]
    );
- ```
+````
 
- ─────────────────────────────────────────────────────────
- 3. backups 🔴 P0 - CRITICAL MISCONFIGURATION
- ─────────────────────────────────────────────────────────
+───────────────────────────────────────────────────────── 3. backups 🔴 P0 - CRITICAL MISCONFIGURATION
+─────────────────────────────────────────────────────────
 
- Status: Public (SHOULD NEVER BE PUBLIC)
- Purpose: Database backups
+Status: Public (SHOULD NEVER BE PUBLIC)
+Purpose: Database backups
 
- ⚠️ CRITICAL: Backup files publicly accessible!
+⚠️ CRITICAL: Backup files publicly accessible!
 
- Exposed Content:
- ├── 🔴 db-backup-2025-01-30.sql (125MB)
- │   └── Full database dump with all user data
- ├── 🔴 db-backup-2025-01-29.sql (124MB)
- │   └── Previous day backup
- ├── 🔴 users-export.csv (2.3MB)
- │   └── User data export with emails, names
- ├── 🔴 secrets.env (1KB)
- │   └── Contains API keys and passwords!
- └── 🔴 .env.production (1KB)
-     └── Production environment secrets!
+Exposed Content:
+├── 🔴 db-backup-2025-01-30.sql (125MB)
+│ └── Full database dump with all user data
+├── 🔴 db-backup-2025-01-29.sql (124MB)
+│ └── Previous day backup
+├── 🔴 users-export.csv (2.3MB)
+│ └── User data export with emails, names
+├── 🔴 secrets.env (1KB)
+│ └── Contains API keys and passwords!
+└── 🔴 .env.production (1KB)
+└── Production environment secrets!
 
- Public URLs (Currently Accessible):
- https://abc123def.supabase.co/storage/v1/object/public/backups/db-backup-2025-01-30.sql
- https://abc123def.supabase.co/storage/v1/object/public/backups/secrets.env
+Public URLs (Currently Accessible):
+https://abc123def.supabase.co/storage/v1/object/public/backups/db-backup-2025-01-30.sql
+https://abc123def.supabase.co/storage/v1/object/public/backups/secrets.env
 
- Impact:
- ├── Complete database can be downloaded
- ├── All user PII exposed
- ├── All API secrets exposed
- └── Full application compromise possible
+Impact:
+├── Complete database can be downloaded
+├── All user PII exposed
+├── All API secrets exposed
+└── Full application compromise possible
 
- ═══════════════════════════════════════════════════════════
- 🚨 IMMEDIATE ACTION REQUIRED 🚨
- ═══════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════
+🚨 IMMEDIATE ACTION REQUIRED 🚨
+═══════════════════════════════════════════════════════════
 
- 1. MAKE BUCKET PRIVATE NOW:
+1.  MAKE BUCKET PRIVATE NOW:
+
     ```sql
     UPDATE storage.buckets
     SET public = false
     WHERE name = 'backups';
     ```
 
- 2. DELETE PUBLIC FILES:
+2.  DELETE PUBLIC FILES:
     Delete or move all sensitive files from public access
 
- 3. ROTATE ALL EXPOSED SECRETS:
+3.  ROTATE ALL EXPOSED SECRETS:
     - Stripe API keys
     - Database passwords
     - JWT secrets
     - Any other keys in exposed files
 
- 4. AUDIT ACCESS LOGS:
+4.  AUDIT ACCESS LOGS:
     Check if files were accessed by unauthorized parties
 
- 5. INCIDENT RESPONSE:
+5.  INCIDENT RESPONSE:
     Consider this a data breach and follow your
     incident response procedures
 
- ─────────────────────────────────────────────────────────
- Summary
- ─────────────────────────────────────────────────────────
+─────────────────────────────────────────────────────────
+Summary
+─────────────────────────────────────────────────────────
 
- Public Buckets: 3
- ├── ✅ Appropriate: 1 (avatars)
- ├── 🟠 P1 Review: 1 (uploads)
- └── 🔴 P0 Critical: 1 (backups)
+Public Buckets: 3
+├── ✅ Appropriate: 1 (avatars)
+├── 🟠 P1 Review: 1 (uploads)
+└── 🔴 P0 Critical: 1 (backups)
 
- Exposed Sensitive Files: 47
- Exposed Secret Files: 2
+Exposed Sensitive Files: 47
+Exposed Secret Files: 2
 
- Critical Finding: Database backups and secrets
-                   publicly accessible via direct URL
+Critical Finding: Database backups and secrets
+publicly accessible via direct URL
 
 ═══════════════════════════════════════════════════════════
-```
+
+````
 
 ## Bucket Classification
 
@@ -260,7 +262,7 @@ The skill classifies buckets by content:
     ]
   }
 }
-```
+````
 
 ## Prevention Checklist
 
@@ -288,19 +290,20 @@ REVOKE INSERT ON storage.buckets FROM anon;
 
 ```typescript
 // Validate file type before upload
-const allowedTypes = ['image/jpeg', 'image/png'];
+const allowedTypes = ["image/jpeg", "image/png"];
 if (!allowedTypes.includes(file.type)) {
-  throw new Error('Invalid file type');
+  throw new Error("Invalid file type");
 }
 
 // Use user-specific paths
 const path = `${user.id}/${file.name}`;
-await supabase.storage.from('uploads').upload(path, file);
+await supabase.storage.from("uploads").upload(path, file);
 ```
 
 ### 4. Regular Audits
 
 Run this skill regularly:
+
 - Before each production deployment
 - Weekly automated scans
 - After any storage configuration changes
@@ -322,6 +325,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 ### Required Actions (Progressive)
 
 1. **Update `.sb-pentest-context.json`** with results:
+
    ```json
    {
      "public_bucket_audit": {
@@ -333,6 +337,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
    ```
 
 2. **Log to `.sb-pentest-audit.log`**:
+
    ```
    [TIMESTAMP] [supabase-audit-buckets-public] [START] Auditing public buckets
    [TIMESTAMP] [supabase-audit-buckets-public] [FINDING] P0: backups bucket is public
@@ -349,10 +354,10 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 
 ### Evidence Files to Create
 
-| File | Content |
-|------|---------|
-| `public-url-tests/[bucket]-access.json` | Public URL access test results |
-| `public-url-tests/sensitive-content.json` | Sensitive content found |
+| File                                      | Content                        |
+| ----------------------------------------- | ------------------------------ |
+| `public-url-tests/[bucket]-access.json`   | Public URL access test results |
+| `public-url-tests/sensitive-content.json` | Sensitive content found        |
 
 ### Evidence Format
 

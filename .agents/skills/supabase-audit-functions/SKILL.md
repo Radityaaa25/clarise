@@ -8,6 +8,7 @@ description: Discover and test Supabase Edge Functions for security vulnerabilit
 > 🔴 **CRITICAL: PROGRESSIVE FILE UPDATES REQUIRED**
 >
 > You MUST write to context files **AS YOU GO**, not just at the end.
+>
 > - Write to `.sb-pentest-context.json` **IMMEDIATELY after each function tested**
 > - Log to `.sb-pentest-audit.log` **BEFORE and AFTER each function test**
 > - **DO NOT** wait until the skill completes to update files
@@ -37,21 +38,21 @@ Supabase Edge Functions are Deno-based serverless functions:
 https://[project].supabase.co/functions/v1/[function-name]
 ```
 
-| Security Aspect | Consideration |
-|-----------------|---------------|
-| Authentication | Functions can require JWT or be public |
-| CORS | Cross-origin access control |
-| Input Validation | User input handling |
-| Secrets | Environment variable exposure |
+| Security Aspect  | Consideration                          |
+| ---------------- | -------------------------------------- |
+| Authentication   | Functions can require JWT or be public |
+| CORS             | Cross-origin access control            |
+| Input Validation | User input handling                    |
+| Secrets          | Environment variable exposure          |
 
 ## Tests Performed
 
-| Test | Purpose |
-|------|---------|
-| Function discovery | Find exposed functions |
-| Auth requirements | Check if JWT required |
-| Input validation | Test for injection |
-| Error handling | Check for information disclosure |
+| Test               | Purpose                          |
+| ------------------ | -------------------------------- |
+| Function discovery | Find exposed functions           |
+| Auth requirements  | Check if JWT required            |
+| Input validation   | Test for injection               |
+| Error handling     | Check for information disclosure |
 
 ## Usage
 
@@ -69,7 +70,7 @@ Test the process-payment Edge Function for security issues
 
 ## Output Format
 
-```
+````
 ═══════════════════════════════════════════════════════════
  EDGE FUNCTIONS AUDIT
 ═══════════════════════════════════════════════════════════
@@ -99,167 +100,171 @@ Test the process-payment Edge Function for security issues
  Response:
  ```json
  {"message": "Hello, World!"}
- ```
+````
 
- Assessment: ✅ APPROPRIATE
- Simple public endpoint, no sensitive operations.
+Assessment: ✅ APPROPRIATE
+Simple public endpoint, no sensitive operations.
 
- ─────────────────────────────────────────────────────────
- 2. process-payment
- ─────────────────────────────────────────────────────────
+───────────────────────────────────────────────────────── 2. process-payment
+─────────────────────────────────────────────────────────
 
- Endpoint: /functions/v1/process-payment
- Method: POST
+Endpoint: /functions/v1/process-payment
+Method: POST
 
- Authentication Test:
- ├── Without JWT: ❌ 401 Unauthorized
- ├── With valid JWT: ✅ 200 OK
- └── Status: ✅ Authentication required
+Authentication Test:
+├── Without JWT: ❌ 401 Unauthorized
+├── With valid JWT: ✅ 200 OK
+└── Status: ✅ Authentication required
 
- Input Validation Test:
- ├── Missing amount: ❌ 400 Bad Request (good)
- ├── Negative amount: ❌ 400 Bad Request (good)
- ├── String amount: ❌ 400 Bad Request (good)
- └── Valid input: ✅ 200 OK
+Input Validation Test:
+├── Missing amount: ❌ 400 Bad Request (good)
+├── Negative amount: ❌ 400 Bad Request (good)
+├── String amount: ❌ 400 Bad Request (good)
+└── Valid input: ✅ 200 OK
 
- Error Response Test:
- ├── Error format: Generic message (good)
- └── Stack trace: ❌ Not exposed (good)
+Error Response Test:
+├── Error format: Generic message (good)
+└── Stack trace: ❌ Not exposed (good)
 
- Assessment: ✅ PROPERLY SECURED
- Requires auth, validates input, safe error handling.
+Assessment: ✅ PROPERLY SECURED
+Requires auth, validates input, safe error handling.
 
- ─────────────────────────────────────────────────────────
- 3. get-user-data
- ─────────────────────────────────────────────────────────
+───────────────────────────────────────────────────────── 3. get-user-data
+─────────────────────────────────────────────────────────
 
- Endpoint: /functions/v1/get-user-data
- Method: GET
+Endpoint: /functions/v1/get-user-data
+Method: GET
 
- Authentication Test:
- ├── Without JWT: ❌ 401 Unauthorized
- └── Status: ✅ Authentication required
+Authentication Test:
+├── Without JWT: ❌ 401 Unauthorized
+└── Status: ✅ Authentication required
 
- Authorization Test:
- ├── Request own data: ✅ 200 OK
- ├── Request other user's data: ✅ 200 OK ← 🔴 P0!
- └── Status: 🔴 BROKEN ACCESS CONTROL
+Authorization Test:
+├── Request own data: ✅ 200 OK
+├── Request other user's data: ✅ 200 OK ← 🔴 P0!
+└── Status: 🔴 BROKEN ACCESS CONTROL
 
- Test:
- ```bash
- # As user A, request user B's data
- curl https://abc123def.supabase.co/functions/v1/get-user-data?user_id=user-b-id \
-   -H "Authorization: Bearer [user-a-token]"
+Test:
 
- # Returns user B's data!
- ```
+```bash
+# As user A, request user B's data
+curl https://abc123def.supabase.co/functions/v1/get-user-data?user_id=user-b-id \
+  -H "Authorization: Bearer [user-a-token]"
 
- Finding: 🔴 P0 - IDOR VULNERABILITY
- Function accepts user_id parameter without verifying
- that the authenticated user is requesting their own data.
+# Returns user B's data!
+```
 
- Fix:
- ```typescript
- // In Edge Function
- const { user_id } = await req.json();
- const jwt_user = getUser(req); // From JWT
+Finding: 🔴 P0 - IDOR VULNERABILITY
+Function accepts user_id parameter without verifying
+that the authenticated user is requesting their own data.
 
- // Verify ownership
- if (user_id !== jwt_user.id) {
-   return new Response('Forbidden', { status: 403 });
- }
- ```
+Fix:
 
- ─────────────────────────────────────────────────────────
- 4. admin-panel
- ─────────────────────────────────────────────────────────
+```typescript
+// In Edge Function
+const { user_id } = await req.json();
+const jwt_user = getUser(req); // From JWT
 
- Endpoint: /functions/v1/admin-panel
- Method: GET, POST
+// Verify ownership
+if (user_id !== jwt_user.id) {
+  return new Response("Forbidden", { status: 403 });
+}
+```
 
- Authentication Test:
- ├── Without JWT: ❌ 401 Unauthorized
- ├── With regular user JWT: ✅ 200 OK ← 🔴 P0!
- └── Status: 🔴 MISSING ROLE CHECK
+───────────────────────────────────────────────────────── 4. admin-panel
+─────────────────────────────────────────────────────────
 
- Finding: 🔴 P0 - PRIVILEGE ESCALATION
- Admin function accessible to any authenticated user.
- No role verification in function code.
+Endpoint: /functions/v1/admin-panel
+Method: GET, POST
 
- Fix:
- ```typescript
- // Verify admin role
- const user = getUser(req);
- const { data: profile } = await supabase
-   .from('profiles')
-   .select('is_admin')
-   .eq('id', user.id)
-   .single();
+Authentication Test:
+├── Without JWT: ❌ 401 Unauthorized
+├── With regular user JWT: ✅ 200 OK ← 🔴 P0!
+└── Status: 🔴 MISSING ROLE CHECK
 
- if (!profile?.is_admin) {
-   return new Response('Forbidden', { status: 403 });
- }
- ```
+Finding: 🔴 P0 - PRIVILEGE ESCALATION
+Admin function accessible to any authenticated user.
+No role verification in function code.
 
- ─────────────────────────────────────────────────────────
- 5. webhook-handler
- ─────────────────────────────────────────────────────────
+Fix:
 
- Endpoint: /functions/v1/webhook-handler
- Method: POST
+```typescript
+// Verify admin role
+const user = getUser(req);
+const { data: profile } = await supabase
+  .from("profiles")
+  .select("is_admin")
+  .eq("id", user.id)
+  .single();
 
- Authentication Test:
- ├── Without JWT: ✅ 200 OK (expected for webhooks)
- └── Status: ℹ️ Public (webhook endpoints are typically public)
+if (!profile?.is_admin) {
+  return new Response("Forbidden", { status: 403 });
+}
+```
 
- Webhook Security Test:
- ├── Signature validation: ⚠️ Unable to test (need valid signature)
- └── Rate limiting: Unknown
+───────────────────────────────────────────────────────── 5. webhook-handler
+─────────────────────────────────────────────────────────
 
- Error Response Test:
- ```json
- {
-   "error": "Invalid signature",
-   "expected": "sha256=abc123...",
-   "received": "sha256=xyz789..."
- }
- ```
+Endpoint: /functions/v1/webhook-handler
+Method: POST
 
- Finding: 🟠 P1 - INFORMATION DISCLOSURE
- Error response reveals expected signature format.
- Could help attacker understand validation mechanism.
+Authentication Test:
+├── Without JWT: ✅ 200 OK (expected for webhooks)
+└── Status: ℹ️ Public (webhook endpoints are typically public)
 
- Fix:
- ```typescript
- // Generic error, log details server-side
- if (!validSignature) {
-   console.error(`Invalid signature: expected ${expected}, got ${received}`);
-   return new Response('Unauthorized', { status: 401 });
- }
- ```
+Webhook Security Test:
+├── Signature validation: ⚠️ Unable to test (need valid signature)
+└── Rate limiting: Unknown
 
- ─────────────────────────────────────────────────────────
- Summary
- ─────────────────────────────────────────────────────────
+Error Response Test:
 
- Functions Found: 5
+```json
+{
+  "error": "Invalid signature",
+  "expected": "sha256=abc123...",
+  "received": "sha256=xyz789..."
+}
+```
 
- Security Assessment:
- ├── ✅ Secure: 2 (hello-world, process-payment)
- ├── 🔴 P0: 2 (get-user-data IDOR, admin-panel privilege escalation)
- └── 🟠 P1: 1 (webhook-handler info disclosure)
+Finding: 🟠 P1 - INFORMATION DISCLOSURE
+Error response reveals expected signature format.
+Could help attacker understand validation mechanism.
 
- Critical Findings:
- 1. IDOR in get-user-data - any user can access any user's data
- 2. Missing role check in admin-panel - any user is admin
+Fix:
 
- Priority Actions:
- 1. Fix get-user-data to verify user owns requested data
- 2. Add admin role verification to admin-panel
- 3. Fix webhook-handler error messages
+```typescript
+// Generic error, log details server-side
+if (!validSignature) {
+  console.error(`Invalid signature: expected ${expected}, got ${received}`);
+  return new Response("Unauthorized", { status: 401 });
+}
+```
+
+─────────────────────────────────────────────────────────
+Summary
+─────────────────────────────────────────────────────────
+
+Functions Found: 5
+
+Security Assessment:
+├── ✅ Secure: 2 (hello-world, process-payment)
+├── 🔴 P0: 2 (get-user-data IDOR, admin-panel privilege escalation)
+└── 🟠 P1: 1 (webhook-handler info disclosure)
+
+Critical Findings:
+
+1.  IDOR in get-user-data - any user can access any user's data
+2.  Missing role check in admin-panel - any user is admin
+
+Priority Actions:
+
+1.  Fix get-user-data to verify user owns requested data
+2.  Add admin role verification to admin-panel
+3.  Fix webhook-handler error messages
 
 ═══════════════════════════════════════════════════════════
-```
+
+````
 
 ## Common Function Vulnerabilities
 
@@ -280,11 +285,12 @@ Test the process-payment Edge Function for security issues
 // Look for function invocations in client code
 supabase.functions.invoke('function-name', {...})
 fetch('/functions/v1/function-name', {...})
-```
+````
 
 ### 2. Common Name Enumeration
 
 Tested function names:
+
 - hello-world, hello, test
 - process-payment, payment, checkout
 - get-user-data, user, profile
@@ -332,25 +338,28 @@ Tested function names:
 ### Authentication Check
 
 ```typescript
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from "@supabase/supabase-js";
 
 Deno.serve(async (req) => {
   // Get JWT from header
-  const authHeader = req.headers.get('Authorization');
+  const authHeader = req.headers.get("Authorization");
   if (!authHeader) {
-    return new Response('Unauthorized', { status: 401 });
+    return new Response("Unauthorized", { status: 401 });
   }
 
   // Verify JWT with Supabase
   const supabase = createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_ANON_KEY')!,
-    { global: { headers: { Authorization: authHeader } } }
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_ANON_KEY")!,
+    { global: { headers: { Authorization: authHeader } } },
   );
 
-  const { data: { user }, error } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
   if (error || !user) {
-    return new Response('Unauthorized', { status: 401 });
+    return new Response("Unauthorized", { status: 401 });
   }
 
   // User is authenticated
@@ -366,7 +375,7 @@ const requestedUserId = body.user_id;
 const authenticatedUserId = user.id;
 
 if (requestedUserId !== authenticatedUserId) {
-  return new Response('Forbidden', { status: 403 });
+  return new Response("Forbidden", { status: 403 });
 }
 ```
 
@@ -375,34 +384,33 @@ if (requestedUserId !== authenticatedUserId) {
 ```typescript
 // Check admin role
 const { data: profile } = await supabase
-  .from('profiles')
-  .select('role')
-  .eq('id', user.id)
+  .from("profiles")
+  .select("role")
+  .eq("id", user.id)
   .single();
 
-if (profile?.role !== 'admin') {
-  return new Response('Forbidden', { status: 403 });
+if (profile?.role !== "admin") {
+  return new Response("Forbidden", { status: 403 });
 }
 ```
 
 ### Input Validation
 
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 
 const PaymentSchema = z.object({
   amount: z.number().positive().max(10000),
-  currency: z.enum(['usd', 'eur', 'gbp']),
-  description: z.string().max(200).optional()
+  currency: z.enum(["usd", "eur", "gbp"]),
+  description: z.string().max(200).optional(),
 });
 
 // Validate input
 const result = PaymentSchema.safeParse(body);
 if (!result.success) {
-  return new Response(
-    JSON.stringify({ error: 'Invalid input' }),
-    { status: 400 }
-  );
+  return new Response(JSON.stringify({ error: "Invalid input" }), {
+    status: 400,
+  });
 }
 ```
 
@@ -423,6 +431,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 ### Required Actions (Progressive)
 
 1. **Update `.sb-pentest-context.json`** with results:
+
    ```json
    {
      "functions_audit": {
@@ -434,6 +443,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
    ```
 
 2. **Log to `.sb-pentest-audit.log`**:
+
    ```
    [TIMESTAMP] [supabase-audit-functions] [START] Auditing Edge Functions
    [TIMESTAMP] [supabase-audit-functions] [FINDING] P0: IDOR in get-user-data
@@ -450,10 +460,10 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 
 ### Evidence Files to Create
 
-| File | Content |
-|------|---------|
-| `discovered-functions.json` | List of discovered Edge Functions |
-| `function-tests/[name].json` | Test results per function |
+| File                         | Content                           |
+| ---------------------------- | --------------------------------- |
+| `discovered-functions.json`  | List of discovered Edge Functions |
+| `function-tests/[name].json` | Test results per function         |
 
 ### Evidence Format (IDOR Vulnerability)
 
@@ -476,7 +486,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
         "headers": {},
         "curl_command": "curl '$URL/functions/v1/get-user-data'"
       },
-      "response": {"status": 401},
+      "response": { "status": 401 },
       "result": "PASS"
     },
     {
@@ -485,12 +495,16 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
       "request": {
         "method": "GET",
         "url": "$URL/functions/v1/get-user-data?user_id=user-b-id",
-        "headers": {"Authorization": "Bearer [USER_A_TOKEN]"},
+        "headers": { "Authorization": "Bearer [USER_A_TOKEN]" },
         "curl_command": "curl '$URL/functions/v1/get-user-data?user_id=user-b-id' -H 'Authorization: Bearer [USER_A_TOKEN]'"
       },
       "response": {
         "status": 200,
-        "body": {"id": "user-b-id", "email": "[REDACTED]", "data": "[REDACTED]"}
+        "body": {
+          "id": "user-b-id",
+          "email": "[REDACTED]",
+          "data": "[REDACTED]"
+        }
       },
       "result": "VULNERABLE",
       "impact": "Any authenticated user can access any other user's data"
@@ -517,12 +531,12 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
     "description": "Regular user accessing admin function",
     "request": {
       "method": "GET",
-      "headers": {"Authorization": "Bearer [REGULAR_USER_TOKEN]"},
+      "headers": { "Authorization": "Bearer [REGULAR_USER_TOKEN]" },
       "curl_command": "curl '$URL/functions/v1/admin-panel' -H 'Authorization: Bearer [REGULAR_USER_TOKEN]'"
     },
     "response": {
       "status": 200,
-      "body": {"admin_data": "[REDACTED]"}
+      "body": { "admin_data": "[REDACTED]" }
     },
     "result": "VULNERABLE",
     "impact": "Any authenticated user has admin access"

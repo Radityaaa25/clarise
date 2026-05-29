@@ -3,7 +3,7 @@ import { CoursesClient } from "./client";
 
 export default async function CoursesPage() {
   const courses = await prisma.course.findMany({
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: "desc" },
     select: {
       id: true,
       title: true,
@@ -11,18 +11,18 @@ export default async function CoursesPage() {
       isAiGenerated: true,
       isPublished: true,
       author: {
-        select: { name: true }
-      }
-    }
+        select: { name: true },
+      },
+    },
   });
 
-  const formattedCourses = courses.map((course: typeof courses[number]) => ({
+  const formattedCourses = courses.map((course: (typeof courses)[number]) => ({
     id: course.id,
     title: course.title,
     slug: course.slug,
     isAiGenerated: course.isAiGenerated,
     isPublished: course.isPublished,
-    authorName: course.author?.name
+    authorName: course.author?.name,
   }));
 
   return <CoursesClient initialCourses={formattedCourses} />;

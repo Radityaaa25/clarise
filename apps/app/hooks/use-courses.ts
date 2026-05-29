@@ -11,7 +11,13 @@ interface UseCoursesProps {
   limit?: number;
 }
 
-export function useCourses({ category, difficulty, search, cursor, limit = 12 }: UseCoursesProps = {}) {
+export function useCourses({
+  category,
+  difficulty,
+  search,
+  cursor,
+  limit = 12,
+}: UseCoursesProps = {}) {
   const params = new URLSearchParams();
   if (category) params.append("category", category);
   if (difficulty) params.append("difficulty", difficulty);
@@ -21,7 +27,7 @@ export function useCourses({ category, difficulty, search, cursor, limit = 12 }:
 
   const { data, error, isLoading, mutate } = useSWR(
     `/api/courses?${params.toString()}`,
-    fetcher
+    fetcher,
   );
 
   return {

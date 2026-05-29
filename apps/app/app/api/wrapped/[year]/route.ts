@@ -5,7 +5,7 @@ import { isSubscriptionActive } from "@/lib/subscription";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ year: string }> }
+  { params }: { params: Promise<{ year: string }> },
 ) {
   try {
     const { userId: clerkId } = await auth();
@@ -21,9 +21,16 @@ export async function GET(
 
     const user = await prisma.user.findUnique({
       where: { clerkId },
-      select: { id: true, name: true, createdAt: true, xp: true, longestStreak: true },
+      select: {
+        id: true,
+        name: true,
+        createdAt: true,
+        xp: true,
+        longestStreak: true,
+      },
     });
-    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    if (!user)
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     // Determine if it's the season (Dec-Jan)
     const now = new Date();
@@ -44,20 +51,20 @@ export async function GET(
     const completedCourses = await prisma.userProgress.findMany({
       where: {
         userId: user.id,
-        completedAt: { gte: startOfYear, lte: endOfYear }
+        completedAt: { gte: startOfYear, lte: endOfYear },
       },
-      select: { courseId: true }
+      select: { courseId: true },
     });
     // Distinct course completions
-    const uniqueCourses = new Set(completedCourses.map(c => c.courseId));
+    const uniqueCourses = new Set(completedCourses.map((c) => c.courseId));
 
     // 2. Total learning time (Approximation from UserActivity duration)
     const activities = await prisma.userActivity.aggregate({
       where: {
         userId: user.id,
-        date: { gte: startOfYear, lte: endOfYear }
+        date: { gte: startOfYear, lte: endOfYear },
       },
-      _sum: { duration: true } // assuming duration is in minutes
+      _sum: { duration: true }, // assuming duration is in minutes
     });
     const totalMinutesLearned = activities._sum.duration || 0;
 
@@ -71,14 +78,15 @@ export async function GET(
       totalMinutesLearned,
       totalXp: user.xp,
       longestStreak: user.longestStreak,
-      isPremium
+      isPremium,
     };
 
     if (!isPremium) {
       return NextResponse.json({
         success: true,
         data: basicStats,
-        message: "Upgrade ke Premium untuk melihat statistik penuh Clarise Wrapped!"
+        message:
+          "Upgrade ke Premium untuk melihat statistik penuh Clarise Wrapped!",
       });
     }
 
@@ -88,14 +96,17 @@ export async function GET(
     const categoryProgress = await prisma.userProgress.findMany({
       where: {
         userId: user.id,
-        completedAt: { gte: startOfYear, lte: endOfYear }
+        completedAt: { gte: startOfYear, lte: endOfYear },
       },
       include: {
-        course: { include: { category: true } }
-      }
+        course: { include: { category: true } },
+      },
     });
 
-    const categoryCount: Record<string, { count: number; name: string; icon: string | null }> = {};
+    const categoryCount: Record<
+      string,
+      { count: number; name: string; icon: string | null }
+    > = {};
     for (const p of categoryProgress) {
       const cat = p.course.category;
       if (!categoryCount[cat.id]) {
@@ -104,15 +115,17 @@ export async function GET(
       categoryCount[cat.id]!.count += 1;
     }
 
-    const topCategory = Object.values(categoryCount).sort((a, b) => b.count - a.count)[0];
+    const topCategory = Object.values(categoryCount).sort(
+      (a, b) => b.count - a.count,
+    )[0];
 
     // Badges Earned this year
     const badgesEarned = await prisma.userBadge.findMany({
       where: {
         userId: user.id,
-        earnedAt: { gte: startOfYear, lte: endOfYear }
+        earnedAt: { gte: startOfYear, lte: endOfYear },
       },
-      include: { badge: true }
+      include: { badge: true },
     });
 
     const premiumStats = {
@@ -120,17 +133,19 @@ export async function GET(
       topCategory: topCategory ? topCategory.name : "Belum ada",
       topCategoryIcon: topCategory ? topCategory.icon : null,
       badgesEarnedCount: badgesEarned.length,
-      topBadges: badgesEarned.slice(0, 3).map(b => b.badge),
-      shareableQuote: `Tahun ${yearInt} gue menghabiskan ${Math.round(totalMinutesLearned/60)} jam belajar di Clarise. Rekor streak gue ${user.longestStreak} hari! 🔥 #ClariseWrapped`
+      topBadges: badgesEarned.slice(0, 3).map((b) => b.badge),
+      shareableQuote: `Tahun ${yearInt} gue menghabiskan ${Math.round(totalMinutesLearned / 60)} jam belajar di Clarise. Rekor streak gue ${user.longestStreak} hari! 🔥 #ClariseWrapped`,
     };
 
     return NextResponse.json({
       success: true,
-      data: premiumStats
+      data: premiumStats,
     });
-
   } catch (error: any) {
     console.error("[CLARISE_WRAPPED]", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
   }
 }

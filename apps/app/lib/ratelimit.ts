@@ -1,7 +1,10 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 
-if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
+if (
+  !process.env.UPSTASH_REDIS_REST_URL ||
+  !process.env.UPSTASH_REDIS_REST_TOKEN
+) {
   throw new Error("Upstash Redis environment variables are not set");
 }
 

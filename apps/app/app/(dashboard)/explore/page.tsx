@@ -1,13 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { Search, BookOpen, Star, Filter } from "lucide-react";
+import {
+  Search,
+  BookOpen,
+  Star,
+  Filter,
+  Sparkles,
+  MoreHorizontal,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { EnrollModal } from "@/components/course/enroll-modal";
 import { useCourses } from "@/hooks/use-courses";
 import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
+import { useUser } from "@/hooks/use-user";
+import { toast } from "sonner";
+import useSWR from "swr";
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 function difficultyBadge(difficulty: string) {
   const map: Record<string, { label: string; classes: string }> = {
@@ -17,7 +30,9 @@ function difficultyBadge(difficulty: string) {
   };
   const d = map[difficulty] || map.BEGINNER!;
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold ${d!.classes}`}>
+    <span
+      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold ${d!.classes}`}
+    >
       {d!.label}
     </span>
   );
@@ -27,7 +42,7 @@ export default function ExplorePage() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  
+
   // Debounce search query
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -37,33 +52,54 @@ export default function ExplorePage() {
   }, [searchQuery]);
 
   // Fetch courses via SWR
-  const { courses, nextCursor, isLoading: isCoursesLoading } = useCourses({
+  const {
+    courses,
+    nextCursor,
+    isLoading: isCoursesLoading,
+  } = useCourses({
     category: activeCategory !== "all" ? activeCategory : null,
     search: debouncedSearch || null,
     limit: 12,
   });
 
+  // Fetch Categories dynamically
+  const { data: catData } = useSWR("/api/categories", fetcher);
+  const allCategories = catData?.categories || [];
+
   // Derived arrays
   const categoriesList = [
     { name: "Semua", slug: "all" },
-    { name: "Pemrograman", slug: "pemrograman" },
-    { name: "Matematika", slug: "matematika" },
-    { name: "Sains", slug: "sains" },
-    { name: "Bahasa", slug: "bahasa" },
-    { name: "Desain", slug: "desain" },
-    { name: "Bisnis", slug: "bisnis" },
+    ...allCategories.map((c: any) => ({ name: c.name, slug: c.slug })),
   ];
 
-  
+  // Pisahkan kategori teratas (top 4) dan sisanya
+  const topCategories = categoriesList.slice(0, 5); // 1 Semua + 4 kategori teratas
+  const restCategories = categoriesList.slice(5);
+
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [categorySearch, setCategorySearch] = useState("");
+
+  const filteredRestCategories = restCategories.filter((cat) =>
+    cat.name.toLowerCase().includes(categorySearch.toLowerCase()),
+  );
+
   // Enroll Modal State
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  // Mock User State (Replace with real data later)
-  const isFreeUser = true;
-  const hasReachedLimit = true; // Set to true to test block condition
+  // Fetch active courses to check limit
+  const { data: progressData, mutate: mutateActiveCourses } = useSWR(
+    "/api/progress/active",
+    fetcher,
+  );
+  const activeCourses = progressData?.activeCourses || [];
+
+  // User State
+  const { user } = useUser();
+  const isFreeUser = user?.subscription?.plan === "FREE" || !user?.subscription;
+  const hasReachedLimit = activeCourses.length >= 1; // 1 course limit for free tier
 
   const handleCourseClick = (e: React.MouseEvent, course: any) => {
     e.preventDefault();
@@ -71,16 +107,30 @@ export default function ExplorePage() {
     setModalOpen(true);
   };
 
-  const handleConfirmEnroll = () => {
+  const handleConfirmEnroll = async () => {
     setIsLoading(true);
-    // Mock API call delay
-    setTimeout(() => {
-      setIsLoading(false);
-      setModalOpen(false);
+    try {
       if (selectedCourse) {
-        router.push(`/course/${selectedCourse.slug}`);
+        const res = await fetch(`/api/courses/${selectedCourse.slug}/enroll`, {
+          method: "POST",
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          await mutateActiveCourses(); // Update the active courses list
+          setModalOpen(false);
+          router.push(`/course/${selectedCourse.slug}`);
+        } else {
+          console.error("Enrollment failed:", data.error);
+          toast.error(data.error || "Gagal mengambil kursus");
+        }
       }
-    }, 1000);
+    } catch (error) {
+      console.error("Error enrolling:", error);
+      toast.error("Terjadi kesalahan saat mengambil kursus");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const filteredCourses = courses || [];
@@ -88,13 +138,26 @@ export default function ExplorePage() {
   return (
     <div className="space-y-8 max-w-6xl">
       {/* Page Header */}
-      <div>
-        <h1 className="text-3xl font-black font-heading text-ink dark:text-white mb-2">
-          Jelajahi Kursus
-        </h1>
-        <p className="text-muted">
-          Temukan materi yang sesuai dengan tujuan belajarmu.
-        </p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-black font-heading text-ink dark:text-white mb-2">
+            Jelajahi Kursus
+          </h1>
+          <p className="text-muted">
+            Temukan materi yang sesuai dengan tujuan belajarmu.
+          </p>
+        </div>
+
+        {/* Create AI Course Button */}
+        {!isFreeUser && (
+          <Link
+            href="/generate"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-spark to-core-blue hover:from-spark/90 hover:to-core-blue/90 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-spark/20 transition-all hover:-translate-y-0.5"
+          >
+            <Sparkles className="w-5 h-5" />
+            Buat Kursus dengan AI
+          </Link>
+        )}
       </div>
 
       {/* Search + Filter */}
@@ -114,7 +177,7 @@ export default function ExplorePage() {
       {/* Category Pills (Mobile horizontal scroll) */}
       <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:pb-0">
         <div className="flex gap-2 w-max sm:w-auto">
-          {categoriesList.map((cat) => (
+          {topCategories.map((cat) => (
             <button
               key={cat.slug}
               onClick={() => setActiveCategory(cat.slug)}
@@ -127,6 +190,15 @@ export default function ExplorePage() {
               {cat.name}
             </button>
           ))}
+
+          {restCategories.length > 0 && (
+            <button
+              onClick={() => setShowCategoryModal(true)}
+              className="px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 whitespace-nowrap border bg-surface-soft dark:bg-void-elevated text-sky dark:text-sky border-hairline dark:border-white/10 hover:text-core-blue dark:hover:text-sky hover:border-core-blue flex items-center gap-2"
+            >
+              <MoreHorizontal className="w-4 h-4" /> Lainnya
+            </button>
+          )}
         </div>
       </div>
 
@@ -152,7 +224,9 @@ export default function ExplorePage() {
               )}
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-xs font-medium text-muted bg-surface-soft dark:bg-white/5 px-2 py-0.5 rounded-full capitalize">
-                  {typeof course.category === 'object' ? course.category.name : course.category}
+                  {typeof course.category === "object"
+                    ? course.category.name
+                    : course.category}
                 </span>
                 {difficultyBadge(course.difficulty)}
               </div>
@@ -169,7 +243,9 @@ export default function ExplorePage() {
                 </div>
                 <div className="flex items-center gap-1 text-spark">
                   <Star className="h-4 w-4 fill-current" />
-                  <span className="font-medium">{course.rating?.toFixed(1) || "5.0"}</span>
+                  <span className="font-medium">
+                    {course.rating?.toFixed(1) || "5.0"}
+                  </span>
                 </div>
               </div>
             </button>
@@ -178,8 +254,12 @@ export default function ExplorePage() {
       ) : (
         <div className="rounded-xl border border-hairline shadow-sm bg-canvas dark:bg-void-elevated p-12 text-center">
           <Search className="h-12 w-12 text-muted-soft mx-auto mb-4" />
-          <h3 className="text-lg font-bold text-ink dark:text-white mb-2">Tidak ditemukan</h3>
-          <p className="text-muted">Coba ubah kata kunci atau kategori pencarianmu.</p>
+          <h3 className="text-lg font-bold text-ink dark:text-white mb-2">
+            Tidak ditemukan
+          </h3>
+          <p className="text-muted">
+            Coba ubah kata kunci atau kategori pencarianmu.
+          </p>
         </div>
       )}
 
@@ -200,8 +280,71 @@ export default function ExplorePage() {
         courseName={selectedCourse?.title || ""}
         isFreeUser={isFreeUser}
         hasReachedLimit={hasReachedLimit}
+        isPremiumCourse={selectedCourse?.isPremium || false}
         isLoading={isLoading}
       />
+
+      {/* Category Selection Modal */}
+      {showCategoryModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-canvas dark:bg-void rounded-2xl shadow-2xl border border-hairline w-full max-w-lg max-h-[85vh] flex flex-col animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="p-5 border-b border-hairline flex items-center justify-between shrink-0">
+              <h2 className="text-xl font-bold font-heading text-ink dark:text-white">
+                Semua Kategori
+              </h2>
+              <button
+                onClick={() => setShowCategoryModal(false)}
+                className="p-2 rounded-full hover:bg-surface-soft dark:hover:bg-white/5 text-muted transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Search */}
+            <div className="p-4 border-b border-hairline shrink-0">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
+                <input
+                  type="text"
+                  placeholder="Cari kategori... (Contoh: Web Development)"
+                  value={categorySearch}
+                  onChange={(e) => setCategorySearch(e.target.value)}
+                  className="w-full h-11 rounded-xl border border-hairline bg-surface-soft dark:bg-void-elevated pl-10 pr-4 text-sm text-ink dark:text-white placeholder:text-muted focus:border-core-blue focus:ring-2 focus:ring-core-blue/20 outline-none transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Modal Body (Scrollable) */}
+            <div className="p-4 overflow-y-auto overflow-x-hidden flex-1 custom-scrollbar">
+              {filteredRestCategories.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {filteredRestCategories.map((cat) => (
+                    <button
+                      key={cat.slug}
+                      onClick={() => {
+                        setActiveCategory(cat.slug);
+                        setShowCategoryModal(false);
+                      }}
+                      className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 border ${
+                        activeCategory === cat.slug
+                          ? "bg-core-blue text-white border-core-blue shadow-md shadow-core-blue/30"
+                          : "bg-surface-soft dark:bg-void-elevated text-sky dark:text-sky border-hairline hover:border-core-blue hover:text-core-blue"
+                      }`}
+                    >
+                      {cat.name}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-12 text-center text-muted">
+                  Kategori tidak ditemukan.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

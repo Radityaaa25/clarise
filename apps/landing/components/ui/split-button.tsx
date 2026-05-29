@@ -9,7 +9,12 @@ interface SplitButtonProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
   variant?: "primary" | "secondary";
 }
 
-export function SplitButton({ children, className, variant = "primary", ...props }: SplitButtonProps) {
+export function SplitButton({
+  children,
+  className,
+  variant = "primary",
+  ...props
+}: SplitButtonProps) {
   return (
     <a
       className={cn(
@@ -17,7 +22,7 @@ export function SplitButton({ children, className, variant = "primary", ...props
         variant === "primary"
           ? "bg-core-blue text-white shadow-lg shadow-core-blue/20 hover:bg-core-blue/90 hover:scale-[1.02] hover:shadow-xl hover:shadow-core-blue/30 active:scale-[0.98]"
           : "border border-black/10 dark:border-white/20 bg-white/50 dark:bg-white/5 text-ink dark:text-white backdrop-blur-sm hover:bg-black/5 dark:hover:bg-white/10 hover:border-black/20 dark:hover:border-white/30 hover:scale-[1.02] active:scale-[0.98]",
-        className
+        className,
       )}
       {...props}
     >
@@ -30,7 +35,7 @@ export function SplitButton({ children, className, variant = "primary", ...props
         <span className="opacity-0">{children}</span>
 
         {/* Top half of the text */}
-        <span 
+        <span
           className="absolute inset-0 flex items-center justify-center transition-all duration-[400ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-[100%] group-hover:opacity-0"
           style={{ clipPath: "inset(0 0 50% 0)" }}
         >
@@ -38,7 +43,7 @@ export function SplitButton({ children, className, variant = "primary", ...props
         </span>
 
         {/* Bottom half of the text */}
-        <span 
+        <span
           className="absolute inset-0 flex items-center justify-center transition-all duration-[400ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-[100%] group-hover:opacity-0"
           style={{ clipPath: "inset(50% 0 0 0)" }}
         >

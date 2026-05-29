@@ -7,23 +7,26 @@ const plans = [
   {
     name: "Free",
     badge: "Selamanya",
-    badgeClass: "bg-surface-card text-ink dark:bg-void dark:border dark:border-white/10 dark:text-white/70",
+    badgeClass:
+      "bg-surface-card text-ink dark:bg-void dark:border dark:border-white/10 dark:text-white/70",
     price: "Rp 0",
     period: "",
     features: [
       "1 course aktif (Level Dasar)",
       "10x tanya AI per hari",
       "XP, Level & Streak basic",
-      "Public course visibility"
+      "Public course visibility",
     ],
     cta: "Mulai Gratis",
-    ctaClass: "border border-primary text-primary hover:bg-surface-card dark:hover:bg-void",
+    ctaClass:
+      "border border-primary text-primary hover:bg-surface-card dark:hover:bg-void",
     featured: false,
   },
   {
     name: "Premium Bulanan",
     badge: "Fleksibel",
-    badgeClass: "bg-surface-card text-ink dark:bg-void dark:border dark:border-white/10 dark:text-white/70",
+    badgeClass:
+      "bg-surface-card text-ink dark:bg-void dark:border dark:border-white/10 dark:text-white/70",
     price: "Rp 79.000",
     period: "/bulan",
     features: [
@@ -31,10 +34,11 @@ const plans = [
       "AI Unlimited & Buat kursus AI",
       "Sertifikat & Download PDF",
       "Streak protection (1x/bulan)",
-      "Pro badges & Priority support"
+      "Pro badges & Priority support",
     ],
     cta: "Langganan Bulanan",
-    ctaClass: "border border-primary text-primary hover:bg-surface-card dark:hover:bg-void",
+    ctaClass:
+      "border border-primary text-primary hover:bg-surface-card dark:hover:bg-void",
     featured: false,
   },
   {
@@ -48,10 +52,11 @@ const plans = [
       "Hemat lebih dari Rp 340.000",
       "AI Recommendations khusus",
       "Clarise Wrapped Detailed Report",
-      "Investasi belajar terbaik"
+      "Investasi belajar terbaik",
     ],
     cta: "Paling Hemat",
-    ctaClass: "bg-primary text-on-primary hover:bg-primary-active shadow-lg shadow-primary/25",
+    ctaClass:
+      "bg-primary text-on-primary hover:bg-primary-active shadow-lg shadow-primary/25",
     featured: true,
   },
 ];
@@ -60,7 +65,10 @@ export function Pricing() {
   const { ref, inView } = useInView(0.15);
 
   return (
-    <section id="pricing" className="px-6 py-24 bg-surface-soft dark:bg-void-elevated">
+    <section
+      id="pricing"
+      className="px-6 py-24 bg-surface-soft dark:bg-void-elevated"
+    >
       <div className="mx-auto max-w-[1100px]">
         <h2 className="text-center text-3xl font-black md:text-4xl text-ink dark:text-white">
           Mulai gratis, upgrade kapan saja.
@@ -80,20 +88,33 @@ export function Pricing() {
               } ${inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
             >
               <div>
-                <span className={`inline-block rounded-full px-3 py-1 text-xs font-bold ${plan.badgeClass}`}>
+                <span
+                  className={`inline-block rounded-full px-3 py-1 text-xs font-bold ${plan.badgeClass}`}
+                >
                   {plan.badge}
                 </span>
-                
-                <h3 className="mt-6 text-xl font-bold text-ink dark:text-white">{plan.name}</h3>
+
+                <h3 className="mt-6 text-xl font-bold text-ink dark:text-white">
+                  {plan.name}
+                </h3>
 
                 <div className="mt-4 flex items-baseline gap-1">
-                  <span className="font-heading text-4xl font-black text-ink dark:text-white">{plan.price}</span>
-                  {plan.period && <span className="text-sm text-muted dark:text-white/60">{plan.period}</span>}
+                  <span className="font-heading text-4xl font-black text-ink dark:text-white">
+                    {plan.price}
+                  </span>
+                  {plan.period && (
+                    <span className="text-sm text-muted dark:text-white/60">
+                      {plan.period}
+                    </span>
+                  )}
                 </div>
 
                 <ul className="mt-8 space-y-4">
                   {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-3 text-sm text-body dark:text-white/80">
+                    <li
+                      key={feature}
+                      className="flex items-start gap-3 text-sm text-body dark:text-white/80"
+                    >
                       <Check className="h-5 w-5 text-success shrink-0 mt-0.5" />
                       <span className="leading-tight">{feature}</span>
                     </li>
@@ -103,7 +124,9 @@ export function Pricing() {
 
               <div className="mt-auto pt-8">
                 <a
-                  href={process.env.NEXT_PUBLIC_APP_URL || "https://app.clarise.com"}
+                  href={
+                    process.env.NEXT_PUBLIC_APP_URL || "https://app.clarise.com"
+                  }
                   className={`block w-full rounded-xl py-3.5 text-center text-sm font-bold transition-all ${plan.ctaClass}`}
                 >
                   {plan.cta}

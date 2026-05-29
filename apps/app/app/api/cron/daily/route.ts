@@ -21,11 +21,17 @@ export async function GET(req: NextRequest) {
       currentStreak: { gt: 0 },
       lastActiveDate: { lt: yesterday },
     },
-    select: { id: true, streakProtectionUsed: true, subscription: { select: { plan: true, status: true } } },
+    select: {
+      id: true,
+      streakProtectionUsed: true,
+      subscription: { select: { plan: true, status: true } },
+    },
   });
 
   for (const user of inactiveUsers) {
-    const isPremium = user.subscription?.status === "ACTIVE" && user.subscription.plan !== "FREE";
+    const isPremium =
+      user.subscription?.status === "ACTIVE" &&
+      user.subscription.plan !== "FREE";
     if (isPremium && user.streakProtectionUsed < 1) {
       await prisma.user.update({
         where: { id: user.id },
@@ -50,7 +56,10 @@ export async function GET(req: NextRequest) {
 
   for (const sub of expiredSubs) {
     await prisma.$transaction([
-      prisma.subscription.update({ where: { id: sub.id }, data: { status: "EXPIRED" } }),
+      prisma.subscription.update({
+        where: { id: sub.id },
+        data: { status: "EXPIRED" },
+      }),
       prisma.user.update({ where: { id: sub.userId }, data: { role: "USER" } }),
       prisma.notification.create({
         data: {
@@ -74,7 +83,10 @@ export async function GET(req: NextRequest) {
     targetEnd.setHours(23, 59, 59, 999);
 
     const expiringSubs = await prisma.subscription.findMany({
-      where: { status: "ACTIVE", endDate: { gte: targetStart, lte: targetEnd } },
+      where: {
+        status: "ACTIVE",
+        endDate: { gte: targetStart, lte: targetEnd },
+      },
       select: { userId: true },
     });
 
@@ -98,5 +110,11 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  return NextResponse.json({ success: true, processed: { streakResets: inactiveUsers.length, expired: expiredSubs.length } });
+  return NextResponse.json({
+    success: true,
+    processed: {
+      streakResets: inactiveUsers.length,
+      expired: expiredSubs.length,
+    },
+  });
 }

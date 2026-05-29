@@ -6,7 +6,8 @@ import { getCachedBadges } from "@/lib/db";
 
 export async function GET() {
   const { userId: clerkId } = await auth();
-  if (!clerkId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!clerkId)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const user = await prisma.user.findUnique({
     where: { clerkId },
@@ -20,7 +21,8 @@ export async function GET() {
     },
   });
 
-  if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+  if (!user)
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
 
   const allBadges = await getCachedBadges();
   const earnedMap = new Map(user.badges.map((b) => [b.badgeId, b.earnedAt]));

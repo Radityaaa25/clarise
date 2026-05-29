@@ -8,6 +8,7 @@ description: Attempt to list and read files from storage buckets to verify acces
 > 🔴 **CRITICAL: PROGRESSIVE FILE UPDATES REQUIRED**
 >
 > You MUST write to context files **AS YOU GO**, not just at the end.
+>
 > - Write to `.sb-pentest-context.json` **IMMEDIATELY after each bucket tested**
 > - Log to `.sb-pentest-audit.log` **BEFORE and AFTER each file access test**
 > - **DO NOT** wait until the skill completes to update files
@@ -42,10 +43,10 @@ The skill attempts to:
 
 ## Test Approach
 
-| Bucket Type | Tests Performed |
-|-------------|-----------------|
-| Public | Direct URL access, listing, metadata |
-| Private | API listing with anon key, authenticated access |
+| Bucket Type | Tests Performed                                 |
+| ----------- | ----------------------------------------------- |
+| Public      | Direct URL access, listing, metadata            |
+| Private     | API listing with anon key, authenticated access |
 
 ## Usage
 
@@ -195,19 +196,20 @@ The skill identifies sensitive files by:
 
 ### Filename Patterns
 
-| Pattern | Risk | Type |
-|---------|------|------|
-| `*.sql`, `backup*` | P0 | Database dumps |
-| `.env*`, `*secrets*` | P0 | Secret files |
-| `*password*`, `*credential*` | P0 | Credentials |
-| `*invoice*`, `*payment*` | P1 | Financial |
-| `*contract*`, `*agreement*` | P1 | Legal |
-| `*id*`, `*passport*`, `*license*` | P1 | Identity |
-| `*export*`, `*dump*` | P1 | Data exports |
+| Pattern                           | Risk | Type           |
+| --------------------------------- | ---- | -------------- |
+| `*.sql`, `backup*`                | P0   | Database dumps |
+| `.env*`, `*secrets*`              | P0   | Secret files   |
+| `*password*`, `*credential*`      | P0   | Credentials    |
+| `*invoice*`, `*payment*`          | P1   | Financial      |
+| `*contract*`, `*agreement*`       | P1   | Legal          |
+| `*id*`, `*passport*`, `*license*` | P1   | Identity       |
+| `*export*`, `*dump*`              | P1   | Data exports   |
 
 ### Content Detection
 
 For accessible files, the skill samples content for:
+
 - API keys (patterns like `sk_live_`, `pk_test_`)
 - Database credentials
 - JWT secrets
@@ -237,7 +239,11 @@ For accessible files, the skill samples content for:
             "path": "secrets.env",
             "size": 1024,
             "type": "secrets",
-            "exposed_secrets": ["STRIPE_SECRET_KEY", "DATABASE_URL", "JWT_SECRET"]
+            "exposed_secrets": [
+              "STRIPE_SECRET_KEY",
+              "DATABASE_URL",
+              "JWT_SECRET"
+            ]
           }
         ]
       }
@@ -322,6 +328,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 ### Required Actions (Progressive)
 
 1. **Update `.sb-pentest-context.json`** with results:
+
    ```json
    {
      "storage_access": {
@@ -334,6 +341,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
    ```
 
 2. **Log to `.sb-pentest-audit.log`**:
+
    ```
    [TIMESTAMP] [supabase-audit-buckets-read] [START] Testing bucket file access
    [TIMESTAMP] [supabase-audit-buckets-read] [FINDING] P0: backups bucket has exposed secrets
@@ -350,11 +358,11 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 
 ### Evidence Files to Create
 
-| File | Content |
-|------|---------|
-| `buckets/[name]/file-list.json` | Files found in bucket |
+| File                                  | Content                  |
+| ------------------------------------- | ------------------------ |
+| `buckets/[name]/file-list.json`       | Files found in bucket    |
 | `buckets/[name]/sensitive-files.json` | Sensitive files detected |
-| `buckets/[name]/sample-contents/` | Redacted content samples |
+| `buckets/[name]/sample-contents/`     | Redacted content samples |
 
 ### Evidence Format (Sensitive Files Exposed)
 
@@ -391,7 +399,11 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
     "data_breach": true,
     "secrets_exposed": true,
     "affected_records": "All database records",
-    "credentials_to_rotate": ["Stripe API key", "Database password", "JWT secret"]
+    "credentials_to_rotate": [
+      "Stripe API key",
+      "Database password",
+      "JWT secret"
+    ]
   }
 }
 ```

@@ -8,6 +8,7 @@ description: Test for user enumeration vulnerabilities through various authentic
 > 🔴 **CRITICAL: PROGRESSIVE FILE UPDATES REQUIRED**
 >
 > You MUST write to context files **AS YOU GO**, not just at the end.
+>
 > - Write to `.sb-pentest-context.json` **IMMEDIATELY after each endpoint tested**
 > - Log to `.sb-pentest-audit.log` **BEFORE and AFTER each test**
 > - **DO NOT** wait until the skill completes to update files
@@ -33,30 +34,30 @@ This skill tests for user enumeration vulnerabilities in authentication flows.
 
 User enumeration occurs when an application reveals whether a user account exists through:
 
-| Vector | Indicator |
-|--------|-----------|
-| Different error messages | "User not found" vs "Wrong password" |
-| Response timing | Fast for non-existent, slow for existing |
-| Response codes | 404 vs 401 |
-| Signup response | "Email already registered" |
+| Vector                   | Indicator                                |
+| ------------------------ | ---------------------------------------- |
+| Different error messages | "User not found" vs "Wrong password"     |
+| Response timing          | Fast for non-existent, slow for existing |
+| Response codes           | 404 vs 401                               |
+| Signup response          | "Email already registered"               |
 
 ## Why It Matters
 
-| Risk | Impact |
-|------|--------|
-| Targeted attacks | Attackers know valid accounts |
-| Phishing | Confirm targets have accounts |
-| Credential stuffing | Reduce attack scope |
-| Privacy | Reveal user presence |
+| Risk                | Impact                        |
+| ------------------- | ----------------------------- |
+| Targeted attacks    | Attackers know valid accounts |
+| Phishing            | Confirm targets have accounts |
+| Credential stuffing | Reduce attack scope           |
+| Privacy             | Reveal user presence          |
 
 ## Tests Performed
 
-| Endpoint | Test Method |
-|----------|-------------|
-| `/auth/v1/signup` | Try registering existing email |
-| `/auth/v1/token` | Try login with various emails |
-| `/auth/v1/recover` | Try password reset |
-| `/auth/v1/otp` | Try OTP for various emails |
+| Endpoint           | Test Method                    |
+| ------------------ | ------------------------------ |
+| `/auth/v1/signup`  | Try registering existing email |
+| `/auth/v1/token`   | Try login with various emails  |
+| `/auth/v1/recover` | Try password reset             |
+| `/auth/v1/otp`     | Try OTP for various emails     |
 
 ## Usage
 
@@ -74,7 +75,7 @@ Test login endpoint for user enumeration
 
 ## Output Format
 
-```
+````
 ═══════════════════════════════════════════════════════════
  USER ENUMERATION AUDIT
 ═══════════════════════════════════════════════════════════
@@ -102,146 +103,149 @@ Test login endpoint for user enumeration
 
  # If user exists: {"msg": "User already registered"}
  # If new user: User created or confirmation needed
- ```
+````
 
- ─────────────────────────────────────────────────────────
- Login Endpoint (/auth/v1/token)
- ─────────────────────────────────────────────────────────
+─────────────────────────────────────────────────────────
+Login Endpoint (/auth/v1/token)
+─────────────────────────────────────────────────────────
 
- Test: POST with different email scenarios
+Test: POST with different email scenarios
 
- Existing email, wrong password:
- ├── Response: {"error": "Invalid login credentials"}
- ├── Time: 245ms
- └── Code: 400
+Existing email, wrong password:
+├── Response: {"error": "Invalid login credentials"}
+├── Time: 245ms
+└── Code: 400
 
- Non-existing email:
- ├── Response: {"error": "Invalid login credentials"}
- ├── Time: 52ms ← Significantly faster!
- └── Code: 400
+Non-existing email:
+├── Response: {"error": "Invalid login credentials"}
+├── Time: 52ms ← Significantly faster!
+└── Code: 400
 
- Status: 🟠 P2 - ENUMERABLE VIA TIMING
+Status: 🟠 P2 - ENUMERABLE VIA TIMING
 
- Although the error message is the same, the response
- time is noticeably different:
- ├── Existing user: ~200-300ms (password hashing)
- └── Non-existing: ~50-100ms (no hash check)
+Although the error message is the same, the response
+time is noticeably different:
+├── Existing user: ~200-300ms (password hashing)
+└── Non-existing: ~50-100ms (no hash check)
 
- Timing Attack PoC:
- ```python
- import requests
- import time
+Timing Attack PoC:
 
- def check_user(email):
-     start = time.time()
-     requests.post(
-         'https://abc123def.supabase.co/auth/v1/token',
-         params={'grant_type': 'password'},
-         json={'email': email, 'password': 'wrong'},
-         headers={'apikey': '[anon-key]'}
-     )
-     elapsed = time.time() - start
-     return elapsed > 0.15  # Threshold
+```python
+import requests
+import time
 
- exists = check_user('target@example.com')
- ```
+def check_user(email):
+    start = time.time()
+    requests.post(
+        'https://abc123def.supabase.co/auth/v1/token',
+        params={'grant_type': 'password'},
+        json={'email': email, 'password': 'wrong'},
+        headers={'apikey': '[anon-key]'}
+    )
+    elapsed = time.time() - start
+    return elapsed > 0.15  # Threshold
 
- ─────────────────────────────────────────────────────────
- Password Recovery (/auth/v1/recover)
- ─────────────────────────────────────────────────────────
+exists = check_user('target@example.com')
+```
 
- Test: POST recovery request for different emails
+─────────────────────────────────────────────────────────
+Password Recovery (/auth/v1/recover)
+─────────────────────────────────────────────────────────
 
- Existing email:
- ├── Response: {"message": "Password recovery email sent"}
- ├── Time: 1250ms (email actually sent)
- └── Code: 200
+Test: POST recovery request for different emails
 
- Non-existing email:
- ├── Response: {"message": "Password recovery email sent"}
- ├── Time: 85ms ← Much faster (no email sent)
- └── Code: 200
+Existing email:
+├── Response: {"message": "Password recovery email sent"}
+├── Time: 1250ms (email actually sent)
+└── Code: 200
 
- Status: 🟠 P2 - ENUMERABLE VIA TIMING
+Non-existing email:
+├── Response: {"message": "Password recovery email sent"}
+├── Time: 85ms ← Much faster (no email sent)
+└── Code: 200
 
- Same message, but timing reveals existence.
- Existing users trigger actual email sending (~1s+).
+Status: 🟠 P2 - ENUMERABLE VIA TIMING
 
- ─────────────────────────────────────────────────────────
- Magic Link / OTP (/auth/v1/otp)
- ─────────────────────────────────────────────────────────
+Same message, but timing reveals existence.
+Existing users trigger actual email sending (~1s+).
 
- Test: Request OTP for different emails
+─────────────────────────────────────────────────────────
+Magic Link / OTP (/auth/v1/otp)
+─────────────────────────────────────────────────────────
 
- Existing email:
- ├── Response: {"message": "OTP sent"}
- ├── Time: 1180ms
- └── Code: 200
+Test: Request OTP for different emails
 
- Non-existing email:
- ├── Response: {"error": "User not found"}
- ├── Time: 95ms
- └── Code: 400
+Existing email:
+├── Response: {"message": "OTP sent"}
+├── Time: 1180ms
+└── Code: 200
 
- Status: 🔴 P1 - DIRECTLY ENUMERABLE
+Non-existing email:
+├── Response: {"error": "User not found"}
+├── Time: 95ms
+└── Code: 400
 
- The error message explicitly states user doesn't exist.
+Status: 🔴 P1 - DIRECTLY ENUMERABLE
 
- ─────────────────────────────────────────────────────────
- Summary
- ─────────────────────────────────────────────────────────
+The error message explicitly states user doesn't exist.
 
- Endpoints Tested: 4
- Enumerable: 4 (100%)
+─────────────────────────────────────────────────────────
+Summary
+─────────────────────────────────────────────────────────
 
- Vulnerability Severity:
- ├── 🔴 P1: OTP endpoint (explicit message)
- ├── 🟠 P2: Signup endpoint (explicit message)
- ├── 🟠 P2: Login endpoint (timing attack)
- └── 🟠 P2: Recovery endpoint (timing attack)
+Endpoints Tested: 4
+Enumerable: 4 (100%)
 
- Overall User Enumeration Risk: HIGH
+Vulnerability Severity:
+├── 🔴 P1: OTP endpoint (explicit message)
+├── 🟠 P2: Signup endpoint (explicit message)
+├── 🟠 P2: Login endpoint (timing attack)
+└── 🟠 P2: Recovery endpoint (timing attack)
 
- An attacker can determine if any email address
- has an account in your application.
+Overall User Enumeration Risk: HIGH
 
- ─────────────────────────────────────────────────────────
- Mitigation Recommendations
- ─────────────────────────────────────────────────────────
+An attacker can determine if any email address
+has an account in your application.
 
- 1. CONSISTENT RESPONSES
+─────────────────────────────────────────────────────────
+Mitigation Recommendations
+─────────────────────────────────────────────────────────
+
+1.  CONSISTENT RESPONSES
     Return identical messages for all scenarios:
     "If an account exists, you will receive an email"
 
- 2. CONSISTENT TIMING
+2.  CONSISTENT TIMING
     Add artificial delay to normalize response times:
+
     ```typescript
     const MIN_RESPONSE_TIME = 1000; // 1 second
     const start = Date.now();
     // ... perform auth operation ...
     const elapsed = Date.now() - start;
-    await new Promise(r => setTimeout(r,
-      Math.max(0, MIN_RESPONSE_TIME - elapsed)
-    ));
+    await new Promise((r) =>
+      setTimeout(r, Math.max(0, MIN_RESPONSE_TIME - elapsed)),
+    );
     return response;
     ```
 
- 3. RATE LIMITING
+3.  RATE LIMITING
     Already enabled: 3/hour per IP
     Consider per-email rate limiting too.
 
- 4. CAPTCHA
+4.  CAPTCHA
     Add CAPTCHA for repeated attempts:
     - After 3 failed logins
     - For password recovery
     - For signup
 
- 5. MONITORING
+5.  MONITORING
     Alert on enumeration patterns:
     - Many requests with different emails
     - Sequential email patterns (user1@, user2@, ...)
 
 ═══════════════════════════════════════════════════════════
+
 ```
 
 ## Timing Analysis
@@ -249,6 +253,7 @@ Test login endpoint for user enumeration
 The skill measures response times to detect timing-based enumeration:
 
 ```
+
 Existing user:
 ├── Password hash verification: ~200-300ms
 ├── Email sending: ~1000-2000ms
@@ -258,7 +263,8 @@ Non-existing user:
 ├── No hash verification: 0ms
 ├── No email sending: 0ms
 └── Database lookup: ~5-20ms (not found)
-```
+
+````
 
 Threshold detection:
 - Difference > 100ms: Possible timing leak
@@ -303,7 +309,7 @@ Threshold detection:
     ]
   }
 }
-```
+````
 
 ## Mitigation Code Examples
 
@@ -322,22 +328,24 @@ Deno.serve(async (req) => {
 
     // Normalize response time
     const elapsed = Date.now() - start;
-    await new Promise(r => setTimeout(r,
-      Math.max(0, MIN_RESPONSE_TIME - elapsed)
-    ));
+    await new Promise((r) =>
+      setTimeout(r, Math.max(0, MIN_RESPONSE_TIME - elapsed)),
+    );
 
     return new Response(JSON.stringify(result));
   } catch (error) {
     // Same timing for errors
     const elapsed = Date.now() - start;
-    await new Promise(r => setTimeout(r,
-      Math.max(0, MIN_RESPONSE_TIME - elapsed)
-    ));
+    await new Promise((r) =>
+      setTimeout(r, Math.max(0, MIN_RESPONSE_TIME - elapsed)),
+    );
 
     // Generic error message
-    return new Response(JSON.stringify({
-      message: "Check your email if you have an account"
-    }));
+    return new Response(
+      JSON.stringify({
+        message: "Check your email if you have an account",
+      }),
+    );
   }
 });
 ```
@@ -349,8 +357,9 @@ Deno.serve(async (req) => {
 async function requestPasswordReset(email: string) {
   // Always return success message
   const response = {
-    message: "If an account with that email exists, " +
-             "you will receive a password reset link."
+    message:
+      "If an account with that email exists, " +
+      "you will receive a password reset link.",
   };
 
   // Perform actual reset in background (don't await)
@@ -377,6 +386,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 ### Required Actions (Progressive)
 
 1. **Update `.sb-pentest-context.json`** with results:
+
    ```json
    {
      "user_enumeration": {
@@ -388,6 +398,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
    ```
 
 2. **Log to `.sb-pentest-audit.log`**:
+
    ```
    [TIMESTAMP] [supabase-audit-auth-users] [START] Testing user enumeration
    [TIMESTAMP] [supabase-audit-auth-users] [FINDING] P1: OTP endpoint enumerable
@@ -404,11 +415,11 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 
 ### Evidence Files to Create
 
-| File | Content |
-|------|---------|
-| `enumeration-tests/login-timing.json` | Login endpoint timing analysis |
-| `enumeration-tests/recovery-timing.json` | Recovery endpoint timing |
-| `enumeration-tests/otp-enumeration.json` | OTP endpoint message analysis |
+| File                                     | Content                        |
+| ---------------------------------------- | ------------------------------ |
+| `enumeration-tests/login-timing.json`    | Login endpoint timing analysis |
+| `enumeration-tests/recovery-timing.json` | Recovery endpoint timing       |
+| `enumeration-tests/otp-enumeration.json` | OTP endpoint message analysis  |
 
 ### Evidence Format
 
@@ -428,13 +439,13 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
       "existing_user_test": {
         "email": "[KNOWN_EXISTING]@example.com",
         "response_time_ms": 245,
-        "response": {"error": "Invalid login credentials"}
+        "response": { "error": "Invalid login credentials" }
       },
 
       "nonexisting_user_test": {
         "email": "definitely-not-exists@example.com",
         "response_time_ms": 52,
-        "response": {"error": "Invalid login credentials"}
+        "response": { "error": "Invalid login credentials" }
       },
 
       "timing_difference_ms": 193,
@@ -446,8 +457,8 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
       "test_type": "explicit_message",
       "severity": "P1",
 
-      "existing_user_response": {"message": "OTP sent"},
-      "nonexisting_user_response": {"error": "User not found"},
+      "existing_user_response": { "message": "OTP sent" },
+      "nonexisting_user_response": { "error": "User not found" },
 
       "result": "ENUMERABLE",
       "impact": "Error message explicitly reveals user existence"

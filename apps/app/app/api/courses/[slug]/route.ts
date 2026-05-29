@@ -5,12 +5,14 @@ import { isSubscriptionActive } from "@/lib/subscription";
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
+  { params }: { params: Promise<{ slug: string }> },
 ) {
-  const { userId: clerkId } = await auth();
-  if (!clerkId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
   const { slug } = await params;
+  console.log(`HIT /api/courses/[slug] with slug: ${slug} !`);
+
+  const { userId: clerkId } = await auth();
+  if (!clerkId)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const course = await prisma.course.findUnique({
     where: { slug },
@@ -30,18 +32,43 @@ export async function GET(
       category: { select: { name: true, slug: true, icon: true } },
       modules: {
         orderBy: { order: "asc" },
-        select: { id: true, title: true, slug: true, order: true, xpReward: true },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          order: true,
+          xpReward: true,
+          slides: {
+            orderBy: { order: "asc" },
+            select: {
+              id: true,
+              title: true,
+              order: true,
+              content: true,
+              sources: {
+                select: {
+                  id: true,
+                  title: true,
+                  url: true,
+                  type: true,
+                },
+              },
+            },
+          },
+        },
       },
     },
   });
 
-  if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!course)
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const user = await prisma.user.findUnique({
     where: { clerkId },
     select: { id: true },
   });
-  if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+  if (!user)
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
 
   // Private course: only creator can access
   if (course.visibility === "PRIVATE" && course.authorId !== user.id) {
@@ -51,7 +78,7 @@ export async function GET(
   // Check premium access
   let canAccess = true;
   const hasPremium = await isSubscriptionActive(user.id);
-  
+
   if (course.isPremium || course.difficulty !== "BEGINNER") {
     canAccess = hasPremium;
   }
@@ -65,8 +92,9 @@ export async function GET(
     ...course,
     canAccess,
     userProgress: userProgress.map((p) => p.moduleId),
-    progressPercent: course.totalModules > 0
-      ? Math.round((userProgress.length / course.totalModules) * 100)
-      : 0,
+    progressPercent:
+      course.totalModules > 0
+        ? Math.round((userProgress.length / course.totalModules) * 100)
+        : 0,
   });
 }

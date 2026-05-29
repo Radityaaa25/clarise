@@ -1,28 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles, Lock, ArrowRight, BookOpen, Wand2, CheckCircle2, Loader2 } from "lucide-react";
+import {
+  Sparkles,
+  Lock,
+  ArrowRight,
+  BookOpen,
+  Wand2,
+  CheckCircle2,
+  Loader2,
+} from "lucide-react";
 import Link from "next/link";
 
-// Simulated premium check — will be replaced with real user data
-const isPremium = false;
-
-const categoryOptions = [
-  "Pemrograman", "Matematika", "Sains", "Bahasa", "Desain",
-  "Bisnis", "Musik", "Fotografi", "Marketing", "Lainnya",
-];
-
-const difficultyOptions = [
-  { value: "BEGINNER", label: "Pemula" },
-  { value: "INTERMEDIATE", label: "Menengah" },
-  { value: "ADVANCED", label: "Mahir" },
-];
+import { useUser } from "@/hooks/use-user";
 
 export default function GenerateCoursePage() {
+  const { user } = useUser();
+  const isPremium =
+    user?.subscription?.plan && user.subscription.plan !== "FREE";
+
   const [topic, setTopic] = useState("");
-  const [category, setCategory] = useState("");
-  const [difficulty, setDifficulty] = useState("BEGINNER");
-  const [moduleCount, setModuleCount] = useState(5);
   const [isGenerating, setIsGenerating] = useState(false);
 
   if (!isPremium) {
@@ -36,11 +33,15 @@ export default function GenerateCoursePage() {
             Fitur Premium
           </h1>
           <p className="text-lg text-muted dark:text-white/90 leading-relaxed">
-            AI Course Generator hanya tersedia untuk pengguna Premium. Buat kursus khusus dari topik apapun, di-generate oleh AI dari berbagai sumber terpercaya.
+            AI Course Generator hanya tersedia untuk pengguna Premium. Buat
+            kursus khusus dari topik apapun, di-generate oleh AI dari berbagai
+            sumber terpercaya.
           </p>
         </div>
         <div className="rounded-xl border border-hairline bg-canvas dark:bg-void-elevated p-8 text-left space-y-4">
-          <h3 className="font-bold text-ink dark:text-white">Yang kamu dapatkan:</h3>
+          <h3 className="font-bold text-ink dark:text-white">
+            Yang kamu dapatkan:
+          </h3>
           <ul className="space-y-3">
             {[
               "Buat kursus dari topik apapun dengan prompt",
@@ -50,7 +51,10 @@ export default function GenerateCoursePage() {
               "50 pesan AI Tutor per jam (vs 5 untuk gratis)",
               "Akses unlimited kursus",
             ].map((item, i) => (
-              <li key={i} className="flex items-start gap-3 text-sm text-body dark:text-white/90">
+              <li
+                key={i}
+                className="flex items-start gap-3 text-sm text-body dark:text-white/90"
+              >
                 <CheckCircle2 className="h-5 w-5 text-success shrink-0 mt-0.5" />
                 {item}
               </li>
@@ -69,119 +73,82 @@ export default function GenerateCoursePage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-black font-heading text-ink dark:text-white mb-2 flex items-center gap-3">
-          <Wand2 className="h-8 w-8 text-spark" />
-          AI Course Generator
+    <div className="max-w-3xl mx-auto space-y-8 h-full flex flex-col justify-center min-h-[60vh]">
+      {/* Header / Greeting */}
+      <div className="text-center space-y-4 mb-8">
+        <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-spark/10 mb-2">
+          <Sparkles className="h-8 w-8 text-spark" />
+        </div>
+        <h1 className="text-3xl md:text-4xl font-black font-heading text-ink dark:text-white">
+          Hai {user?.firstName || "Teman"}, mau belajar apa hari ini?
         </h1>
-        <p className="text-muted dark:text-white/90">
-          Deskripsikan topik yang ingin kamu pelajari, dan AI akan membuatkan kursus lengkap untukmu.
+        <p className="text-lg text-muted dark:text-white/80 max-w-xl mx-auto">
+          Tulis apa pun yang ingin kamu kuasai, biar AI Clarise yang meracik
+          materi kursus terstruktur khusus buatmu.
         </p>
       </div>
 
-      {/* Form */}
-      <div className="rounded-xl border border-hairline bg-canvas dark:bg-void-elevated p-8 space-y-6">
-        {/* Topic */}
-        <div>
-          <label className="block text-sm font-bold text-ink dark:text-white mb-2">
-            Topik Kursus <span className="text-error">*</span>
-          </label>
-          <input
-            type="text"
+      {/* Input Form */}
+      <div className="relative">
+        <div className="rounded-2xl border border-hairline bg-canvas dark:bg-void-elevated p-2 shadow-sm focus-within:ring-2 focus-within:ring-spark/30 focus-within:border-spark transition-all">
+          <textarea
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
-            placeholder="Contoh: Belajar TypeScript untuk React Developer"
-            className="w-full h-12 rounded-lg border border-hairline bg-surface-soft dark:bg-void px-4 text-sm text-ink dark:text-white placeholder:text-muted-soft focus:border-core-blue focus:ring-2 focus:ring-core-blue/20 outline-none transition-all"
+            placeholder="Contoh: Ajarkan saya dasar-dasar bahasa pemrograman Python dari nol..."
+            className="w-full h-32 resize-none bg-transparent p-4 text-base text-ink dark:text-white placeholder:text-muted-soft dark:placeholder:text-white/40 outline-none"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                if (topic && !isGenerating) setIsGenerating(true);
+              }
+            }}
           />
-          <p className="text-xs text-muted-soft dark:text-white/70 mt-1.5">Semakin spesifik topikmu, semakin baik hasilnya.</p>
-        </div>
-
-        {/* Category */}
-        <div>
-          <label className="block text-sm font-bold text-ink dark:text-white mb-2">Kategori</label>
-          <div className="flex flex-wrap gap-2">
-            {categoryOptions.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setCategory(cat)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  category === cat
-                    ? "bg-core-blue text-white shadow-sm"
-                    : "bg-surface-soft dark:bg-void text-body dark:text-on-dark-soft hover:bg-surface-strong dark:hover:bg-white/10 border border-hairline"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+          <div className="flex items-center justify-between p-2">
+            <div className="text-xs text-muted-soft dark:text-white/50 px-2 flex items-center gap-1">
+              <Lock className="w-3 h-3" /> Pribadi
+            </div>
+            <button
+              disabled={!topic || isGenerating}
+              onClick={() => setIsGenerating(true)}
+              className="flex items-center gap-2 rounded-xl bg-spark px-6 py-2.5 text-sm font-bold text-white hover:bg-spark/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-spark/20"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Menganalisis...
+                </>
+              ) : (
+                <>
+                  <Wand2 className="h-4 w-4" />
+                  Generate
+                </>
+              )}
+            </button>
           </div>
         </div>
-
-        {/* Difficulty */}
-        <div>
-          <label className="block text-sm font-bold text-ink dark:text-white mb-2">Tingkat Kesulitan</label>
-          <div className="flex gap-3">
-            {difficultyOptions.map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => setDifficulty(opt.value)}
-                className={`flex-1 py-3 rounded-lg text-sm font-medium transition-all border ${
-                  difficulty === opt.value
-                    ? "border-core-blue bg-core-blue/10 text-core-blue dark:text-sky"
-                    : "border-hairline bg-surface-soft dark:bg-void text-body dark:text-on-dark-soft hover:border-core-blue/30"
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Module Count */}
-        <div>
-          <label className="block text-sm font-bold text-ink dark:text-white mb-2">
-            Jumlah Modul: <span className="text-core-blue">{moduleCount}</span>
-          </label>
-          <input
-            type="range"
-            min={3}
-            max={15}
-            value={moduleCount}
-            onChange={(e) => setModuleCount(Number(e.target.value))}
-            className="w-full accent-core-blue"
-          />
-          <div className="flex justify-between text-xs text-muted-soft dark:text-white/70 mt-1">
-            <span>3 modul</span>
-            <span>15 modul</span>
-          </div>
-        </div>
-
-        {/* Generate Button */}
-        <button
-          disabled={!topic || !category || isGenerating}
-          onClick={() => setIsGenerating(true)}
-          className="w-full flex items-center justify-center gap-2 rounded-lg bg-core-blue px-6 py-4 text-base font-bold text-white hover:bg-core-blue/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-core-blue/20"
-        >
-          {isGenerating ? (
-            <>
-              <Loader2 className="h-5 w-5 animate-spin" />
-              Sedang generate kursus...
-            </>
-          ) : (
-            <>
-              <Sparkles className="h-5 w-5" />
-              Generate Kursus
-            </>
-          )}
-        </button>
       </div>
 
-      {/* Privacy Notice */}
-      <div className="rounded-lg border border-hairline bg-surface-soft dark:bg-void-elevated p-4">
-        <p className="text-xs text-muted dark:text-white/90 leading-relaxed">
-          🔒 <strong>Privasi:</strong> Kursus yang kamu buat akan tersimpan secara <strong>pribadi</strong> dan hanya bisa diakses oleh kamu sendiri. Tidak ada data pribadi yang dikirim ke pihak ketiga — hanya topik dan konteks materi yang diproses oleh AI.
+      {/* Suggestions */}
+      <div className="pt-4">
+        <p className="text-xs font-bold text-muted dark:text-white/60 mb-3 text-center uppercase tracking-wider">
+          Saran Topik
         </p>
+        <div className="flex flex-wrap justify-center gap-2">
+          {[
+            "Cara membuat website portofolio dengan React",
+            "Dasar-dasar Machine Learning pakai Python",
+            "Teknik Digital Marketing untuk jualan online",
+            "Cara public speaking yang percaya diri",
+          ].map((suggestion) => (
+            <button
+              key={suggestion}
+              onClick={() => setTopic(suggestion)}
+              className="px-4 py-2 rounded-full text-sm bg-surface-soft dark:bg-white/5 text-body dark:text-white/80 hover:bg-surface-strong dark:hover:bg-white/10 border border-hairline transition-colors"
+            >
+              {suggestion}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );

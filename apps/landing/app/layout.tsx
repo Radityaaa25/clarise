@@ -34,11 +34,26 @@ export const metadata: Metadata = {
   description:
     "Master new skills with AI-powered adaptive learning. Personalized courses, real-time feedback, and gamified progress tracking. Belajar AI dengan tutor interaktif.",
   keywords: [
-    "Clarise", "Clarise AI", "Clarise Platform Belajar AI", "Platform Belajar AI Indonesia",
-    "Belajar AI Bahasa Indonesia", "Kursus AI", "AI Tutor Indonesia", "LMS AI", "Aplikasi Belajar AI",
-    "Belajar Pemrograman", "Belajar Coding AI", "Tutorial AI Indonesia", "Kursus Online AI",
-    "Bootcamp AI Indonesia", "Belajar Prompt Engineering", "Belajar Machine Learning Indonesia",
-    "Edukasi AI", "Teknologi AI Pendidikan", "Sistem Pembelajaran Adaptif", "Clarise.my.id"
+    "Clarise",
+    "Clarise AI",
+    "Clarise Platform Belajar AI",
+    "Platform Belajar AI Indonesia",
+    "Belajar AI Bahasa Indonesia",
+    "Kursus AI",
+    "AI Tutor Indonesia",
+    "LMS AI",
+    "Aplikasi Belajar AI",
+    "Belajar Pemrograman",
+    "Belajar Coding AI",
+    "Tutorial AI Indonesia",
+    "Kursus Online AI",
+    "Bootcamp AI Indonesia",
+    "Belajar Prompt Engineering",
+    "Belajar Machine Learning Indonesia",
+    "Edukasi AI",
+    "Teknologi AI Pendidikan",
+    "Sistem Pembelajaran Adaptif",
+    "Clarise.my.id",
   ],
   authors: [{ name: "Clarise Team" }],
   creator: "Clarise",
@@ -56,7 +71,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Clarise — AI-Powered Learning Platform",
-    description: "Tingkatkan skill kamu dengan AI-Powered Precision bersama Clarise AI.",
+    description:
+      "Tingkatkan skill kamu dengan AI-Powered Precision bersama Clarise AI.",
     creator: "@clarise_id",
   },
   robots: {
@@ -65,22 +81,34 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
     },
   },
   icons: {
     icon: [
-      { url: '/favicon/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-      { url: '/favicon/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-      { url: '/favicon/android-chrome-192x192.png', sizes: '192x192', type: 'image/png' },
-      { url: '/favicon/android-chrome-512x512.png', sizes: '512x512', type: 'image/png' },
+      { url: "/favicon/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      {
+        url: "/favicon/android-chrome-192x192.png",
+        sizes: "192x192",
+        type: "image/png",
+      },
+      {
+        url: "/favicon/android-chrome-512x512.png",
+        sizes: "512x512",
+        type: "image/png",
+      },
     ],
     apple: [
-      { url: '/favicon/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+      {
+        url: "/favicon/apple-touch-icon.png",
+        sizes: "180x180",
+        type: "image/png",
+      },
     ],
-    shortcut: ['/favicon/favicon.ico'],
+    shortcut: ["/favicon/favicon.ico"],
   },
 };
 
@@ -90,32 +118,33 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-      <html
-        lang="id"
-        suppressHydrationWarning
-        className={`${darkerGrotesque.variable} ${jost.variable} ${dmSans.variable} scroll-smooth`}
-      >
-        <head>
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "EducationalOrganization",
-                "name": "Clarise",
-                "url": "https://clarise.my.id",
-                "logo": "https://clarise.my.id/logo.png",
-                "description": "Clarise adalah platform pembelajaran interaktif berbasis Artificial Intelligence (AI) yang menyediakan jalur belajar personal untuk penggunanya di Indonesia.",
-                "sameAs": [
-                  "https://twitter.com/clarise_id",
-                  "https://instagram.com/clarise.ai"
-                ]
-              })
-            }}
-          />
-        </head>
-        <body>
+    <html
+      lang="id"
+      suppressHydrationWarning
+      className={`${darkerGrotesque.variable} ${jost.variable} ${dmSans.variable} scroll-smooth`}
+    >
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "EducationalOrganization",
+              name: "Clarise",
+              url: "https://clarise.my.id",
+              logo: "https://clarise.my.id/logo.png",
+              description:
+                "Clarise adalah platform pembelajaran interaktif berbasis Artificial Intelligence (AI) yang menyediakan jalur belajar personal untuk penggunanya di Indonesia.",
+              sameAs: [
+                "https://twitter.com/clarise_id",
+                "https://instagram.com/clarise.ai",
+              ],
+            }),
+          }}
+        />
+      </head>
+      <body>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

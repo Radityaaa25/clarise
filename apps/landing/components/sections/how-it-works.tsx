@@ -12,12 +12,14 @@ const steps = [
   {
     icon: Sparkles,
     title: "AI Kurasikan Materi",
-    description: "AI mengumpulkan konten terbaik dari seluruh internet, disusun jadi learning path.",
+    description:
+      "AI mengumpulkan konten terbaik dari seluruh internet, disusun jadi learning path.",
   },
   {
     icon: MessageCircle,
     title: "Belajar & Tanya",
-    description: "Pelajari materi, klik konsep apapun untuk penjelasan detail, tanya AI kapan saja.",
+    description:
+      "Pelajari materi, klik konsep apapun untuk penjelasan detail, tanya AI kapan saja.",
   },
 ];
 
@@ -52,7 +54,9 @@ export function HowItWorks() {
                 <step.icon className="h-6 w-6 text-primary" />
               </div>
               <h3 className="text-xl font-bold text-ink">{step.title}</h3>
-              <p className="mt-2 text-body leading-relaxed">{step.description}</p>
+              <p className="mt-2 text-body leading-relaxed">
+                {step.description}
+              </p>
             </div>
           ))}
         </div>

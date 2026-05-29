@@ -8,6 +8,7 @@ description: CRITICAL - Detect exposed PostgreSQL database connection strings in
 > 🔴 **CRITICAL: PROGRESSIVE FILE UPDATES REQUIRED**
 >
 > You MUST write to context files **AS YOU GO**, not just at the end.
+>
 > - Write to `.sb-pentest-context.json` **IMMEDIATELY after each discovery**
 > - Log to `.sb-pentest-audit.log` **BEFORE and AFTER each action**
 > - **DO NOT** wait until the skill completes to update files
@@ -32,12 +33,12 @@ This skill detects if PostgreSQL database connection strings are accidentally ex
 
 Exposed database connection strings allow:
 
-| Impact | Description |
-|--------|-------------|
+| Impact              | Description                                |
+| ------------------- | ------------------------------------------ |
 | 🔴 Direct DB Access | Bypass API, connect directly to PostgreSQL |
-| 🔴 Full Data Access | Read/write all data without RLS |
-| 🔴 Schema Access | View and modify database structure |
-| 🔴 User Enumeration | Access auth.users table directly |
+| 🔴 Full Data Access | Read/write all data without RLS            |
+| 🔴 Schema Access    | View and modify database structure         |
+| 🔴 User Enumeration | Access auth.users table directly           |
 
 **This is a P0 (Critical) finding requiring immediate action.**
 
@@ -51,13 +52,13 @@ postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres
 
 ### Connection String Components
 
-| Component | Example | Sensitivity |
-|-----------|---------|-------------|
-| Host | `db.abc123.supabase.co` | Medium |
-| Port | `5432` | Low |
-| Database | `postgres` | Low |
-| Username | `postgres` | Medium |
-| Password | `[your-password]` | 🔴 Critical |
+| Component | Example                 | Sensitivity |
+| --------- | ----------------------- | ----------- |
+| Host      | `db.abc123.supabase.co` | Medium      |
+| Port      | `5432`                  | Low         |
+| Database  | `postgres`              | Low         |
+| Username  | `postgres`              | Medium      |
+| Password  | `[your-password]`       | 🔴 Critical |
 
 ### Pooler Connection (Supavisor)
 
@@ -71,24 +72,25 @@ postgresql://postgres.[project-ref]:[password]@aws-0-us-east-1.pooler.supabase.c
 
 ```javascript
 // ❌ CRITICAL - Full connection string
-const dbUrl = 'postgresql://postgres:MySecretPass123@db.abc123.supabase.co:5432/postgres'
+const dbUrl =
+  "postgresql://postgres:MySecretPass123@db.abc123.supabase.co:5432/postgres";
 ```
 
 ### 2. Environment Variable Leaks
 
 ```javascript
 // ❌ Exposed in client bundle
-process.env.DATABASE_URL
-process.env.POSTGRES_URL
-process.env.SUPABASE_DB_URL
+process.env.DATABASE_URL;
+process.env.POSTGRES_URL;
+process.env.SUPABASE_DB_URL;
 ```
 
 ### 3. Partial Exposure
 
 ```javascript
 // ⚠️ Password exposed separately
-const DB_PASSWORD = 'MySecretPass123'
-const DB_HOST = 'db.abc123.supabase.co'
+const DB_PASSWORD = "MySecretPass123";
+const DB_HOST = "db.abc123.supabase.co";
 ```
 
 ### 4. ORM Configuration
@@ -98,10 +100,10 @@ const DB_HOST = 'db.abc123.supabase.co'
 const prisma = new PrismaClient({
   datasources: {
     db: {
-      url: 'postgresql://postgres:pass@db.abc123.supabase.co:5432/postgres'
-    }
-  }
-})
+      url: "postgresql://postgres:pass@db.abc123.supabase.co:5432/postgres",
+    },
+  },
+});
 ```
 
 ## Usage
@@ -262,12 +264,12 @@ Even partial exposure is concerning:
 
 ## Common Causes
 
-| Cause | Solution |
-|-------|----------|
-| Wrong env prefix | Never use `NEXT_PUBLIC_DATABASE_URL` |
-| SSR code in client | Ensure server-only code stays server-side |
+| Cause                    | Solution                                    |
+| ------------------------ | ------------------------------------------- |
+| Wrong env prefix         | Never use `NEXT_PUBLIC_DATABASE_URL`        |
+| SSR code in client       | Ensure server-only code stays server-side   |
 | Bundler misconfiguration | Review webpack/vite config for env exposure |
-| Copy-paste error | Double-check what you're committing |
+| Copy-paste error         | Double-check what you're committing         |
 
 ## Architecture Guidance
 
@@ -275,41 +277,39 @@ Even partial exposure is concerning:
 
 ```javascript
 // ❌ NEVER in client code
-import { Pool } from 'pg'
+import { Pool } from "pg";
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL  // ❌
-})
+  connectionString: process.env.DATABASE_URL, // ❌
+});
 ```
 
 ### Correct (API or Edge Function)
 
 ```javascript
 // ✅ Client uses Supabase client
-const { data } = await supabase
-  .from('products')
-  .select('*')
+const { data } = await supabase.from("products").select("*");
 
 // OR call an Edge Function for complex queries
-const { data } = await supabase.functions.invoke('complex-query')
+const { data } = await supabase.functions.invoke("complex-query");
 ```
 
 ### Edge Function (Server-Side)
 
 ```typescript
 // supabase/functions/complex-query/index.ts
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from "@supabase/supabase-js";
 
 Deno.serve(async (req) => {
   // ✅ Direct DB access only on server
   const supabase = createClient(
-    Deno.env.get('SUPABASE_URL'),
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-  )
+    Deno.env.get("SUPABASE_URL"),
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"),
+  );
 
   // Complex query that can't be done via REST
-  const { data } = await supabase.rpc('complex_function')
-  return new Response(JSON.stringify(data))
-})
+  const { data } = await supabase.rpc("complex_function");
+  return new Response(JSON.stringify(data));
+});
 ```
 
 ## MANDATORY: Progressive Context File Updates
@@ -329,6 +329,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 ### Required Actions (Progressive)
 
 1. **Update `.sb-pentest-context.json`** with findings:
+
    ```json
    {
      "supabase": {
@@ -346,6 +347,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
    ```
 
 2. **Log to `.sb-pentest-audit.log`**:
+
    ```
    [TIMESTAMP] [supabase-extract-db-string] [START] Checking for DB connection strings
    [TIMESTAMP] [supabase-extract-db-string] [CRITICAL] Connection string EXPOSED
@@ -362,10 +364,10 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 
 ### Evidence Files to Create (if DB string found)
 
-| File | Content |
-|------|---------|
+| File                                         | Content                                      |
+| -------------------------------------------- | -------------------------------------------- |
 | `db-string-exposure/connection-details.json` | Parsed connection string (password redacted) |
-| `db-string-exposure/location.txt` | File path and line number |
+| `db-string-exposure/location.txt`            | File path and line number                    |
 
 ### Evidence Format (P0 Finding)
 
@@ -413,6 +415,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 
 ```markdown
 ## [TIMESTAMP] - 🔴 P0 CRITICAL: Database Connection String Exposed
+
 - PostgreSQL connection string with password found in client code
 - Location: [file]:[line]
 - Impact: Direct database access, full RLS bypass

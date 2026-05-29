@@ -3,11 +3,15 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
-const reminderSchema = z.object({
-  enabled: z.boolean(),
-  preferredTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Format jam tidak valid (HH:MM)"),
-  channel: z.enum(["EMAIL"]).default("EMAIL"),
-}).strict();
+const reminderSchema = z
+  .object({
+    enabled: z.boolean(),
+    preferredTime: z
+      .string()
+      .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Format jam tidak valid (HH:MM)"),
+    channel: z.enum(["EMAIL"]).default("EMAIL"),
+  })
+  .strict();
 
 export async function GET(req: NextRequest) {
   try {
@@ -30,12 +34,15 @@ export async function GET(req: NextRequest) {
       data: user.dailyReminder || {
         enabled: false,
         preferredTime: "08:00",
-        channel: "EMAIL"
-      }
+        channel: "EMAIL",
+      },
     });
   } catch (error) {
     console.error("[USER_REMINDER_GET]", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
   }
 }
 
@@ -58,7 +65,10 @@ export async function PATCH(req: NextRequest) {
     const parsed = reminderSchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid data", details: parsed.error }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid data", details: parsed.error },
+        { status: 400 },
+      );
     }
 
     const { enabled, preferredTime, channel } = parsed.data;
@@ -81,6 +91,9 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ success: true, reminder });
   } catch (error) {
     console.error("[USER_REMINDER_PATCH]", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
   }
 }

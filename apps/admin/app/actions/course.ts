@@ -26,17 +26,23 @@ export async function deleteCourse(courseId: string) {
   }
 }
 
-export async function toggleCoursePublish(courseId: string, isPublished: boolean) {
+export async function toggleCoursePublish(
+  courseId: string,
+  isPublished: boolean,
+) {
   try {
     await prisma.course.update({
       where: { id: courseId },
       data: { isPublished },
     });
-    
+
     revalidatePath("/courses");
     return { success: true };
   } catch (error: any) {
     console.error("Error toggleCoursePublish:", error);
-    return { success: false, error: error.message || "Gagal memperbarui status kursus" };
+    return {
+      success: false,
+      error: error.message || "Gagal memperbarui status kursus",
+    };
   }
 }

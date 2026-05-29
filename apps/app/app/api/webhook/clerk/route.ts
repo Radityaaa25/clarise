@@ -8,7 +8,10 @@ export async function POST(req: NextRequest) {
 
   if (!WEBHOOK_SECRET) {
     console.error("Missing CLERK_WEBHOOK_SECRET");
-    return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Server misconfigured" },
+      { status: 500 },
+    );
   }
 
   // Get headers
@@ -17,7 +20,10 @@ export async function POST(req: NextRequest) {
   const svix_signature = req.headers.get("svix-signature");
 
   if (!svix_id || !svix_timestamp || !svix_signature) {
-    return NextResponse.json({ error: "Missing svix headers" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Missing svix headers" },
+      { status: 400 },
+    );
   }
 
   // Get body
@@ -50,7 +56,10 @@ export async function POST(req: NextRequest) {
     }
 
     const name = [first_name, last_name].filter(Boolean).join(" ") || null;
-    const referralCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+    const referralCode = Math.random()
+      .toString(36)
+      .substring(2, 10)
+      .toUpperCase();
 
     if (eventType === "user.created") {
       await prisma.user.create({
@@ -65,8 +74,8 @@ export async function POST(req: NextRequest) {
               status: "ACTIVE",
               plan: "FREE",
               startDate: new Date(),
-            }
-          }
+            },
+          },
         },
       });
     } else {

@@ -22,22 +22,24 @@ export default function Error({
         <div className="w-24 h-24 bg-destructive flex items-center justify-center border-4 border-border mb-6 neo-shadow">
           <AlertTriangle className="w-12 h-12 text-destructive-foreground" />
         </div>
-        
-        <h1 className="text-3xl font-black uppercase text-foreground mb-2">Terjadi Kesalahan</h1>
+
+        <h1 className="text-3xl font-black uppercase text-foreground mb-2">
+          Terjadi Kesalahan
+        </h1>
         <h2 className="text-sm font-bold text-muted-foreground mb-6 border-b-2 border-border pb-4 w-full">
           {error.message || "Sistem admin mengalami masalah internal."}
         </h2>
-        
+
         <div className="flex flex-col gap-3 w-full">
-          <button 
+          <button
             onClick={() => reset()}
             className="neo-btn bg-accent text-accent-foreground flex items-center gap-2 px-6 py-3 uppercase font-black w-full justify-center"
           >
             <RefreshCcw className="w-5 h-5" />
             Coba Lagi
           </button>
-          
-          <Link 
+
+          <Link
             href="/"
             className="neo-btn bg-card text-foreground flex items-center gap-2 px-6 py-3 uppercase font-black w-full justify-center"
           >

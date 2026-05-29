@@ -8,6 +8,7 @@ description: Extract and decode Supabase-related JWTs from client-side code, coo
 > 🔴 **CRITICAL: PROGRESSIVE FILE UPDATES REQUIRED**
 >
 > You MUST write to context files **AS YOU GO**, not just at the end.
+>
 > - Write to `.sb-pentest-context.json` **IMMEDIATELY after each discovery**
 > - Log to `.sb-pentest-audit.log` **BEFORE and AFTER each action**
 > - **DO NOT** wait until the skill completes to update files
@@ -31,12 +32,12 @@ This skill extracts and analyzes JSON Web Tokens (JWTs) related to Supabase from
 
 ## Types of JWTs in Supabase
 
-| Type | Purpose | Client Exposure |
-|------|---------|-----------------|
-| Anon Key | API authentication | ✅ Expected |
-| Service Role Key | Admin access | ❌ Never |
-| Access Token | User session | ⚠️ Dynamic only |
-| Refresh Token | Token renewal | ⚠️ Dynamic only |
+| Type             | Purpose            | Client Exposure |
+| ---------------- | ------------------ | --------------- |
+| Anon Key         | API authentication | ✅ Expected     |
+| Service Role Key | Admin access       | ❌ Never        |
+| Access Token     | User session       | ⚠️ Dynamic only |
+| Refresh Token    | Token renewal      | ⚠️ Dynamic only |
 
 ## Detection Patterns
 
@@ -44,23 +45,24 @@ This skill extracts and analyzes JSON Web Tokens (JWTs) related to Supabase from
 
 ```javascript
 // Supabase API keys are JWTs
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
 ```
 
 ### 2. Hardcoded User Tokens (Problem)
 
 ```javascript
 // ❌ Should never be hardcoded
-const userToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiZW1haWwiOiJ1c2VyQGV4YW1wbGUuY29tIn0...'
+const userToken =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiZW1haWwiOiJ1c2VyQGV4YW1wbGUuY29tIn0...";
 ```
 
 ### 3. Storage Key Patterns
 
 ```javascript
 // Code referencing where JWTs are stored
-localStorage.getItem('supabase.auth.token')
-localStorage.getItem('sb-abc123-auth-token')
-sessionStorage.getItem('supabase_session')
+localStorage.getItem("supabase.auth.token");
+localStorage.getItem("sb-abc123-auth-token");
+sessionStorage.getItem("supabase_session");
 ```
 
 ## Usage
@@ -148,22 +150,22 @@ The skill identifies key claims:
 
 ### Standard Claims
 
-| Claim | Description | Security Impact |
-|-------|-------------|-----------------|
-| `sub` | User ID | Identifies specific user |
-| `email` | User email | PII exposure if hardcoded |
-| `role` | Permission level | `service_role` is critical |
-| `exp` | Expiration | Expired tokens less risky |
-| `iat` | Issued at | Indicates when created |
+| Claim   | Description      | Security Impact            |
+| ------- | ---------------- | -------------------------- |
+| `sub`   | User ID          | Identifies specific user   |
+| `email` | User email       | PII exposure if hardcoded  |
+| `role`  | Permission level | `service_role` is critical |
+| `exp`   | Expiration       | Expired tokens less risky  |
+| `iat`   | Issued at        | Indicates when created     |
 
 ### Supabase-Specific Claims
 
-| Claim | Description |
-|-------|-------------|
-| `ref` | Project reference |
-| `iss` | Should be "supabase" |
+| Claim | Description                   |
+| ----- | ----------------------------- |
+| `ref` | Project reference             |
+| `iss` | Should be "supabase"          |
 | `aal` | Authenticator assurance level |
-| `amr` | Authentication methods used |
+| `amr` | Authentication methods used   |
 
 ## Security Findings
 
@@ -244,20 +246,22 @@ Saved to `.sb-pentest-context.json`:
 
 ```javascript
 // ❌ Never hardcode user tokens
-const adminToken = 'eyJhbGciOiJIUzI1NiI...'
-fetch('/api/admin', {
-  headers: { Authorization: `Bearer ${adminToken}` }
-})
+const adminToken = "eyJhbGciOiJIUzI1NiI...";
+fetch("/api/admin", {
+  headers: { Authorization: `Bearer ${adminToken}` },
+});
 ```
 
 ### After (Correct)
 
 ```javascript
 // ✅ Get token from Supabase session
-const { data: { session } } = await supabase.auth.getSession()
-fetch('/api/admin', {
-  headers: { Authorization: `Bearer ${session.access_token}` }
-})
+const {
+  data: { session },
+} = await supabase.auth.getSession();
+fetch("/api/admin", {
+  headers: { Authorization: `Bearer ${session.access_token}` },
+});
 ```
 
 ## MANDATORY: Progressive Context File Updates
@@ -277,6 +281,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 ### Required Actions (Progressive)
 
 1. **Update `.sb-pentest-context.json`** with extracted data:
+
    ```json
    {
      "jwts": {
@@ -289,6 +294,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
    ```
 
 2. **Log to `.sb-pentest-audit.log`**:
+
    ```
    [TIMESTAMP] [supabase-extract-jwt] [START] Beginning JWT extraction
    [TIMESTAMP] [supabase-extract-jwt] [SUCCESS] Found 3 JWTs
@@ -305,8 +311,8 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 
 ### Evidence Files to Create
 
-| File | Content |
-|------|---------|
+| File                  | Content                      |
+| --------------------- | ---------------------------- |
 | `extracted-jwts.json` | All JWTs found with analysis |
 
 ### Evidence Format

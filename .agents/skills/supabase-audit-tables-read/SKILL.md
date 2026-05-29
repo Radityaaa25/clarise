@@ -8,6 +8,7 @@ description: Attempt to read data from exposed tables to verify actual data expo
 > 🔴 **CRITICAL: PROGRESSIVE FILE UPDATES REQUIRED**
 >
 > You MUST write to context files **AS YOU GO**, not just at the end.
+>
 > - Write to `.sb-pentest-context.json` **IMMEDIATELY after each table tested**
 > - Log to `.sb-pentest-audit.log` **BEFORE and AFTER each test**
 > - **DO NOT** wait until the skill completes to update files
@@ -42,11 +43,11 @@ Authorization: Bearer [anon-key]
 
 ## Test Modes
 
-| Mode | Description | Queries |
-|------|-------------|---------|
-| **Quick** | First 5 rows from each table | `?limit=5` |
-| **Sample** | Random sample across tables | `?limit=10&order=random` |
-| **Count** | Just row counts, no data | `HEAD` request |
+| Mode       | Description                  | Queries                  |
+| ---------- | ---------------------------- | ------------------------ |
+| **Quick**  | First 5 rows from each table | `?limit=5`               |
+| **Sample** | Random sample across tables  | `?limit=10&order=random` |
+| **Count**  | Just row counts, no data     | `HEAD` request           |
 
 ## Usage
 
@@ -161,25 +162,25 @@ Test read access on the users table
 
 ## Severity Assessment
 
-| Status | Severity | Criteria |
-|--------|----------|----------|
-| 🔴 DATA EXPOSED | P0 | Sensitive data (PII, secrets, financial) accessible |
-| 🟠 PARTIAL ACCESS | P1 | More data than expected, but not critical |
-| 🟡 UNEXPECTED | P2 | Accessible but low-risk data |
-| ✅ BLOCKED | - | RLS properly preventing access |
-| ✅ EXPECTED | - | Public data, appropriate access |
+| Status            | Severity | Criteria                                            |
+| ----------------- | -------- | --------------------------------------------------- |
+| 🔴 DATA EXPOSED   | P0       | Sensitive data (PII, secrets, financial) accessible |
+| 🟠 PARTIAL ACCESS | P1       | More data than expected, but not critical           |
+| 🟡 UNEXPECTED     | P2       | Accessible but low-risk data                        |
+| ✅ BLOCKED        | -        | RLS properly preventing access                      |
+| ✅ EXPECTED       | -        | Public data, appropriate access                     |
 
 ## Data Classification
 
 The skill identifies sensitive data types:
 
-| Type | Patterns | Severity if Exposed |
-|------|----------|---------------------|
-| PII | email, phone, name, address | P0 |
-| Financial | amount, total, card, payment | P0 |
-| Secrets | key, secret, token, password | P0 |
-| Auth | user_id, session, jwt | P1 |
-| Metadata | created_at, updated_at | P2 |
+| Type      | Patterns                     | Severity if Exposed |
+| --------- | ---------------------------- | ------------------- |
+| PII       | email, phone, name, address  | P0                  |
+| Financial | amount, total, card, payment | P0                  |
+| Secrets   | key, secret, token, password | P0                  |
+| Auth      | user_id, session, jwt        | P1                  |
+| Metadata  | created_at, updated_at       | P2                  |
 
 ## Context Output
 
@@ -301,6 +302,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 ### Required Actions (Progressive)
 
 1. **Update `.sb-pentest-context.json`** with results:
+
    ```json
    {
      "data_access": {
@@ -314,6 +316,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
    ```
 
 2. **Log to `.sb-pentest-audit.log`**:
+
    ```
    [TIMESTAMP] [supabase-audit-tables-read] [START] Testing data access
    [TIMESTAMP] [supabase-audit-tables-read] [FINDING] P0: users table exposed
@@ -330,9 +333,9 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 
 ### Evidence Files to Create
 
-| File | Content |
-|------|---------|
-| `data-samples/[table]-sample.json` | Sample data from each accessible table |
+| File                                | Content                                |
+| ----------------------------------- | -------------------------------------- |
+| `data-samples/[table]-sample.json`  | Sample data from each accessible table |
 | `data-samples/[table]-blocked.json` | Proof of blocked access (403 response) |
 
 ### Evidence Format (Data Exposed)
@@ -395,7 +398,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 
   "response": {
     "status": 403,
-    "body": {"message": "new row violates row-level security policy"}
+    "body": { "message": "new row violates row-level security policy" }
   },
 
   "analysis": {

@@ -8,6 +8,7 @@ description: Analyze Supabase authentication configuration for security weakness
 > 🔴 **CRITICAL: PROGRESSIVE FILE UPDATES REQUIRED**
 >
 > You MUST write to context files **AS YOU GO**, not just at the end.
+>
 > - Write to `.sb-pentest-context.json` **IMMEDIATELY after each setting analyzed**
 > - Log to `.sb-pentest-audit.log` **BEFORE and AFTER each test**
 > - **DO NOT** wait until the skill completes to update files
@@ -37,26 +38,26 @@ Supabase Auth (GoTrue) exposes:
 https://[project].supabase.co/auth/v1/
 ```
 
-| Endpoint | Purpose |
-|----------|---------|
+| Endpoint            | Purpose                   |
+| ------------------- | ------------------------- |
 | `/auth/v1/settings` | Public settings (limited) |
-| `/auth/v1/signup` | User registration |
-| `/auth/v1/token` | Authentication |
-| `/auth/v1/user` | Current user info |
-| `/auth/v1/recover` | Password recovery |
+| `/auth/v1/signup`   | User registration         |
+| `/auth/v1/token`    | Authentication            |
+| `/auth/v1/user`     | Current user info         |
+| `/auth/v1/recover`  | Password recovery         |
 
 ## What Can Be Detected
 
 From the public API, we can detect:
 
-| Setting | Detection Method |
-|---------|------------------|
-| Email auth enabled | Attempt signup |
-| Phone auth enabled | Check settings |
-| OAuth providers | Check settings |
-| Signup disabled | Attempt signup |
-| Email confirmation | Signup response |
-| Password requirements | Error messages |
+| Setting               | Detection Method |
+| --------------------- | ---------------- |
+| Email auth enabled    | Attempt signup   |
+| Phone auth enabled    | Check settings   |
+| OAuth providers       | Check settings   |
+| Signup disabled       | Attempt signup   |
+| Email confirmation    | Signup response  |
+| Password requirements | Error messages   |
 
 ## Usage
 
@@ -197,28 +198,28 @@ Check if signup is open and what providers are enabled
 
 ### Email Authentication
 
-| Setting | Recommended | Risk if Wrong |
-|---------|-------------|---------------|
-| Email Confirmation | ✅ Required | Fake accounts |
-| Password Length | ≥8 chars | Weak passwords |
-| Password Complexity | Enable | Easy to guess |
-| Rate Limiting | Enable | Brute force |
+| Setting             | Recommended | Risk if Wrong  |
+| ------------------- | ----------- | -------------- |
+| Email Confirmation  | ✅ Required | Fake accounts  |
+| Password Length     | ≥8 chars    | Weak passwords |
+| Password Complexity | Enable      | Easy to guess  |
+| Rate Limiting       | Enable      | Brute force    |
 
 ### OAuth Configuration
 
-| Setting | Recommended | Risk if Wrong |
-|---------|-------------|---------------|
-| Verified providers only | Yes | Account takeover |
-| Proper redirect URLs | Specific URLs | OAuth redirect attacks |
-| State parameter | Enabled | CSRF attacks |
+| Setting                 | Recommended   | Risk if Wrong          |
+| ----------------------- | ------------- | ---------------------- |
+| Verified providers only | Yes           | Account takeover       |
+| Proper redirect URLs    | Specific URLs | OAuth redirect attacks |
+| State parameter         | Enabled       | CSRF attacks           |
 
 ### Session Security
 
-| Setting | Recommended | Risk if Wrong |
-|---------|-------------|---------------|
-| Short JWT expiry | 1 hour or less | Token theft |
-| Refresh token rotation | Enabled | Token reuse |
-| Secure cookie flags | HttpOnly, Secure, SameSite | XSS, CSRF |
+| Setting                | Recommended                | Risk if Wrong |
+| ---------------------- | -------------------------- | ------------- |
+| Short JWT expiry       | 1 hour or less             | Token theft   |
+| Refresh token rotation | Enabled                    | Token reuse   |
+| Secure cookie flags    | HttpOnly, Secure, SameSite | XSS, CSRF     |
 
 ## Context Output
 
@@ -267,9 +268,9 @@ Check if signup is open and what providers are enabled
 ```javascript
 // User can signup with any email
 const { data, error } = await supabase.auth.signUp({
-  email: 'fake@example.com',  // No verification needed
-  password: 'password123'
-})
+  email: "fake@example.com", // No verification needed
+  password: "password123",
+});
 // User is immediately authenticated
 ```
 
@@ -278,9 +279,9 @@ const { data, error } = await supabase.auth.signUp({
 ```javascript
 // Weak password accepted
 await supabase.auth.signUp({
-  email: 'user@example.com',
-  password: '123456'  // Accepted with min length 6
-})
+  email: "user@example.com",
+  password: "123456", // Accepted with min length 6
+});
 ```
 
 ### 3. Open Signup When Not Needed
@@ -331,6 +332,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 ### Required Actions (Progressive)
 
 1. **Update `.sb-pentest-context.json`** with results:
+
    ```json
    {
      "auth_config": {
@@ -342,6 +344,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
    ```
 
 2. **Log to `.sb-pentest-audit.log`**:
+
    ```
    [TIMESTAMP] [supabase-audit-auth-config] [START] Auditing auth configuration
    [TIMESTAMP] [supabase-audit-auth-config] [FINDING] P1: Email confirmation disabled
@@ -358,8 +361,8 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 
 ### Evidence Files to Create
 
-| File | Content |
-|------|---------|
+| File                 | Content                     |
+| -------------------- | --------------------------- |
 | `auth-settings.json` | Complete auth configuration |
 
 ### Evidence Format

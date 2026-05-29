@@ -8,6 +8,7 @@ description: Generate a comprehensive Markdown security audit report with execut
 > 🔴 **CRITICAL: PROGRESSIVE FILE UPDATES REQUIRED**
 >
 > You MUST write to context files **AS YOU GO**, not just at the end.
+>
 > - Write to `.sb-pentest-audit.log` **IMMEDIATELY as you process each section**
 > - Update `.sb-pentest-context.json` with report metadata **progressively**
 > - **DO NOT** wait until the entire report is generated to update files
@@ -84,11 +85,11 @@ This security audit identified **12 vulnerabilities** across the Supabase implem
 
 ### Key Findings
 
-| Severity | Count | Status |
-|----------|-------|--------|
-| 🔴 P0 (Critical) | 3 | Immediate action required |
-| 🟠 P1 (High) | 4 | Address within 7 days |
-| 🟡 P2 (Medium) | 5 | Address within 30 days |
+| Severity         | Count | Status                    |
+| ---------------- | ----- | ------------------------- |
+| 🔴 P0 (Critical) | 3     | Immediate action required |
+| 🟠 P1 (High)     | 4     | Address within 7 days     |
+| 🟡 P2 (Medium)   | 5     | Address within 30 days    |
 
 ### Security Score
 
@@ -134,12 +135,13 @@ The application has significant security gaps that expose user data and allow pr
 The Supabase service_role key was found in client-side JavaScript code. This key bypasses all Row Level Security policies and provides full database access.
 
 #### Location
-
 ```
+
 File: /static/js/admin.chunk.js
 Line: 89
 Code: const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiI...'
-```
+
+````
 
 #### Impact
 
@@ -156,36 +158,39 @@ curl 'https://abc123def.supabase.co/rest/v1/users' \
   -H 'Authorization: Bearer [service_role_key]'
 
 # Returns ALL users with full data
-```
+````
 
 #### Remediation
 
 **Immediate:**
+
 1. Rotate the service role key in Supabase Dashboard
    - Settings → API → Regenerate service_role key
 2. Remove the key from client code
 3. Redeploy the application
 
 **Long-term:**
+
 ```typescript
 // Move privileged operations to Edge Functions
 // supabase/functions/admin-action/index.ts
 
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from "@supabase/supabase-js";
 
 Deno.serve(async (req) => {
   // Service key only on server
   const supabase = createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-  )
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+  );
 
   // Verify caller is admin before proceeding
   // ...
-})
+});
 ```
 
 **Documentation:**
+
 - [Supabase API Keys](https://supabase.com/docs/guides/api/api-keys)
 - [Edge Functions](https://supabase.com/docs/guides/functions)
 
@@ -203,11 +208,11 @@ The storage bucket named "backups" is configured as public, exposing database du
 
 #### Exposed Files
 
-| File | Size | Content |
-|------|------|---------|
-| db-backup-2025-01-30.sql | 125MB | Full database dump |
-| users-export.csv | 2.3MB | All user data with PII |
-| secrets.env | 1KB | API keys and passwords |
+| File                     | Size  | Content                |
+| ------------------------ | ----- | ---------------------- |
+| db-backup-2025-01-30.sql | 125MB | Full database dump     |
+| users-export.csv         | 2.3MB | All user data with PII |
+| secrets.env              | 1KB   | API keys and passwords |
 
 #### Impact
 
@@ -218,6 +223,7 @@ The storage bucket named "backups" is configured as public, exposing database du
 #### Remediation
 
 **Immediate:**
+
 ```sql
 -- Make bucket private
 UPDATE storage.buckets
@@ -229,6 +235,7 @@ WHERE name = 'backups';
 ```
 
 **Credential Rotation:**
+
 - Stripe API keys
 - Database password
 - JWT secret
@@ -276,25 +283,25 @@ The `/functions/v1/admin-panel` Edge Function is accessible to any authenticated
 
 ### API Security
 
-| Table | RLS | Access Level | Status |
-|-------|-----|--------------|--------|
-| users | ❌ | Full read | 🔴 P0 |
-| orders | ✅ | None | ✅ |
-| posts | ✅ | Published only | ✅ |
+| Table  | RLS | Access Level   | Status |
+| ------ | --- | -------------- | ------ |
+| users  | ❌  | Full read      | 🔴 P0  |
+| orders | ✅  | None           | ✅     |
+| posts  | ✅  | Published only | ✅     |
 
 ### Storage Security
 
-| Bucket | Public | Sensitive Files | Status |
-|--------|--------|-----------------|--------|
-| avatars | Yes | No | ✅ |
-| backups | Yes | Yes (45 files) | 🔴 P0 |
+| Bucket  | Public | Sensitive Files | Status |
+| ------- | ------ | --------------- | ------ |
+| avatars | Yes    | No              | ✅     |
+| backups | Yes    | Yes (45 files)  | 🔴 P0  |
 
 ### Authentication
 
-| Setting | Current | Recommended | Status |
-|---------|---------|-------------|--------|
-| Email confirm | Disabled | Enabled | 🟠 P1 |
-| Password min | 6 | 8+ | 🟡 P2 |
+| Setting       | Current  | Recommended | Status |
+| ------------- | -------- | ----------- | ------ |
+| Email confirm | Disabled | Enabled     | 🟠 P1  |
+| Password min  | 6        | 8+          | 🟡 P2  |
 
 ---
 
@@ -302,25 +309,25 @@ The `/functions/v1/admin-panel` Edge Function is accessible to any authenticated
 
 ### Phase 1: Critical (Immediate)
 
-| ID | Action | Owner | Deadline |
-|----|--------|-------|----------|
-| P0-001 | Rotate service key | DevOps | Today |
-| P0-002 | Make backups private | DevOps | Today |
-| P0-003 | Add admin role check | Backend | Today |
+| ID     | Action               | Owner   | Deadline |
+| ------ | -------------------- | ------- | -------- |
+| P0-001 | Rotate service key   | DevOps  | Today    |
+| P0-002 | Make backups private | DevOps  | Today    |
+| P0-003 | Add admin role check | Backend | Today    |
 
 ### Phase 2: High Priority (This Week)
 
-| ID | Action | Owner | Deadline |
-|----|--------|-------|----------|
-| P1-001 | Enable email confirmation | Backend | 3 days |
-| P1-002 | Fix IDOR in get-user-data | Backend | 3 days |
+| ID     | Action                    | Owner   | Deadline |
+| ------ | ------------------------- | ------- | -------- |
+| P1-001 | Enable email confirmation | Backend | 3 days   |
+| P1-002 | Fix IDOR in get-user-data | Backend | 3 days   |
 
 ### Phase 3: Medium Priority (This Month)
 
-| ID | Action | Owner | Deadline |
-|----|--------|-------|----------|
-| P2-001 | Strengthen password policy | Backend | 14 days |
-| P2-002 | Restrict CORS origins | DevOps | 14 days |
+| ID     | Action                     | Owner   | Deadline |
+| ------ | -------------------------- | ------- | -------- |
+| P2-001 | Strengthen password policy | Backend | 14 days  |
+| P2-002 | Restrict CORS origins      | DevOps  | 14 days  |
 
 ---
 
@@ -329,6 +336,7 @@ The `/functions/v1/admin-panel` Edge Function is accessible to any authenticated
 ### A. Methodology
 
 This audit was performed using the Supabase Pentest Skills toolkit, which includes:
+
 - Passive reconnaissance of client-side code
 - API endpoint testing with anon and service keys
 - Storage bucket enumeration and access testing
@@ -356,7 +364,8 @@ Full audit log available in `.sb-pentest-audit.log`
 
 **Report generated by supabase-pentest-skills**
 **Audit completed:** January 31, 2025 at 15:00 UTC
-```
+
+````
 
 ## Score Calculation
 
@@ -405,7 +414,7 @@ The report generator reads from `.sb-pentest-context.json`:
   ],
   "audit_completed": "2025-01-31T15:00:00Z"
 }
-```
+````
 
 ## Report Customization
 
@@ -438,6 +447,7 @@ Before generating a report, ensure:
 ### If Context Files Are Missing
 
 If context files are missing or empty:
+
 1. DO NOT generate an empty report
 2. Inform the user that audit skills must be run first
 3. Recommend running `supabase-pentest` for a complete audit
@@ -447,6 +457,7 @@ If context files are missing or empty:
 After generating the report, this skill MUST:
 
 1. **Log to `.sb-pentest-audit.log`**:
+
    ```
    [TIMESTAMP] [supabase-report] [START] Generating security report
    [TIMESTAMP] [supabase-report] [SUCCESS] Report generated: supabase-audit-report.md

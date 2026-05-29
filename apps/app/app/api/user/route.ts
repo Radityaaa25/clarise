@@ -15,7 +15,8 @@ const updateUserSchema = z
 
 export async function GET() {
   const { userId: clerkId } = await auth();
-  if (!clerkId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!clerkId)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   let user = await prisma.user.findUnique({
     where: { clerkId },
@@ -38,7 +39,8 @@ export async function GET() {
   // Upsert if not found
   if (!user) {
     const clerk = await currentUser();
-    if (!clerk) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!clerk)
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     user = await prisma.user.create({
       data: {
@@ -85,13 +87,18 @@ export async function GET() {
     currentStreak: user.currentStreak,
     longestStreak: user.longestStreak,
     onboardingCompleted: user.onboardingCompleted,
-    subscription: user.subscription ?? { plan: "FREE", status: "ACTIVE", endDate: null },
+    subscription: user.subscription ?? {
+      plan: "FREE",
+      status: "ACTIVE",
+      endDate: null,
+    },
   });
 }
 
 export async function PATCH(req: NextRequest) {
   const { userId: clerkId } = await auth();
-  if (!clerkId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!clerkId)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
   const result = updateUserSchema.safeParse(body);

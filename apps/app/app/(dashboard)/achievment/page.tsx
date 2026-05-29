@@ -80,7 +80,9 @@ export default function AchievementPage() {
               <Zap className="h-6 w-6 text-spark" />
             </div>
             <div>
-              <div className="text-sm text-muted dark:text-frost/80">Level {xpData.level}</div>
+              <div className="text-sm text-muted dark:text-frost/80">
+                Level {xpData.level}
+              </div>
               <div className="text-2xl font-black font-heading text-ink dark:text-white">
                 {xpData.current} XP
               </div>
@@ -107,8 +109,12 @@ export default function AchievementPage() {
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-error/10 mb-3">
             <Flame className="h-7 w-7 text-error" />
           </div>
-          <div className="text-3xl font-black font-heading text-ink dark:text-white">0</div>
-          <div className="text-sm text-muted dark:text-frost/80">Hari Streak</div>
+          <div className="text-3xl font-black font-heading text-ink dark:text-white">
+            0
+          </div>
+          <div className="text-sm text-muted dark:text-frost/80">
+            Hari Streak
+          </div>
         </div>
       </div>
 

@@ -8,6 +8,7 @@ description: Detect if a web application uses Supabase by analyzing client-side 
 > 🔴 **CRITICAL: PROGRESSIVE FILE UPDATES REQUIRED**
 >
 > You MUST write to context files **AS YOU GO**, not just at the end.
+>
 > - Write to `.sb-pentest-context.json` **IMMEDIATELY after each discovery**
 > - Log to `.sb-pentest-audit.log` **BEFORE and AFTER each action**
 > - **DO NOT** wait until the skill completes to update files
@@ -35,11 +36,13 @@ The skill uses multiple detection vectors:
 ### 1. Domain Pattern Matching
 
 Searches for Supabase-related domains in:
+
 - HTML source code
 - JavaScript bundles
 - Network requests (via inline scripts)
 
 **Patterns detected:**
+
 ```
 *.supabase.co
 *.supabase.com
@@ -191,11 +194,11 @@ Each detection is logged to `.sb-pentest-audit.log`:
 
 ## Confidence Levels
 
-| Level | Criteria |
-|-------|----------|
-| **High** | Multiple evidence types (domain + client + endpoints) |
-| **Medium** | Single strong evidence (domain or explicit client init) |
-| **Low** | Only indirect evidence (generic patterns, possible false positive) |
+| Level      | Criteria                                                           |
+| ---------- | ------------------------------------------------------------------ |
+| **High**   | Multiple evidence types (domain + client + endpoints)              |
+| **Medium** | Single strong evidence (domain or explicit client init)            |
+| **Low**    | Only indirect evidence (generic patterns, possible false positive) |
 
 ## Edge Cases
 
@@ -210,6 +213,7 @@ Detect Supabase on https://myapp.com with custom API domain api.mycompany.com
 ### Self-Hosted Supabase
 
 Self-hosted instances won't have `.supabase.co` domains. Look for:
+
 - PostgREST patterns (`/rest/v1/`)
 - GoTrue auth patterns (`/auth/v1/`)
 - Supabase client library in code
@@ -232,6 +236,7 @@ Detect Supabase on https://myapp.com including all JS chunks
 
 ❌ **Problem:** Detection is slow
 ✅ **Solution:** Large JS bundles take time to analyze. Use `--quick` mode for faster but less thorough detection:
+
 ```
 Quick detect Supabase on https://myapp.com
 ```
@@ -239,6 +244,7 @@ Quick detect Supabase on https://myapp.com
 ## Next Steps
 
 After detection:
+
 1. Run `supabase-extract-url` to confirm and extract the project URL
 2. Run `supabase-extract-anon-key` to find the API key
 3. Or use `supabase-pentest` for a full guided audit
@@ -260,6 +266,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 ### Required Actions (Progressive)
 
 1. **Create/Update `.sb-pentest-context.json`** with results:
+
    ```json
    {
      "target_url": "https://myapp.example.com",
@@ -277,6 +284,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
    ```
 
 2. **Create/Log to `.sb-pentest-audit.log`**:
+
    ```
    [TIMESTAMP] [supabase-detect] [START] Starting Supabase detection
    [TIMESTAMP] [supabase-detect] [SUCCESS] Supabase detected with high confidence
@@ -293,11 +301,11 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 
 ### Evidence Files to Create
 
-| File | Content |
-|------|---------|
-| `initial-scan.json` | Raw detection results with all evidence |
-| `supabase-endpoints.txt` | List of discovered Supabase endpoints |
-| `client-code-snippets/` | Directory with relevant code excerpts |
+| File                     | Content                                 |
+| ------------------------ | --------------------------------------- |
+| `initial-scan.json`      | Raw detection results with all evidence |
+| `supabase-endpoints.txt` | List of discovered Supabase endpoints   |
+| `client-code-snippets/`  | Directory with relevant code excerpts   |
 
 ### Evidence Format
 
@@ -346,6 +354,7 @@ curl -s "$SUPABASE_URL/rest/v1/" -H "apikey: $ANON_KEY" | head -100
 
 ```markdown
 ## [TIMESTAMP] - Detection Phase Complete
+
 - Supabase detected with [confidence] confidence
 - Project: [project_ref]
 - Evidence: `01-detection/initial-scan.json`

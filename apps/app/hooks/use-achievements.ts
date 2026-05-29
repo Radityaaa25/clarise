@@ -5,7 +5,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export function useAchievements() {
   const { data, error, isLoading, mutate } = useSWR(
     "/api/achievements",
-    fetcher
+    fetcher,
   );
 
   return {

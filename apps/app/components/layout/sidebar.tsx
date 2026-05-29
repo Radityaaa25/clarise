@@ -29,12 +29,12 @@ const bottomItems = [
   { href: "/settings", label: "Pengaturan", icon: Settings },
 ];
 
-export function Sidebar({ 
-  collapsed, 
-  setCollapsed 
-}: { 
-  collapsed: boolean; 
-  setCollapsed: (val: boolean) => void; 
+export function Sidebar({
+  collapsed,
+  setCollapsed,
+}: {
+  collapsed: boolean;
+  setCollapsed: (val: boolean) => void;
 }) {
   const pathname = usePathname();
 
@@ -42,15 +42,32 @@ export function Sidebar({
     <aside
       className={cn(
         "fixed inset-y-0 left-0 z-40 flex flex-col border-r border-hairline bg-canvas dark:bg-void transition-all duration-300",
-        collapsed ? "w-[72px]" : "w-[260px]"
+        collapsed ? "w-[72px]" : "w-[260px]",
       )}
     >
       {/* Logo */}
-      <div className={`flex h-16 items-center px-4 border-b border-hairline ${collapsed ? 'justify-center' : 'justify-between'}`}>
+      <div
+        className={`flex h-16 items-center px-4 border-b border-hairline ${collapsed ? "justify-center" : "justify-between"}`}
+      >
         {!collapsed && (
-          <Link href="/dashboard" className="flex items-center gap-2.5 overflow-hidden">
-            <Image src="/logoLM.png" alt="Clarise Logo" width={80} height={26} className="w-[80px] h-auto dark:hidden" />
-            <Image src="/logoDM.png" alt="Clarise Logo" width={80} height={26} className="w-[80px] h-auto hidden dark:block" />
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-2.5 overflow-hidden"
+          >
+            <Image
+              src="/logoLM.png"
+              alt="Clarise Logo"
+              width={80}
+              height={26}
+              className="w-[80px] h-auto dark:hidden"
+            />
+            <Image
+              src="/logoDM.png"
+              alt="Clarise Logo"
+              width={80}
+              height={26}
+              className="w-[80px] h-auto hidden dark:block"
+            />
           </Link>
         )}
         <button
@@ -58,19 +75,27 @@ export function Sidebar({
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           aria-expanded={!collapsed}
           className={`hidden lg:flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-            collapsed 
-              ? "bg-sky text-white hover:bg-sky/90 shadow-sm" 
+            collapsed
+              ? "bg-sky text-white hover:bg-sky/90 shadow-sm"
               : "hover:bg-surface-soft dark:hover:bg-void-elevated text-muted hover:text-ink dark:hover:text-white"
           }`}
         >
-          {collapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+          {collapsed ? (
+            <ChevronRight className="h-5 w-5" />
+          ) : (
+            <ChevronLeft className="h-5 w-5" />
+          )}
         </button>
       </div>
 
       {/* Main Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto" aria-label="Main Navigation">
+      <nav
+        className="flex-1 px-3 py-4 space-y-1 overflow-y-auto"
+        aria-label="Main Navigation"
+      >
         {navItems.map((item) => {
-          const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
+          const isActive =
+            pathname === item.href || pathname?.startsWith(item.href + "/");
           return (
             <Link
               key={item.href}
@@ -81,13 +106,15 @@ export function Sidebar({
                 "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
                 isActive
                   ? "bg-core-blue/10 text-core-blue dark:bg-core-blue/20 dark:text-sky"
-                  : "text-body dark:text-white/70 hover:bg-surface-soft dark:hover:bg-void-elevated hover:text-ink dark:hover:text-white"
+                  : "text-body dark:text-white/70 hover:bg-surface-soft dark:hover:bg-void-elevated hover:text-ink dark:hover:text-white",
               )}
             >
               <item.icon
                 className={cn(
                   "h-5 w-5 shrink-0 transition-colors",
-                  isActive ? "text-core-blue dark:text-sky" : "text-muted dark:text-white/70 group-hover:text-ink dark:group-hover:text-white"
+                  isActive
+                    ? "text-core-blue dark:text-sky"
+                    : "text-muted dark:text-white/70 group-hover:text-ink dark:group-hover:text-white",
                 )}
               />
               {!collapsed && <span className="truncate">{item.label}</span>}
@@ -107,13 +134,15 @@ export function Sidebar({
             "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
             pathname === "/generate"
               ? "bg-spark/10 text-spark dark:bg-spark/20"
-              : "text-body dark:text-white/70 hover:bg-surface-soft dark:hover:bg-void-elevated hover:text-ink dark:hover:text-white"
+              : "text-body dark:text-white/70 hover:bg-surface-soft dark:hover:bg-void-elevated hover:text-ink dark:hover:text-white",
           )}
         >
           <Sparkles
             className={cn(
               "h-5 w-5 shrink-0 transition-colors",
-              pathname === "/generate" ? "text-spark" : "text-muted dark:text-white/70 group-hover:text-spark"
+              pathname === "/generate"
+                ? "text-spark"
+                : "text-muted dark:text-white/70 group-hover:text-spark",
             )}
           />
           {!collapsed && <span className="truncate">Buat Kursus AI</span>}
@@ -139,13 +168,15 @@ export function Sidebar({
                 "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
                 isActive
                   ? "bg-core-blue/10 text-core-blue dark:bg-core-blue/20 dark:text-sky"
-                  : "text-body dark:text-white/70 hover:bg-surface-soft dark:hover:bg-void-elevated hover:text-ink dark:hover:text-white"
+                  : "text-body dark:text-white/70 hover:bg-surface-soft dark:hover:bg-void-elevated hover:text-ink dark:hover:text-white",
               )}
             >
               <item.icon
                 className={cn(
                   "h-5 w-5 shrink-0 transition-colors",
-                  isActive ? "text-core-blue dark:text-sky" : "text-muted dark:text-white/70 group-hover:text-ink dark:group-hover:text-white"
+                  isActive
+                    ? "text-core-blue dark:text-sky"
+                    : "text-muted dark:text-white/70 group-hover:text-ink dark:group-hover:text-white",
                 )}
               />
               {!collapsed && <span className="truncate">{item.label}</span>}
@@ -156,34 +187,80 @@ export function Sidebar({
         {/* Social Links */}
         {!collapsed && (
           <div className="pt-4 mt-2 border-t border-hairline/50 flex items-center justify-center gap-4">
-            <a href="https://instagram.com/clariseofficial_" target="_blank" rel="noreferrer" className="text-muted hover:text-core-blue dark:hover:text-sky transition-colors" aria-label="Instagram Clarise">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-                <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
-                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+            <a
+              href="https://instagram.com/clariseofficial_"
+              target="_blank"
+              rel="noreferrer"
+              className="text-muted hover:text-core-blue dark:hover:text-sky transition-colors"
+              aria-label="Instagram Clarise"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-5 w-5"
+              >
+                <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
               </svg>
             </a>
-            <a href="#" className="text-muted hover:text-green-500 dark:hover:text-green-400 transition-colors">
+            <a
+              href="#"
+              className="text-muted hover:text-green-500 dark:hover:text-green-400 transition-colors"
+            >
               <MessageCircle className="h-5 w-5" />
             </a>
-            <a href="mailto:support@clarise.com" className="text-muted hover:text-core-blue dark:hover:text-sky transition-colors">
+            <a
+              href="mailto:support@clarise.com"
+              className="text-muted hover:text-core-blue dark:hover:text-sky transition-colors"
+            >
               <Mail className="h-5 w-5" />
             </a>
           </div>
         )}
         {collapsed && (
           <div className="pt-4 mt-2 border-t border-hairline/50 flex flex-col items-center justify-center gap-4">
-            <a href="https://instagram.com/clariseofficial_" target="_blank" rel="noreferrer" className="text-muted hover:text-core-blue dark:hover:text-sky transition-colors" aria-label="Instagram Clarise">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-                <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
-                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+            <a
+              href="https://instagram.com/clariseofficial_"
+              target="_blank"
+              rel="noreferrer"
+              className="text-muted hover:text-core-blue dark:hover:text-sky transition-colors"
+              aria-label="Instagram Clarise"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-5 w-5"
+              >
+                <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
               </svg>
             </a>
-            <a href="#" className="text-muted hover:text-green-500 dark:hover:text-green-400 transition-colors">
+            <a
+              href="#"
+              className="text-muted hover:text-green-500 dark:hover:text-green-400 transition-colors"
+            >
               <MessageCircle className="h-5 w-5" />
             </a>
-            <a href="mailto:support@clarise.com" className="text-muted hover:text-core-blue dark:hover:text-sky transition-colors">
+            <a
+              href="mailto:support@clarise.com"
+              className="text-muted hover:text-core-blue dark:hover:text-sky transition-colors"
+            >
               <Mail className="h-5 w-5" />
             </a>
           </div>

@@ -4,6 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "next-themes";
 import { ErrorBoundary } from "@/components/layout/error-boundary";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const darkerGrotesque = Darker_Grotesque({
@@ -35,11 +36,16 @@ export const metadata: Metadata = {
   description:
     "Master new skills with AI-powered adaptive learning. Personalized courses, real-time feedback, and gamified progress tracking. Belajar AI dengan tutor interaktif.",
   keywords: [
-    "Clarise App", "Clarise AI", "Platform Belajar AI", "Kursus AI Interaktif",
-    "Belajar AI Bahasa Indonesia", "Dashboard Belajar", "LMS AI Indonesia"
+    "Clarise App",
+    "Clarise AI",
+    "Platform Belajar AI",
+    "Kursus AI Interaktif",
+    "Belajar AI Bahasa Indonesia",
+    "Dashboard Belajar",
+    "LMS AI Indonesia",
   ],
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "https://app.clarise.my.id"
+    process.env.NEXT_PUBLIC_APP_URL || "https://app.clarise.my.id",
   ),
   openGraph: {
     title: "Clarise App — AI-Powered Learning Platform",
@@ -60,15 +66,27 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/favicon/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-      { url: '/favicon/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-      { url: '/favicon/android-chrome-192x192.png', sizes: '192x192', type: 'image/png' },
-      { url: '/favicon/android-chrome-512x512.png', sizes: '512x512', type: 'image/png' },
+      { url: "/favicon/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      {
+        url: "/favicon/android-chrome-192x192.png",
+        sizes: "192x192",
+        type: "image/png",
+      },
+      {
+        url: "/favicon/android-chrome-512x512.png",
+        sizes: "512x512",
+        type: "image/png",
+      },
     ],
     apple: [
-      { url: '/favicon/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+      {
+        url: "/favicon/apple-touch-icon.png",
+        sizes: "180x180",
+        type: "image/png",
+      },
     ],
-    shortcut: ['/favicon/favicon.ico'],
+    shortcut: ["/favicon/favicon.ico"],
   },
 };
 
@@ -78,7 +96,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider afterSignOutUrl="/sign-in"  dynamic>
+    <ClerkProvider afterSignOutUrl="/sign-in" dynamic>
       <html
         lang="id"
         suppressHydrationWarning
@@ -96,6 +114,7 @@ export default function RootLayout({
               disableTransitionOnChange
             >
               {children}
+              <Toaster position="top-right" richColors />
               <SpeedInsights />
             </ThemeProvider>
           </ErrorBoundary>

@@ -4,20 +4,33 @@ import { prisma } from "./prisma";
 export const getCachedCategories = unstable_cache(
   async () =>
     prisma.category.findMany({
-      select: { id: true, name: true, slug: true, icon: true, description: true, order: true },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        icon: true,
+        description: true,
+        order: true,
+      },
       orderBy: { order: "asc" },
     }),
   ["categories"],
-  { revalidate: 3600 }
+  { revalidate: 3600 },
 );
 
 export const getCachedBadges = unstable_cache(
   async () =>
     prisma.badge.findMany({
-      select: { id: true, name: true, description: true, icon: true, condition: true },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        icon: true,
+        condition: true,
+      },
     }),
   ["badges"],
-  { revalidate: 86400 }
+  { revalidate: 86400 },
 );
 
 export async function getUserByClerkId(clerkId: string) {

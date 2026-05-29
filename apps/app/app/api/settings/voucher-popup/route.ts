@@ -14,14 +14,11 @@ export async function GET(req: Request) {
     const enabled = await redis.get<string>(VOUCHER_POPUP_KEY);
     return NextResponse.json(
       { enabled: enabled === "true" },
-      { headers: corsHeaders }
+      { headers: corsHeaders },
     );
   } catch {
     // Default: enabled (aman jika Redis down)
-    return NextResponse.json(
-      { enabled: true },
-      { headers: corsHeaders }
-    );
+    return NextResponse.json({ enabled: true }, { headers: corsHeaders });
   }
 }
 

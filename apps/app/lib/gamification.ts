@@ -1,7 +1,9 @@
 import { prisma } from "./prisma";
 import type { Badge } from "@prisma/client";
 
-const LEVEL_THRESHOLDS = [0, 100, 300, 700, 1500, 2500, 4000, 6000, 9000, 15000];
+const LEVEL_THRESHOLDS = [
+  0, 100, 300, 700, 1500, 2500, 4000, 6000, 9000, 15000,
+];
 
 export function calculateLevel(xp: number): number {
   for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) {
@@ -27,7 +29,10 @@ export async function awardXP(userId: string, amount: number) {
   const leveledUp = newLevel > user.level;
 
   if (leveledUp) {
-    await prisma.user.update({ where: { id: userId }, data: { level: newLevel } });
+    await prisma.user.update({
+      where: { id: userId },
+      data: { level: newLevel },
+    });
   }
 
   return { newXp: user.xp, newLevel, leveledUp };
@@ -36,23 +41,37 @@ export async function awardXP(userId: string, amount: number) {
 export async function updateStreak(userId: string) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { lastActiveDate: true, currentStreak: true, longestStreak: true, streakProtectionUsed: true },
+    select: {
+      lastActiveDate: true,
+      currentStreak: true,
+      longestStreak: true,
+      streakProtectionUsed: true,
+    },
   });
-  if (!user) return { currentStreak: 0, streakKept: false, protectionUsed: false };
+  if (!user)
+    return { currentStreak: 0, streakKept: false, protectionUsed: false };
 
   const now = new Date();
   const today = startOfDay(now);
-  const lastActive = user.lastActiveDate ? startOfDay(user.lastActiveDate) : null;
+  const lastActive = user.lastActiveDate
+    ? startOfDay(user.lastActiveDate)
+    : null;
 
   if (lastActive && lastActive.getTime() === today.getTime()) {
-    return { currentStreak: user.currentStreak, streakKept: true, protectionUsed: false };
+    return {
+      currentStreak: user.currentStreak,
+      streakKept: true,
+      protectionUsed: false,
+    };
   }
 
   let newStreak = user.currentStreak;
   let protectionUsed = false;
 
   if (lastActive) {
-    const diffDays = Math.floor((today.getTime() - lastActive.getTime()) / 86400000);
+    const diffDays = Math.floor(
+      (today.getTime() - lastActive.getTime()) / 86400000,
+    );
     if (diffDays === 1) {
       newStreak += 1;
     } else if (diffDays > 1) {
@@ -83,18 +102,31 @@ export async function updateStreak(userId: string) {
 }
 
 export async function evaluateBadges(userId: string): Promise<Badge[]> {
-  const [user, progressCount, completedCourses, aiChatCount, ratingCount, createdPublicCourse] =
-    await Promise.all([
-      prisma.user.findUnique({
-        where: { id: userId },
-        select: { currentStreak: true, subscription: { select: { plan: true, status: true } } },
-      }),
-      prisma.userProgress.count({ where: { userId, completedAt: { not: null } } }),
-      getCompletedCourseCount(userId),
-      prisma.aiChatHistory.count({ where: { userId } }),
-      prisma.courseRating.count({ where: { userId } }),
-      prisma.course.count({ where: { authorId: userId, visibility: "PUBLIC", isPublished: true } }),
-    ]);
+  const [
+    user,
+    progressCount,
+    completedCourses,
+    aiChatCount,
+    ratingCount,
+    createdPublicCourse,
+  ] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        currentStreak: true,
+        subscription: { select: { plan: true, status: true } },
+      },
+    }),
+    prisma.userProgress.count({
+      where: { userId, completedAt: { not: null } },
+    }),
+    getCompletedCourseCount(userId),
+    prisma.aiChatHistory.count({ where: { userId } }),
+    prisma.courseRating.count({ where: { userId } }),
+    prisma.course.count({
+      where: { authorId: userId, visibility: "PUBLIC", isPublished: true },
+    }),
+  ]);
 
   if (!user) return [];
 
@@ -112,7 +144,9 @@ export async function evaluateBadges(userId: string): Promise<Badge[]> {
     AI_CHAT_50: aiChatCount >= 50,
     COURSE_ALL_MODULES: completedCourses >= 1,
     RATING_10: ratingCount >= 10,
-    PREMIUM_ACTIVE: user.subscription?.plan !== "FREE" && user.subscription?.status === "ACTIVE",
+    PREMIUM_ACTIVE:
+      user.subscription?.plan !== "FREE" &&
+      user.subscription?.status === "ACTIVE",
     QUIZ_PERFECT: false, // future
     COURSE_CREATED_PUBLIC: createdPublicCourse >= 1,
   };

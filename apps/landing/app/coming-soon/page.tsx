@@ -20,22 +20,31 @@ export default function ComingSoonPage() {
         <div className="w-20 h-20 mb-8 rounded-full bg-core-blue/10 flex items-center justify-center">
           <Construction className="w-10 h-10 text-core-blue" />
         </div>
-        
+
         <h1 className="text-4xl sm:text-5xl font-black text-ink dark:text-white mb-6">
-          Fitur Premium Sedang <span className="text-core-blue">Dikembangkan!</span>
+          Fitur Premium Sedang{" "}
+          <span className="text-core-blue">Dikembangkan!</span>
         </h1>
-        
+
         <p className="text-lg text-ink/70 dark:text-white/70 mb-10 leading-relaxed max-w-xl mx-auto">
-          Terima kasih atas antusiasme Anda! Kami sedang meracik sistem pembayaran dan fitur-fitur premium eksklusif agar pengalaman belajar Anda nantinya menjadi lebih sempurna. Pantau terus pembaruannya!
+          Terima kasih atas antusiasme Anda! Kami sedang meracik sistem
+          pembayaran dan fitur-fitur premium eksklusif agar pengalaman belajar
+          Anda nantinya menjadi lebih sempurna. Pantau terus pembaruannya!
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
-          <Link href="/" className="px-6 py-3 rounded-xl border-2 border-border font-bold text-ink dark:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex items-center gap-2">
+          <Link
+            href="/"
+            className="px-6 py-3 rounded-xl border-2 border-border font-bold text-ink dark:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex items-center gap-2"
+          >
             <ArrowLeft className="w-4 h-4" />
             Kembali ke Beranda
           </Link>
-          
-          <ArrowButton href={`${process.env.NEXT_PUBLIC_APP_URL || "https://app.clarise.my.id"}/sign-up`} className="px-8 py-3">
+
+          <ArrowButton
+            href={`${process.env.NEXT_PUBLIC_APP_URL || "https://app.clarise.my.id"}/sign-up`}
+            className="px-8 py-3"
+          >
             Coba Versi Gratis
           </ArrowButton>
         </div>

@@ -8,6 +8,7 @@ description: List and test exposed PostgreSQL RPC functions for security issues 
 > 🔴 **CRITICAL: PROGRESSIVE FILE UPDATES REQUIRED**
 >
 > You MUST write to context files **AS YOU GO**, not just at the end.
+>
 > - Write to `.sb-pentest-context.json` **IMMEDIATELY after each function tested**
 > - Log to `.sb-pentest-audit.log` **BEFORE and AFTER each function test**
 > - **DO NOT** wait until the skill completes to update files
@@ -38,18 +39,19 @@ POST https://[project].supabase.co/rest/v1/rpc/[function_name]
 ```
 
 Functions can:
+
 - ✅ Respect RLS (if using `auth.uid()` and proper security)
 - ❌ Bypass RLS (if `SECURITY DEFINER` without checks)
 - ❌ Execute arbitrary SQL (if poorly written)
 
 ## Risk Levels for Functions
 
-| Type | Risk | Description |
-|------|------|-------------|
-| `SECURITY INVOKER` | Lower | Runs with caller's permissions |
+| Type               | Risk   | Description                     |
+| ------------------ | ------ | ------------------------------- |
+| `SECURITY INVOKER` | Lower  | Runs with caller's permissions  |
 | `SECURITY DEFINER` | Higher | Runs with definer's permissions |
-| Accepts text/json | Higher | Potential for injection |
-| Returns setof | Higher | Can return multiple rows |
+| Accepts text/json  | Higher | Potential for injection         |
+| Returns setof      | Higher | Can return multiple rows        |
 
 ## Usage
 
@@ -67,7 +69,7 @@ Test the get_user_data RPC function
 
 ## Output Format
 
-```
+````
 ═══════════════════════════════════════════════════════════
  RPC FUNCTIONS AUDIT
 ═══════════════════════════════════════════════════════════
@@ -215,7 +217,7 @@ Test the get_user_data RPC function
  3. Fix get_all_users to respect RLS
 
 ═══════════════════════════════════════════════════════════
-```
+````
 
 ## Injection Testing
 
@@ -340,6 +342,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 ### Required Actions (Progressive)
 
 1. **Update `.sb-pentest-context.json`** with results:
+
    ```json
    {
      "rpc_audit": {
@@ -352,6 +355,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
    ```
 
 2. **Log to `.sb-pentest-audit.log`**:
+
    ```
    [TIMESTAMP] [supabase-audit-rpc] [START] Auditing RPC functions
    [TIMESTAMP] [supabase-audit-rpc] [FINDING] P0: dynamic_query has SQL injection
@@ -368,9 +372,9 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 
 ### Evidence Files to Create
 
-| File | Content |
-|------|---------|
-| `function-list.json` | All discovered RPC functions |
+| File                               | Content                              |
+| ---------------------------------- | ------------------------------------ |
+| `function-list.json`               | All discovered RPC functions         |
 | `vulnerable-functions/[name].json` | Details for each vulnerable function |
 
 ### Evidence Format (Vulnerable Function)

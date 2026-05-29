@@ -11,7 +11,10 @@ export async function GET(req: Request) {
     // Basic authorization for cron job (optional but recommended)
     // E.g., checking Authorization header against a CRON_SECRET
     const authHeader = req.headers.get("Authorization");
-    if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    if (
+      process.env.CRON_SECRET &&
+      authHeader !== `Bearer ${process.env.CRON_SECRET}`
+    ) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -21,13 +24,13 @@ export async function GET(req: Request) {
     // Convert to UTC+7
     const currentWibTime = new Date(nowUtc.getTime() + 7 * 60 * 60 * 1000);
     const currentHourStr = currentWibTime.toISOString().substring(11, 13); // "HH"
-    
+
     // Find users with daily reminders enabled matching the current hour
     // E.g., preferredTime like "08:00" -> hour is "08"
     const reminders = await prisma.dailyReminder.findMany({
       where: {
         enabled: true,
-        preferredTime: { startsWith: currentHourStr }
+        preferredTime: { startsWith: currentHourStr },
       },
       include: {
         user: {
@@ -40,11 +43,11 @@ export async function GET(req: Request) {
             progress: {
               where: { completedAt: null },
               include: { course: true, module: true },
-              take: 1
-            }
-          }
-        }
-      }
+              take: 1,
+            },
+          },
+        },
+      },
     });
 
     const emailsToSend = [];
@@ -57,7 +60,9 @@ export async function GET(req: Request) {
 
       // Skip if user was active today
       if (user.lastActiveDate) {
-        const lastActiveWib = new Date(user.lastActiveDate.getTime() + 7 * 60 * 60 * 1000);
+        const lastActiveWib = new Date(
+          user.lastActiveDate.getTime() + 7 * 60 * 60 * 1000,
+        );
         if (lastActiveWib >= todayWibStart) {
           continue; // Already active today, no need to remind
         }
@@ -86,7 +91,7 @@ export async function GET(req: Request) {
               Ubah pengaturan di profilmu jika tidak ingin menerima notifikasi.
             </p>
           </div>
-        `
+        `,
       });
     }
 
@@ -100,14 +105,16 @@ export async function GET(req: Request) {
       }
     }
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       processed: reminders.length,
-      sent: emailsToSend.length 
+      sent: emailsToSend.length,
     });
-
   } catch (error: any) {
     console.error("[CRON_DAILY_REMINDER]", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
   }
 }

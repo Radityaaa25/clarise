@@ -2,25 +2,74 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Code, Palette, Briefcase, LineChart, 
-  Database, Calculator, Sparkles, BookOpen, Clock, ChevronRight, Check
+import {
+  Code,
+  Palette,
+  Briefcase,
+  LineChart,
+  Database,
+  Calculator,
+  Sparkles,
+  BookOpen,
+  Clock,
+  ChevronRight,
+  Check,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 const TOPICS = [
-  { id: "programming", label: "Programming", icon: Code, color: "text-blue-500 dark:text-blue-400", bg: "bg-blue-500/10" },
-  { id: "design", label: "UI/UX Design", icon: Palette, color: "text-purple-500 dark:text-purple-400", bg: "bg-purple-500/10" },
-  { id: "business", label: "Business", icon: Briefcase, color: "text-amber-500 dark:text-amber-400", bg: "bg-amber-500/10" },
-  { id: "marketing", label: "Marketing", icon: LineChart, color: "text-emerald-500 dark:text-emerald-400", bg: "bg-emerald-500/10" },
-  { id: "data", label: "Data Science", icon: Database, color: "text-cyan-500 dark:text-cyan-400", bg: "bg-cyan-500/10" },
-  { id: "lainnya", label: "Lainnya...", icon: Sparkles, color: "text-orange-500 dark:text-orange-400", bg: "bg-orange-500/10" },
+  {
+    id: "programming",
+    label: "Programming",
+    icon: Code,
+    color: "text-blue-500 dark:text-blue-400",
+    bg: "bg-blue-500/10",
+  },
+  {
+    id: "design",
+    label: "UI/UX Design",
+    icon: Palette,
+    color: "text-purple-500 dark:text-purple-400",
+    bg: "bg-purple-500/10",
+  },
+  {
+    id: "business",
+    label: "Business",
+    icon: Briefcase,
+    color: "text-amber-500 dark:text-amber-400",
+    bg: "bg-amber-500/10",
+  },
+  {
+    id: "marketing",
+    label: "Marketing",
+    icon: LineChart,
+    color: "text-emerald-500 dark:text-emerald-400",
+    bg: "bg-emerald-500/10",
+  },
+  {
+    id: "data",
+    label: "Data Science",
+    icon: Database,
+    color: "text-cyan-500 dark:text-cyan-400",
+    bg: "bg-cyan-500/10",
+  },
+  {
+    id: "lainnya",
+    label: "Lainnya...",
+    icon: Sparkles,
+    color: "text-orange-500 dark:text-orange-400",
+    bg: "bg-orange-500/10",
+  },
 ];
 
 const LEVELS = [
   { id: "BEGINNER", label: "Dasar", desc: "Saya baru mulai dari nol" },
-  { id: "INTERMEDIATE", label: "Menengah", desc: "Saya sudah punya dasar-dasar" },
+  {
+    id: "INTERMEDIATE",
+    label: "Menengah",
+    desc: "Saya sudah punya dasar-dasar",
+  },
   { id: "ADVANCED", label: "Mahir", desc: "Saya ingin memperdalam skill" },
 ];
 
@@ -51,20 +100,31 @@ export function OnboardingWizard() {
   const submitOnboarding = async () => {
     setLoading(true);
     const finalGoal = goal === "lainnya" ? customGoal : goal;
-    // TODO: Connect to backend
-    // await fetch('/api/onboarding', { method: 'POST', body: JSON.stringify({ learningGoal: finalGoal, currentLevel: level, dailyHours: hours }) })
-    
-    // Simulate API call for UI presentation
+
+    try {
+      await fetch("/api/onboarding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          learningGoal: finalGoal,
+          currentLevel: level,
+          dailyHours: hours,
+        }),
+      });
+    } catch (error) {
+      console.error("Onboarding failed", error);
+    }
+
     setTimeout(() => {
       setLoading(false);
-      router.push("/dashboard");
-    }, 1500);
+      window.location.href = "/dashboard";
+    }, 500);
   };
 
   const variants = {
     initial: { opacity: 0, x: 20 },
     animate: { opacity: 1, x: 0 },
-    exit: { opacity: 0, x: -20 }
+    exit: { opacity: 0, x: -20 },
   };
 
   return (
@@ -93,7 +153,8 @@ export function OnboardingWizard() {
             initial="initial"
             animate="animate"
             exit="exit"
-            className="flex flex-col">
+            className="flex flex-col"
+          >
             <div className="mb-8 text-center flex flex-col items-center">
               <div className="flex items-center justify-center gap-3 -mt-15 -mb-8">
                 <Sparkles className="w-10 h-10 text-blue-500" />
@@ -131,15 +192,18 @@ export function OnboardingWizard() {
                       isSelected
                         ? "border-blue-500 bg-blue-500/10 ring-1 ring-blue-500 scale-[1.02] shadow-[0_8px_30px_-4px_rgba(59,130,246,0.25)]"
                         : "border-hairline dark:border-zinc-800 bg-surface-card dark:bg-zinc-900/50 hover:border-black/10 dark:hover:border-zinc-600 hover:bg-surface-soft dark:hover:bg-zinc-800 hover:-translate-y-1 hover:shadow-xl"
-                    }`}>
+                    }`}
+                  >
                     <div
-                      className={`p-4 rounded-xl mb-4 transition-all duration-300 ${isSelected ? t.bg : "bg-black/5 dark:bg-zinc-800 group-hover:scale-110"}`}>
+                      className={`p-4 rounded-xl mb-4 transition-all duration-300 ${isSelected ? t.bg : "bg-black/5 dark:bg-zinc-800 group-hover:scale-110"}`}
+                    >
                       <t.icon
                         className={`w-8 h-8 transition-colors ${isSelected ? t.color : "text-muted dark:text-zinc-400 group-hover:text-ink dark:group-hover:text-zinc-200"}`}
                       />
                     </div>
                     <span
-                      className={`font-bold text-sm ${isSelected ? "text-blue-600 dark:text-white" : "text-ink dark:text-white"}`}>
+                      className={`font-bold text-sm ${isSelected ? "text-blue-600 dark:text-white" : "text-ink dark:text-white"}`}
+                    >
                       {t.label}
                     </span>
                   </button>
@@ -153,7 +217,8 @@ export function OnboardingWizard() {
                   initial={{ opacity: 0, height: 0, marginTop: 0 }}
                   animate={{ opacity: 1, height: "auto", marginTop: 24 }}
                   exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                  className="overflow-hidden">
+                  className="overflow-hidden"
+                >
                   <label className="block text-sm font-bold text-ink dark:text-white mb-2">
                     Topik spesifik apa yang ingin kamu pelajari?
                   </label>
@@ -172,7 +237,8 @@ export function OnboardingWizard() {
             <button
               onClick={handleNext}
               disabled={!goal || (goal === "lainnya" && !customGoal.trim())}
-              className="mt-10 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-xl font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_8px_30px_-4px_rgba(59,130,246,0.4)] hover:-translate-y-0.5 transition-all duration-300">
+              className="mt-10 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-xl font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_8px_30px_-4px_rgba(59,130,246,0.4)] hover:-translate-y-0.5 transition-all duration-300"
+            >
               Lanjutkan <ChevronRight className="w-5 h-5" />
             </button>
           </motion.div>
@@ -185,7 +251,8 @@ export function OnboardingWizard() {
             initial="initial"
             animate="animate"
             exit="exit"
-            className="flex flex-col">
+            className="flex flex-col"
+          >
             <div className="mb-8 text-center flex flex-col items-center">
               <div className="flex items-center justify-center gap-3 -mt-15 -mb-8">
                 <BookOpen className="w-10 h-10 text-purple-500 dark:text-purple-400" />
@@ -223,18 +290,21 @@ export function OnboardingWizard() {
                       isSelected
                         ? "border-purple-500 bg-purple-500/10 ring-1 ring-purple-500 scale-[1.02] shadow-[0_8px_30px_-4px_rgba(168,85,247,0.25)]"
                         : "border-hairline dark:border-zinc-800 bg-surface-card dark:bg-zinc-900/50 hover:border-black/10 dark:hover:border-zinc-600 hover:bg-surface-soft dark:hover:bg-zinc-800 hover:-translate-y-1 hover:shadow-xl"
-                    }`}>
+                    }`}
+                  >
                     <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center mr-5 flex-shrink-0 transition-transform duration-300 ${
                         isSelected
                           ? "bg-purple-500 scale-110"
                           : "bg-black/5 dark:bg-zinc-800 group-hover:scale-110"
-                      }`}>
+                      }`}
+                    >
                       {isSelected && <Check className="w-5 h-5 text-white" />}
                     </div>
                     <div>
                       <h3
-                        className={`font-bold text-lg mb-0.5 transition-colors ${isSelected ? "text-purple-600 dark:text-purple-300" : "text-ink dark:text-zinc-200"}`}>
+                        className={`font-bold text-lg mb-0.5 transition-colors ${isSelected ? "text-purple-600 dark:text-purple-300" : "text-ink dark:text-zinc-200"}`}
+                      >
                         {l.label}
                       </h3>
                       <p className="text-muted dark:text-zinc-400 text-sm">
@@ -249,7 +319,8 @@ export function OnboardingWizard() {
             <button
               onClick={handleNext}
               disabled={!level}
-              className="mt-10 flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 rounded-xl font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_8px_30px_-4px_rgba(168,85,247,0.4)] hover:-translate-y-0.5 transition-all duration-300">
+              className="mt-10 flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 rounded-xl font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_8px_30px_-4px_rgba(168,85,247,0.4)] hover:-translate-y-0.5 transition-all duration-300"
+            >
               Lanjutkan <ChevronRight className="w-5 h-5" />
             </button>
           </motion.div>
@@ -262,7 +333,8 @@ export function OnboardingWizard() {
             initial="initial"
             animate="animate"
             exit="exit"
-            className="flex flex-col">
+            className="flex flex-col"
+          >
             <div className="mb-8 text-center flex flex-col items-center">
               <div className="flex items-center justify-center gap-3 -mt-15 -mb-8">
                 <Clock className="w-10 h-10 text-emerald-500 dark:text-emerald-400" />
@@ -300,9 +372,11 @@ export function OnboardingWizard() {
                       isSelected
                         ? "border-emerald-500 bg-emerald-500/10 ring-1 ring-emerald-500 scale-[1.02] shadow-[0_8px_30px_-4px_rgba(16,185,129,0.25)]"
                         : "border-hairline dark:border-zinc-800 bg-surface-card dark:bg-zinc-900/50 hover:border-black/10 dark:hover:border-zinc-600 hover:bg-surface-soft dark:hover:bg-zinc-800 hover:-translate-y-1 hover:shadow-xl"
-                    }`}>
+                    }`}
+                  >
                     <h3
-                      className={`font-bold text-2xl mb-1.5 transition-colors ${isSelected ? "text-emerald-600 dark:text-emerald-300" : "text-ink dark:text-zinc-200"}`}>
+                      className={`font-bold text-2xl mb-1.5 transition-colors ${isSelected ? "text-emerald-600 dark:text-emerald-300" : "text-ink dark:text-zinc-200"}`}
+                    >
                       {h.label}
                     </h3>
                     <p className="text-muted dark:text-zinc-400 text-sm">
@@ -316,7 +390,8 @@ export function OnboardingWizard() {
             <button
               onClick={handleNext}
               disabled={!hours || loading}
-              className="mt-10 flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-4 rounded-xl font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_8px_30px_-4px_rgba(16,185,129,0.4)] hover:-translate-y-0.5 transition-all duration-300">
+              className="mt-10 flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-4 rounded-xl font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_8px_30px_-4px_rgba(16,185,129,0.4)] hover:-translate-y-0.5 transition-all duration-300"
+            >
               {loading ? (
                 <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (

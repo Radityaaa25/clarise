@@ -1,5 +1,5 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
-import { isAllowedOrigin } from "@/lib/cors"
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { isAllowedOrigin } from "@/lib/cors";
 
 const isProtectedRoute = createRouteMatcher([
   "/dashboard(.*)",
@@ -10,7 +10,7 @@ const isProtectedRoute = createRouteMatcher([
   "/course(.*)",
   "/generate(.*)",
   "/settings(.*)",
-])
+]);
 
 export default clerkMiddleware(async (auth, req) => {
   // Handle CORS preflight (OPTIONS) — harus dijawab langsung
@@ -30,15 +30,15 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   // Lapisan 1: Clerk memastikan user sudah login untuk semua protected routes
-  if (isProtectedRoute(req)) await auth.protect()
+  if (isProtectedRoute(req)) await auth.protect();
 
   // JANGAN return apapun — biarkan Clerk yang mengurus response
   // agar auth() di API route bisa membaca session/token dengan benar.
-})
+});
 
 export const config = {
   matcher: [
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
     "/(api|trpc)(.*)",
   ],
-}
+};

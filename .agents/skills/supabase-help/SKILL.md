@@ -30,75 +30,75 @@ Quick reference for all 24 security audit skills.
 
 ### Orchestration
 
-| Skill | Command | Purpose |
-|-------|---------|---------|
-| `supabase-pentest` | `/supabase-pentest <url>` | Full guided security audit |
-| `supabase-evidence` | `/supabase-evidence` | Initialize evidence collection |
-| `supabase-help` | `/supabase-help` | This help reference |
+| Skill               | Command                   | Purpose                        |
+| ------------------- | ------------------------- | ------------------------------ |
+| `supabase-pentest`  | `/supabase-pentest <url>` | Full guided security audit     |
+| `supabase-evidence` | `/supabase-evidence`      | Initialize evidence collection |
+| `supabase-help`     | `/supabase-help`          | This help reference            |
 
 ### Detection
 
-| Skill | Command | Purpose |
-|-------|---------|---------|
+| Skill             | Command                  | Purpose               |
+| ----------------- | ------------------------ | --------------------- |
 | `supabase-detect` | `/supabase-detect <url>` | Detect Supabase usage |
 
 ### Extraction
 
-| Skill | Command | Purpose |
-|-------|---------|---------|
-| `supabase-extract-url` | `/supabase-extract-url <url>` | Find Supabase project URL |
-| `supabase-extract-anon-key` | `/supabase-extract-anon-key` | Extract anon API key |
-| `supabase-extract-service-key` | `/supabase-extract-service-key` | Find leaked service key |
-| `supabase-extract-jwt` | `/supabase-extract-jwt` | Extract JWTs from code |
-| `supabase-extract-db-string` | `/supabase-extract-db-string` | Find DB connection strings |
+| Skill                          | Command                         | Purpose                    |
+| ------------------------------ | ------------------------------- | -------------------------- |
+| `supabase-extract-url`         | `/supabase-extract-url <url>`   | Find Supabase project URL  |
+| `supabase-extract-anon-key`    | `/supabase-extract-anon-key`    | Extract anon API key       |
+| `supabase-extract-service-key` | `/supabase-extract-service-key` | Find leaked service key    |
+| `supabase-extract-jwt`         | `/supabase-extract-jwt`         | Extract JWTs from code     |
+| `supabase-extract-db-string`   | `/supabase-extract-db-string`   | Find DB connection strings |
 
 ### API Audit
 
-| Skill | Command | Purpose |
-|-------|---------|---------|
+| Skill                        | Command                       | Purpose             |
+| ---------------------------- | ----------------------------- | ------------------- |
 | `supabase-audit-tables-list` | `/supabase-audit-tables-list` | List exposed tables |
-| `supabase-audit-tables-read` | `/supabase-audit-tables-read` | Read table data |
-| `supabase-audit-rls` | `/supabase-audit-rls` | Test RLS policies |
-| `supabase-audit-rpc` | `/supabase-audit-rpc` | Test RPC functions |
+| `supabase-audit-tables-read` | `/supabase-audit-tables-read` | Read table data     |
+| `supabase-audit-rls`         | `/supabase-audit-rls`         | Test RLS policies   |
+| `supabase-audit-rpc`         | `/supabase-audit-rpc`         | Test RPC functions  |
 
 ### Storage Audit
 
-| Skill | Command | Purpose |
-|-------|---------|---------|
-| `supabase-audit-buckets-list` | `/supabase-audit-buckets-list` | List storage buckets |
-| `supabase-audit-buckets-read` | `/supabase-audit-buckets-read` | Read bucket files |
-| `supabase-audit-buckets-public` | `/supabase-audit-buckets-public` | Find public buckets |
+| Skill                           | Command                          | Purpose              |
+| ------------------------------- | -------------------------------- | -------------------- |
+| `supabase-audit-buckets-list`   | `/supabase-audit-buckets-list`   | List storage buckets |
+| `supabase-audit-buckets-read`   | `/supabase-audit-buckets-read`   | Read bucket files    |
+| `supabase-audit-buckets-public` | `/supabase-audit-buckets-public` | Find public buckets  |
 
 ### Auth Audit
 
-| Skill | Command | Purpose |
-|-------|---------|---------|
-| `supabase-audit-auth-config` | `/supabase-audit-auth-config` | Check auth settings |
-| `supabase-audit-auth-signup` | `/supabase-audit-auth-signup` | Test signup access |
-| `supabase-audit-auth-users` | `/supabase-audit-auth-users` | Test user enumeration |
+| Skill                          | Command                         | Purpose                             |
+| ------------------------------ | ------------------------------- | ----------------------------------- |
+| `supabase-audit-auth-config`   | `/supabase-audit-auth-config`   | Check auth settings                 |
+| `supabase-audit-auth-signup`   | `/supabase-audit-auth-signup`   | Test signup access                  |
+| `supabase-audit-auth-users`    | `/supabase-audit-auth-users`    | Test user enumeration               |
 | `supabase-audit-authenticated` | `/supabase-audit-authenticated` | **Create test user to detect IDOR** |
 
 ### Realtime & Functions
 
-| Skill | Command | Purpose |
-|-------|---------|---------|
-| `supabase-audit-realtime` | `/supabase-audit-realtime` | Test Realtime channels |
-| `supabase-audit-functions` | `/supabase-audit-functions` | Test Edge Functions |
+| Skill                      | Command                     | Purpose                |
+| -------------------------- | --------------------------- | ---------------------- |
+| `supabase-audit-realtime`  | `/supabase-audit-realtime`  | Test Realtime channels |
+| `supabase-audit-functions` | `/supabase-audit-functions` | Test Edge Functions    |
 
 ### Reporting
 
-| Skill | Command | Purpose |
-|-------|---------|---------|
-| `supabase-report` | `/supabase-report` | Generate Markdown report |
-| `supabase-report-compare` | `/supabase-report-compare <old> <new>` | Compare two reports |
+| Skill                     | Command                                | Purpose                  |
+| ------------------------- | -------------------------------------- | ------------------------ |
+| `supabase-report`         | `/supabase-report`                     | Generate Markdown report |
+| `supabase-report-compare` | `/supabase-report-compare <old> <new>` | Compare two reports      |
 
 ## Severity Levels
 
-| Level | Color | Description |
-|-------|-------|-------------|
-| **P0** | 🔴 | Critical: data exposure, user data, privilege escalation |
-| **P1** | 🟠 | High: sensitive data, security misconfiguration |
-| **P2** | 🟡 | Medium: minor exposure, best practice violations |
+| Level  | Color | Description                                              |
+| ------ | ----- | -------------------------------------------------------- |
+| **P0** | 🔴    | Critical: data exposure, user data, privilege escalation |
+| **P1** | 🟠    | High: sensitive data, security misconfiguration          |
+| **P2** | 🟡    | Medium: minor exposure, best practice violations         |
 
 ## Common Workflows
 
@@ -137,12 +137,12 @@ Quick reference for all 24 security audit skills.
 
 ## Files and Directories Created
 
-| File/Directory | Description |
-|----------------|-------------|
-| `.sb-pentest-context.json` | Shared context between skills |
-| `.sb-pentest-audit.log` | Action log with timestamps |
-| `.sb-pentest-evidence/` | **Evidence directory for professional audits** |
-| `supabase-audit-report.md` | Final security report |
+| File/Directory             | Description                                    |
+| -------------------------- | ---------------------------------------------- |
+| `.sb-pentest-context.json` | Shared context between skills                  |
+| `.sb-pentest-audit.log`    | Action log with timestamps                     |
+| `.sb-pentest-evidence/`    | **Evidence directory for professional audits** |
+| `supabase-audit-report.md` | Final security report                          |
 
 ### Evidence Directory Structure
 

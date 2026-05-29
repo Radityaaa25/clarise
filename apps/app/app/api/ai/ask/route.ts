@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { Ratelimit } from "@upstash/ratelimit";
 import { redis } from "@/lib/ratelimit";
-import { geminiModel } from "@/lib/gemini";
+import { getGeminiModel } from "@/lib/gemini";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { stripHtml, detectPromptInjection } from "@/lib/sanitize";
@@ -61,17 +61,21 @@ const inputSchema = z
 
 export async function POST(req: Request) {
   const { userId: clerkId } = await auth();
-  if (!clerkId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!clerkId)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const user = await prisma.user.findUnique({
     where: { clerkId },
-    select: { id: true, subscription: { select: { plan: true, status: true } } },
+    select: {
+      id: true,
+      subscription: { select: { plan: true, status: true } },
+    },
   });
-  if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+  if (!user)
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
 
   const isPremium =
-    user.subscription?.status === "ACTIVE" &&
-    user.subscription.plan !== "FREE";
+    user.subscription?.status === "ACTIVE" && user.subscription.plan !== "FREE";
 
   // Rate limiting
   const limiter = isPremium ? premiumRatelimit : freeRatelimit;
@@ -82,14 +86,15 @@ export async function POST(req: Request) {
       {
         status: 429,
         headers: { "X-AI-Remaining": "0", "X-AI-Reset": reset.toString() },
-      }
+      },
     );
   }
 
   // Input validation
   const body = await req.json();
   const parsed = inputSchema.safeParse(body);
-  if (!parsed.success) return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+  if (!parsed.success)
+    return NextResponse.json({ error: "Invalid input" }, { status: 400 });
 
   let { message } = parsed.data;
   const { courseId, moduleId } = parsed.data;
@@ -103,7 +108,10 @@ export async function POST(req: Request) {
   // Strip HTML and check injection
   message = stripHtml(message);
   if (detectPromptInjection(message)) {
-    return NextResponse.json({ error: "Pesan tidak dapat diproses" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Pesan tidak dapat diproses" },
+      { status: 400 },
+    );
   }
 
   // Build context
@@ -142,29 +150,86 @@ export async function POST(req: Request) {
     parts: [{ text: m.content }],
   }));
 
-  const chat = geminiModel.startChat({
+  const chat = getGeminiModel().startChat({
     history: [
-      { role: "user", parts: [{ text: SYSTEM_PROMPT + (courseContext ? `\n${courseContext}` : "") }] },
-      { role: "model", parts: [{ text: "Mengerti. Saya Clarise AI dan hanya membantu topik pembelajaran." }] },
+      {
+        role: "user",
+        parts: [
+          { text: SYSTEM_PROMPT + (courseContext ? `\n${courseContext}` : "") },
+        ],
+      },
+      {
+        role: "model",
+        parts: [
+          {
+            text: "Mengerti. Saya Clarise AI dan hanya membantu topik pembelajaran.",
+          },
+        ],
+      },
       ...chatHistory,
     ],
     generationConfig: { maxOutputTokens: 800, temperature: 0.3 },
   });
 
-  const result = await chat.sendMessage(message);
-  let responseText = result.response.text();
+  let responseText = "";
+  try {
+    const result = await chat.sendMessage(message);
+    responseText = result.response.text();
 
-  // Output validation
-  if (SUSPICIOUS_OUTPUT_RE.some((re) => re.test(responseText))) {
-    console.error("[AI] Suspicious output detected for user:", user.id);
-    responseText = "Maaf, saya tidak bisa menjawab pertanyaan tersebut. Silakan tanyakan hal lain seputar pembelajaran.";
+    // Output validation
+    if (SUSPICIOUS_OUTPUT_RE.some((re) => re.test(responseText))) {
+      console.error("[AI] Suspicious output detected for user:", user.id);
+      responseText =
+        "Maaf, saya tidak bisa menjawab pertanyaan tersebut. Silakan tanyakan hal lain seputar pembelajaran.";
+    }
+
+    // Token tracking
+    const totalTokens = result.response.usageMetadata?.totalTokenCount || 0;
+    if (totalTokens > 0) {
+      try {
+        await redis.incrby("clarise:token:chat", totalTokens);
+      } catch (err) {
+        console.error("Failed to track tokens", err);
+      }
+    }
+  } catch (error: any) {
+    console.error("[AI_ASK_ERROR]", error);
+    const msg = error.message || "";
+    if (
+      msg.includes("429") ||
+      msg.includes("Quota exceeded") ||
+      error.status === 429
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Limit API AI telah tercapai. Harap tunggu beberapa saat lalu coba lagi.",
+        },
+        { status: 429 },
+      );
+    }
+    if (msg.includes("503") || error.status === 503) {
+      return NextResponse.json(
+        {
+          error:
+            "Server AI saat ini sedang sibuk (High Demand). Harap tunggu beberapa detik dan coba lagi.",
+        },
+        { status: 503 },
+      );
+    }
+    responseText =
+      "Maaf, saat ini AI sedang mengalami gangguan atau terlalu sibuk. Silakan coba lagi nanti.";
   }
 
   // Save to history
   const newMessages = [
     ...recentMessages,
     { role: "user", content: message, timestamp: new Date().toISOString() },
-    { role: "assistant", content: responseText, timestamp: new Date().toISOString() },
+    {
+      role: "assistant",
+      content: responseText,
+      timestamp: new Date().toISOString(),
+    },
   ].slice(-50);
 
   if (history) {
@@ -180,6 +245,11 @@ export async function POST(req: Request) {
 
   return NextResponse.json(
     { text: responseText },
-    { headers: { "X-AI-Remaining": remaining.toString(), "X-AI-Reset": reset.toString() } }
+    {
+      headers: {
+        "X-AI-Remaining": remaining.toString(),
+        "X-AI-Reset": reset.toString(),
+      },
+    },
   );
 }

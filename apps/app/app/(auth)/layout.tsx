@@ -6,24 +6,30 @@ import Image from "next/image";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="relative flex min-h-screen justify-center pt-[8vh] sm:pt-[12vh] bg-canvas overflow-hidden">
+    <div className="relative flex min-h-screen flex-col items-center bg-canvas py-8 px-4 sm:px-6">
       {/* Background for light mode only */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[-20%] left-[-10%] h-[60%] w-[60%] rounded-full bg-core-blue/15 blur-[150px]" />
         <div className="absolute bottom-[-20%] right-[-10%] h-[60%] w-[60%] rounded-full bg-sky/10 blur-[150px]" />
       </div>
 
-      <div className="relative z-10 flex w-full max-w-md flex-col items-center justify-center p-6 sm:p-0 mx-auto">
+      <div className="relative z-10 flex w-full max-w-md flex-col items-center my-auto">
         {/* Brand / Logo */}
-        <a href={process.env.NEXT_PUBLIC_APP_URL || "/"} className="flex justify-center group relative z-20 -mb-6 translate-y-4">
-          <Image src="/logoLM.png" alt="Clarise Logo" width={180} height={60} className="w-[140px] sm:w-[180px] h-auto dark:hidden" />
-          <Image src="/logoDM.png" alt="Clarise Logo" width={180} height={60} className="w-[140px] sm:w-[180px] h-auto hidden dark:block" />
+        <a
+          href={process.env.NEXT_PUBLIC_APP_URL || "/"}
+          className="flex justify-center group relative z-20 -mb-4 hover:opacity-90 transition-opacity"
+        >
+          <Image
+            src="/logoLM.png"
+            alt="Clarise Logo"
+            width={180}
+            height={60}
+            className="w-[140px] sm:w-[170px] h-auto"
+          />
         </a>
 
         {/* Form Container */}
-        <div className="w-full flex justify-center">
-          {children}
-        </div>
+        <div className="w-full flex justify-center">{children}</div>
       </div>
     </div>
   );

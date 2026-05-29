@@ -26,12 +26,18 @@ export function useAiChat(courseId?: string, moduleId?: string) {
       // Simple implementation assuming JSON response for now.
       // If streaming is used, this needs to be adapted to read the stream.
       const data = await res.json();
-      const aiMessage: AiChatMessage = { role: "assistant", content: data.text || "Sorry, I couldn't understand that." };
-      
+      const aiMessage: AiChatMessage = {
+        role: "assistant",
+        content: data.text || "Sorry, I couldn't understand that.",
+      };
+
       setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
       console.error(error);
-      const errorMessage: AiChatMessage = { role: "assistant", content: "Error connecting to AI. Please try again later." };
+      const errorMessage: AiChatMessage = {
+        role: "assistant",
+        content: "Error connecting to AI. Please try again later.",
+      };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);

@@ -4,7 +4,10 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { ReportStatus } from "@prisma/client";
 
-export async function updateReportStatus(reportId: string, status: ReportStatus) {
+export async function updateReportStatus(
+  reportId: string,
+  status: ReportStatus,
+) {
   try {
     const report = await prisma.report.findUnique({
       where: { id: reportId },
@@ -31,6 +34,9 @@ export async function updateReportStatus(reportId: string, status: ReportStatus)
     return { success: true };
   } catch (error: any) {
     console.error("Error updateReportStatus:", error);
-    return { success: false, error: error.message || "Gagal memperbarui status laporan" };
+    return {
+      success: false,
+      error: error.message || "Gagal memperbarui status laporan",
+    };
   }
 }

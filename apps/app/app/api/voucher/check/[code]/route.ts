@@ -6,7 +6,7 @@ import { getCorsHeaders } from "@/lib/cors";
 // Hanya mengembalikan status valid/tidak, tanpa data sensitif
 export async function GET(
   req: Request,
-  { params }: { params: Promise<{ code: string }> }
+  { params }: { params: Promise<{ code: string }> },
 ) {
   const origin = req.headers.get("origin");
   const corsHeaders = getCorsHeaders(origin);
@@ -18,7 +18,7 @@ export async function GET(
     if (!code || code.trim().length < 3) {
       return NextResponse.json(
         { isValid: false, error: "Kode voucher tidak valid" },
-        { status: 400, headers: corsHeaders }
+        { status: 400, headers: corsHeaders },
       );
     }
 
@@ -36,7 +36,7 @@ export async function GET(
     if (!voucher) {
       return NextResponse.json(
         { isValid: false, error: "Kode voucher tidak ditemukan" },
-        { status: 404, headers: corsHeaders }
+        { status: 404, headers: corsHeaders },
       );
     }
 
@@ -49,15 +49,19 @@ export async function GET(
         isValid: !isExpired && !isFull,
         trialDays: voucher.trialDays,
         remainingSlots,
-        reason: isExpired ? "Kode sudah kedaluwarsa" : isFull ? "Kuota kode sudah habis" : null,
+        reason: isExpired
+          ? "Kode sudah kedaluwarsa"
+          : isFull
+            ? "Kuota kode sudah habis"
+            : null,
       },
-      { status: 200, headers: corsHeaders }
+      { status: 200, headers: corsHeaders },
     );
   } catch (error) {
     console.error("[VOUCHER_CHECK_PUBLIC]", error);
     return NextResponse.json(
       { isValid: false, error: "Terjadi kesalahan" },
-      { status: 500, headers: corsHeaders }
+      { status: 500, headers: corsHeaders },
     );
   }
 }

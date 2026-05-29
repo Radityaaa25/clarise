@@ -8,6 +8,7 @@ description: List all storage buckets and their configuration to identify the st
 > 🔴 **CRITICAL: PROGRESSIVE FILE UPDATES REQUIRED**
 >
 > You MUST write to context files **AS YOU GO**, not just at the end.
+>
 > - Write to `.sb-pentest-context.json` **IMMEDIATELY after each bucket discovered**
 > - Log to `.sb-pentest-audit.log` **BEFORE and AFTER each operation**
 > - **DO NOT** wait until the skill completes to update files
@@ -38,17 +39,18 @@ https://[project].supabase.co/storage/v1/
 ```
 
 Buckets can be:
+
 - **Public**: Files accessible without authentication
 - **Private**: Files require authentication and RLS policies
 
 ## Storage API Endpoints
 
-| Endpoint | Purpose |
-|----------|---------|
-| `/storage/v1/bucket` | List buckets |
-| `/storage/v1/object/list/[bucket]` | List files in bucket |
-| `/storage/v1/object/[bucket]/[path]` | Access file |
-| `/storage/v1/object/public/[bucket]/[path]` | Public file URL |
+| Endpoint                                    | Purpose              |
+| ------------------------------------------- | -------------------- |
+| `/storage/v1/bucket`                        | List buckets         |
+| `/storage/v1/object/list/[bucket]`          | List files in bucket |
+| `/storage/v1/object/[bucket]/[path]`        | Access file          |
+| `/storage/v1/object/public/[bucket]/[path]` | Public file URL      |
 
 ## Usage
 
@@ -146,11 +148,11 @@ List all buckets with their security settings
 
 ## Bucket Configuration Analysis
 
-| Config | Good | Bad |
-|--------|------|-----|
-| public: false | ✅ Private by default | ❌ public: true for sensitive data |
-| fileSizeLimit | ✅ Appropriate limits | ❌ No limit or very large |
-| allowedMimeTypes | ✅ Restricted list | ❌ `*/*` allows anything |
+| Config           | Good                  | Bad                                |
+| ---------------- | --------------------- | ---------------------------------- |
+| public: false    | ✅ Private by default | ❌ public: true for sensitive data |
+| fileSizeLimit    | ✅ Appropriate limits | ❌ No limit or very large          |
+| allowedMimeTypes | ✅ Restricted list    | ❌ `*/*` allows anything           |
 
 ## Context Output
 
@@ -263,6 +265,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 ### Required Actions (Progressive)
 
 1. **Update `.sb-pentest-context.json`** with results:
+
    ```json
    {
      "storage": {
@@ -273,6 +276,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
    ```
 
 2. **Log to `.sb-pentest-audit.log`**:
+
    ```
    [TIMESTAMP] [supabase-audit-buckets-list] [START] Listing storage buckets
    [TIMESTAMP] [supabase-audit-buckets-list] [SUCCESS] Found 5 buckets
@@ -289,10 +293,10 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 
 ### Evidence Files to Create
 
-| File | Content |
-|------|---------|
-| `buckets-config.json` | All bucket configurations |
-| `buckets/[name]/file-list.json` | File listing per bucket |
+| File                            | Content                   |
+| ------------------------------- | ------------------------- |
+| `buckets-config.json`           | All bucket configurations |
+| `buckets/[name]/file-list.json` | File listing per bucket   |
 
 ### Evidence Format
 

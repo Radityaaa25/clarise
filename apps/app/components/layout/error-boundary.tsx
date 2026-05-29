@@ -30,7 +30,9 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         this.props.fallback ?? (
           <div className="flex min-h-screen flex-col items-center justify-center bg-canvas p-8">
-            <h2 className="text-2xl font-bold text-ink">Something went wrong</h2>
+            <h2 className="text-2xl font-bold text-ink">
+              Something went wrong
+            </h2>
             <p className="mt-2 text-body">Please try refreshing the page.</p>
             <button
               onClick={() => this.setState({ hasError: false })}

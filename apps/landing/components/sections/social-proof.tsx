@@ -21,7 +21,9 @@ export function SocialProof() {
       >
         {stats.map((stat) => (
           <div key={stat.label}>
-            <p className="font-heading text-5xl font-black text-ink">{stat.value}</p>
+            <p className="font-heading text-5xl font-black text-ink">
+              {stat.value}
+            </p>
             <p className="mt-2 text-muted">{stat.label}</p>
           </div>
         ))}

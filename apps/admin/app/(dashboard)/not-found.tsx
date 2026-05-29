@@ -10,17 +10,20 @@ export default function NotFound() {
         <div className="w-24 h-24 bg-accent flex items-center justify-center border-4 border-border mb-6 neo-shadow">
           <AlertOctagon className="w-12 h-12 text-accent-foreground" />
         </div>
-        
-        <h1 className="text-4xl font-black uppercase text-foreground mb-2">404</h1>
+
+        <h1 className="text-4xl font-black uppercase text-foreground mb-2">
+          404
+        </h1>
         <h2 className="text-xl font-bold uppercase text-muted-foreground mb-6 border-b-2 border-border pb-4 w-full">
           Halaman Tidak Ditemukan
         </h2>
-        
+
         <p className="text-sm font-medium text-muted-foreground mb-8">
-          Maaf, halaman admin yang Anda cari tidak ada atau mungkin sedang dalam perbaikan.
+          Maaf, halaman admin yang Anda cari tidak ada atau mungkin sedang dalam
+          perbaikan.
         </p>
-        
-        <Link 
+
+        <Link
           href="/"
           className="neo-btn bg-primary text-primary-foreground flex items-center gap-2 px-6 py-3 uppercase font-black w-full justify-center"
         >

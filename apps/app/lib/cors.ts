@@ -29,7 +29,11 @@ export function getCorsHeaders(origin: string | null): Record<string, string> {
   };
 }
 
-export function corsResponse(body: unknown, status: number, origin: string | null) {
+export function corsResponse(
+  body: unknown,
+  status: number,
+  origin: string | null,
+) {
   return new Response(JSON.stringify(body), {
     status,
     headers: {

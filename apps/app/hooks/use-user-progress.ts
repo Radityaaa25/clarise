@@ -5,7 +5,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export function useUserProgress(courseId: string) {
   const { data, error, isLoading, mutate } = useSWR(
     courseId ? `/api/progress?courseId=${courseId}` : null,
-    fetcher
+    fetcher,
   );
 
   const markComplete = async (moduleId: string) => {

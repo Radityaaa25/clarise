@@ -8,6 +8,7 @@ description: Extract the Supabase project URL from client-side JavaScript code, 
 > 🔴 **CRITICAL: PROGRESSIVE FILE UPDATES REQUIRED**
 >
 > You MUST write to context files **AS YOU GO**, not just at the end.
+>
 > - Write to `.sb-pentest-context.json` **IMMEDIATELY after each discovery**
 > - Log to `.sb-pentest-audit.log` **BEFORE and AFTER each action**
 > - **DO NOT** wait until the skill completes to update files
@@ -36,21 +37,21 @@ The skill scans for URL patterns in:
 
 ```javascript
 // Direct URL references
-const SUPABASE_URL = 'https://abc123.supabase.co'
-createClient('https://abc123.supabase.co', key)
+const SUPABASE_URL = "https://abc123.supabase.co";
+createClient("https://abc123.supabase.co", key);
 
 // Environment variable patterns
-process.env.SUPABASE_URL
-process.env.NEXT_PUBLIC_SUPABASE_URL
-import.meta.env.VITE_SUPABASE_URL
+process.env.SUPABASE_URL;
+process.env.NEXT_PUBLIC_SUPABASE_URL;
+import.meta.env.VITE_SUPABASE_URL;
 ```
 
 ### 2. HTML Meta Tags and Scripts
 
 ```html
-<meta name="supabase-url" content="https://abc123.supabase.co">
+<meta name="supabase-url" content="https://abc123.supabase.co" />
 <script>
-  window.SUPABASE_URL = 'https://abc123.supabase.co'
+  window.SUPABASE_URL = "https://abc123.supabase.co";
 </script>
 ```
 
@@ -59,20 +60,20 @@ import.meta.env.VITE_SUPABASE_URL
 ```javascript
 const config = {
   supabase: {
-    url: 'https://abc123.supabase.co'
-  }
-}
+    url: "https://abc123.supabase.co",
+  },
+};
 ```
 
 ## URL Pattern Matching
 
 Recognized patterns:
 
-| Pattern | Example |
-|---------|---------|
-| Standard | `https://abc123.supabase.co` |
-| With region | `https://abc123.eu-central-1.supabase.co` |
-| Custom domain | Detected via API endpoint patterns |
+| Pattern       | Example                                   |
+| ------------- | ----------------------------------------- |
+| Standard      | `https://abc123.supabase.co`              |
+| With region   | `https://abc123.eu-central-1.supabase.co` |
+| Custom domain | Detected via API endpoint patterns        |
 
 ## Usage
 
@@ -85,6 +86,7 @@ Extract Supabase URL from https://myapp.example.com
 ### From Local Files
 
 If you have downloaded the source:
+
 ```
 Extract Supabase URL from ./dist/assets/
 ```
@@ -186,6 +188,7 @@ Validation:
 
 ❌ **Problem:** URL not found despite Supabase detection
 ✅ **Solution:** The URL may be in a dynamically loaded chunk. Try:
+
 ```
 Extract URL with deep scan from https://myapp.example.com
 ```
@@ -205,6 +208,7 @@ Extract URL with deep scan from https://myapp.example.com
 ## Next Steps
 
 After extracting the URL:
+
 1. Run `supabase-extract-anon-key` to find the API key
 2. Run `supabase-extract-service-key` to check for leaked service keys
 3. Proceed to API auditing skills
@@ -226,6 +230,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 ### Required Actions (Progressive)
 
 1. **Update `.sb-pentest-context.json`** with extracted data:
+
    ```json
    {
      "supabase": {
@@ -237,6 +242,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
    ```
 
 2. **Log to `.sb-pentest-audit.log`**:
+
    ```
    [TIMESTAMP] [supabase-extract-url] [START] Beginning URL extraction
    [TIMESTAMP] [supabase-extract-url] [SUCCESS] URL extracted: https://[ref].supabase.co
@@ -253,8 +259,8 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 
 ### Evidence Files to Create
 
-| File | Content |
-|------|---------|
+| File                 | Content                                      |
+| -------------------- | -------------------------------------------- |
 | `extracted-url.json` | URL extraction details with source locations |
 
 ### Evidence Format

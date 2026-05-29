@@ -226,12 +226,12 @@ Findings are matched between reports using:
 
 ### Status Determination
 
-| Previous | Current | Status |
-|----------|---------|--------|
-| Present | Absent | Fixed ✅ |
-| Present | Present | Remaining ⚠️ |
-| Absent | Present | New 🆕 |
-| Absent | Absent | N/A |
+| Previous | Current | Status       |
+| -------- | ------- | ------------ |
+| Present  | Absent  | Fixed ✅     |
+| Present  | Present | Remaining ⚠️ |
+| Absent   | Present | New 🆕       |
+| Absent   | Absent  | N/A          |
 
 ### Score Calculation
 
@@ -280,13 +280,13 @@ The comparison generates `supabase-audit-comparison.md`:
 
 ## Summary
 
-| Metric | Previous | Current | Change |
-|--------|----------|---------|--------|
-| Score | 35/100 | 72/100 | +37 ⬆️ |
-| P0 Issues | 3 | 0 | -3 ✅ |
-| P1 Issues | 4 | 2 | -2 ✅ |
-| P2 Issues | 5 | 4 | -1 ✅ |
-| Total | 12 | 6 | -6 ✅ |
+| Metric    | Previous | Current | Change |
+| --------- | -------- | ------- | ------ |
+| Score     | 35/100   | 72/100  | +37 ⬆️ |
+| P0 Issues | 3        | 0       | -3 ✅  |
+| P1 Issues | 4        | 2       | -2 ✅  |
+| P2 Issues | 5        | 4       | -1 ✅  |
+| Total     | 12       | 6       | -6 ✅  |
 
 ## Fixed Issues (7)
 
@@ -334,10 +334,10 @@ reports/
 
 ### Regular Audits
 
-| Frequency | Purpose |
-|-----------|---------|
-| After fixes | Verify remediation |
-| Monthly | Catch regressions |
+| Frequency       | Purpose              |
+| --------------- | -------------------- |
+| After fixes     | Verify remediation   |
+| Monthly         | Catch regressions    |
 | Before releases | Pre-production check |
 | After incidents | Post-incident review |
 

@@ -5,10 +5,10 @@ export const dynamic = "force-dynamic";
 
 export default async function AnnouncementsPage() {
   const announcementsData = await prisma.announcement.findMany({
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: "desc" },
   });
 
-  const formattedAnnouncements = announcementsData.map(ann => {
+  const formattedAnnouncements = announcementsData.map((ann) => {
     let status = "ACTIVE";
     if (!ann.isActive) status = "INACTIVE";
     else if (ann.endAt && ann.endAt < new Date()) status = "EXPIRED";
@@ -19,7 +19,7 @@ export default async function AnnouncementsPage() {
       title: ann.title,
       target: ann.target,
       status: status,
-      date: ann.createdAt.toISOString().slice(0, 10)
+      date: ann.createdAt.toISOString().slice(0, 10),
     };
   });
 

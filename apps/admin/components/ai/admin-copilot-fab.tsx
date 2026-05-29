@@ -15,7 +15,11 @@ export function AdminCopilotFAB() {
   const { getToken } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { id: "1", role: "model", text: "Halo, Admin! Saya Clarise Copilot. Ada yang bisa saya bantu hari ini?" }
+    {
+      id: "1",
+      role: "model",
+      text: "Halo, Admin! Saya Clarise Copilot. Ada yang bisa saya bantu hari ini?",
+    },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -35,7 +39,11 @@ export function AdminCopilotFAB() {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
-    const userMessage: Message = { id: Date.now().toString(), role: "user", text: input };
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      text: input,
+    };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
@@ -43,32 +51,51 @@ export function AdminCopilotFAB() {
     try {
       // Map history to the format Gemini API expects
       const history = messages
-        .filter(m => m.id !== "1") // filter out the hardcoded intro
-        .map(m => ({
+        .filter((m) => m.id !== "1") // filter out the hardcoded intro
+        .map((m) => ({
           role: m.role,
-          parts: [{ text: m.text }]
+          parts: [{ text: m.text }],
         }));
 
       const token = await getToken();
       const res = await fetch(`${apiUrl}/api/admin/ai/copilot`, {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ prompt: userMessage.text, history }),
       });
 
       if (res.ok) {
         const data = await res.json();
-        setMessages((prev) => [...prev, { id: Date.now().toString(), role: "model", text: data.response }]);
+        setMessages((prev) => [
+          ...prev,
+          { id: Date.now().toString(), role: "model", text: data.response },
+        ]);
       } else {
         const errorData = await res.json().catch(() => ({}));
-        const errorMsg = errorData.error || `Error ${res.status}: Terjadi kesalahan pada server.`;
-        setMessages((prev) => [...prev, { id: Date.now().toString(), role: "model", text: `**System Error:**\n${errorMsg}` }]);
+        const errorMsg =
+          errorData.error ||
+          `Error ${res.status}: Terjadi kesalahan pada server.`;
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now().toString(),
+            role: "model",
+            text: `**System Error:**\n${errorMsg}`,
+          },
+        ]);
       }
     } catch (error: any) {
-      setMessages((prev) => [...prev, { id: Date.now().toString(), role: "model", text: `Gagal terhubung ke server: ${error.message}` }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          role: "model",
+          text: `Gagal terhubung ke server: ${error.message}`,
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -94,7 +121,7 @@ export function AdminCopilotFAB() {
               <Bot className="w-5 h-5" />
               <span>Admin Copilot</span>
             </div>
-            <button 
+            <button
               onClick={() => setIsOpen(false)}
               className="p-1 hover:bg-background/20 rounded-md transition-colors text-secondary-foreground"
             >
@@ -105,14 +132,14 @@ export function AdminCopilotFAB() {
           {/* Messages Area */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-background/50">
             {messages.map((msg) => (
-              <div 
-                key={msg.id} 
+              <div
+                key={msg.id}
                 className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
               >
-                <div 
+                <div
                   className={`max-w-[85%] p-3 text-sm prose prose-sm dark:prose-invert ${
-                    msg.role === "user" 
-                      ? "neo-card bg-accent text-accent-foreground rounded-tr-none" 
+                    msg.role === "user"
+                      ? "neo-card bg-accent text-accent-foreground rounded-tr-none"
                       : "neo-card bg-card text-foreground rounded-tl-none border-primary"
                   }`}
                 >
@@ -142,8 +169,8 @@ export function AdminCopilotFAB() {
                 className="flex-1 neo-input text-sm"
                 disabled={isLoading}
               />
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={isLoading || !input.trim()}
                 className="neo-btn bg-primary text-primary-foreground p-3 disabled:opacity-50"
               >

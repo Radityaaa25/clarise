@@ -5,7 +5,8 @@ import { Difficulty, Prisma } from "@prisma/client";
 
 export async function GET(req: NextRequest) {
   const { userId: clerkId } = await auth();
-  if (!clerkId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!clerkId)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { searchParams } = new URL(req.url);
   const category = searchParams.get("category");
@@ -53,7 +54,8 @@ export async function GET(req: NextRequest) {
 
   const hasMore = courses.length > limit;
   const items = hasMore ? courses.slice(0, limit) : courses;
-  const nextCursor = hasMore && items.length > 0 ? items[items.length - 1]!.id : null;
+  const nextCursor =
+    hasMore && items.length > 0 ? items[items.length - 1]!.id : null;
 
   return NextResponse.json({ courses: items, nextCursor, total });
 }

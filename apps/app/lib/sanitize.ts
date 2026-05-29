@@ -36,7 +36,9 @@ export function isSafeUrl(url: string, allowedDomains: string[]): boolean {
     const parsed = new URL(url);
     return (
       (parsed.protocol === "https:" || parsed.protocol === "http:") &&
-      allowedDomains.some((d) => parsed.hostname === d || parsed.hostname.endsWith(`.${d}`))
+      allowedDomains.some(
+        (d) => parsed.hostname === d || parsed.hostname.endsWith(`.${d}`),
+      )
     );
   } catch {
     return false;

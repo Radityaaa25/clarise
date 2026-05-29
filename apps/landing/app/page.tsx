@@ -1,4 +1,13 @@
-import { ArrowRight, Sparkles, BookOpen, Trophy, Play, Search, GraduationCap, CheckCircle2 } from "lucide-react";
+import {
+  ArrowRight,
+  Sparkles,
+  BookOpen,
+  Trophy,
+  Play,
+  Search,
+  GraduationCap,
+  CheckCircle2,
+} from "lucide-react";
 import { AppPreview } from "@/components/sections/app-preview";
 import { ArrowButton } from "@/components/ui/arrow-button";
 import Link from "next/link";
@@ -53,7 +62,8 @@ export default function HomePage() {
         <div className="fade-in-up delay-300 flex flex-col sm:flex-row items-center gap-4">
           {/* Mulai Gratis — split arrow animation */}
           <ArrowButton
-            href={`${process.env.NEXT_PUBLIC_APP_URL || "https://app.clarise.my.id"}/sign-up`}>
+            href={`${process.env.NEXT_PUBLIC_APP_URL || "https://app.clarise.my.id"}/sign-up`}
+          >
             Mulai Gratis
           </ArrowButton>
           {/* Pelajari Lebih Lanjut — simple outline, no arrow */}
@@ -147,7 +157,8 @@ export default function HomePage() {
                 </p>
                 <a
                   href={`${process.env.NEXT_PUBLIC_APP_URL || "https://app.clarise.my.id"}/sign-up`}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold text-core-blue transition-all hover:bg-white/90">
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold text-core-blue transition-all hover:bg-white/90"
+                >
                   Try AI Tutor
                   <ArrowRight className="h-4 w-4" />
                 </a>
@@ -177,7 +188,8 @@ export default function HomePage() {
       {/* ── HOW IT WORKS ── */}
       <section
         id="how-it-works"
-        className="px-6 py-24 relative z-10 transition-colors">
+        className="px-6 py-24 relative z-10 transition-colors"
+      >
         <div className="mx-auto max-w-5xl">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-black md:text-5xl font-heading text-ink dark:text-white">
@@ -210,7 +222,8 @@ export default function HomePage() {
             ].map((item, i) => (
               <div
                 key={i}
-                className="relative text-center flex flex-col items-center">
+                className="relative text-center flex flex-col items-center"
+              >
                 <div className="w-24 h-24 rounded-full bg-white dark:bg-void border-2 border-core-blue/20 flex items-center justify-center mb-6 relative z-10 shadow-lg shadow-core-blue/5">
                   <item.icon className="h-10 w-10 text-core-blue" />
                   <div className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-sky text-white flex items-center justify-center font-bold text-sm">
@@ -244,7 +257,8 @@ export default function HomePage() {
 
         <ArrowButton
           href={`${process.env.NEXT_PUBLIC_APP_URL || "https://app.clarise.my.id"}/sign-up`}
-          className="px-16 py-3 text-[15px]">
+          className="px-16 py-3 text-[15px]"
+        >
           Mulai Gratis Sekarang
         </ArrowButton>
       </section>
@@ -283,21 +297,24 @@ export default function HomePage() {
                 <li>
                   <a
                     href="#features"
-                    className="inline-block transition-all duration-300 hover:text-core-blue dark:hover:text-sky hover:translate-x-1">
+                    className="inline-block transition-all duration-300 hover:text-core-blue dark:hover:text-sky hover:translate-x-1"
+                  >
                     Features
                   </a>
                 </li>
                 <li>
                   <a
                     href="#how-it-works"
-                    className="inline-block transition-all duration-300 hover:text-core-blue dark:hover:text-sky hover:translate-x-1">
+                    className="inline-block transition-all duration-300 hover:text-core-blue dark:hover:text-sky hover:translate-x-1"
+                  >
                     How it works
                   </a>
                 </li>
                 <li>
                   <Link
                     href="/pricing"
-                    className="inline-block transition-all duration-300 hover:text-core-blue dark:hover:text-sky hover:translate-x-1">
+                    className="inline-block transition-all duration-300 hover:text-core-blue dark:hover:text-sky hover:translate-x-1"
+                  >
                     Pricing
                   </Link>
                 </li>
@@ -312,21 +329,24 @@ export default function HomePage() {
                 <li>
                   <Link
                     href="/about"
-                    className="inline-block transition-all duration-300 hover:text-core-blue dark:hover:text-sky hover:translate-x-1">
+                    className="inline-block transition-all duration-300 hover:text-core-blue dark:hover:text-sky hover:translate-x-1"
+                  >
                     About
                   </Link>
                 </li>
                 <li>
                   <Link
                     href="/careers"
-                    className="inline-block transition-all duration-300 hover:text-core-blue dark:hover:text-sky hover:translate-x-1">
+                    className="inline-block transition-all duration-300 hover:text-core-blue dark:hover:text-sky hover:translate-x-1"
+                  >
                     Careers
                   </Link>
                 </li>
                 <li>
                   <Link
                     href="/privacy"
-                    className="inline-block transition-all duration-300 hover:text-core-blue dark:hover:text-sky hover:translate-x-1">
+                    className="inline-block transition-all duration-300 hover:text-core-blue dark:hover:text-sky hover:translate-x-1"
+                  >
                     Privacy
                   </Link>
                 </li>
@@ -342,48 +362,79 @@ export default function HomePage() {
               </p>
               <a
                 href="mailto:helloclarise.official@gmail.com"
-                className="inline-block text-sm font-bold text-core-blue dark:text-sky transition-all duration-300 hover:text-core-blue/80 dark:hover:text-sky/80 hover:-translate-y-0.5">
+                className="inline-block text-sm font-bold text-core-blue dark:text-sky transition-all duration-300 hover:text-core-blue/80 dark:hover:text-sky/80 hover:-translate-y-0.5"
+              >
                 helloclarise.official@gmail.com
               </a>
 
               <div className="mt-6 flex items-center gap-4">
                 {/* Email */}
-                <a 
-                  href="mailto:helloclarise.official@gmail.com" 
+                <a
+                  href="mailto:helloclarise.official@gmail.com"
                   className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-soft dark:bg-white/5 text-ink dark:text-white transition-all duration-300 hover:bg-core-blue hover:text-white dark:hover:bg-core-blue hover:-translate-y-1 hover:shadow-lg hover:shadow-core-blue/20"
                   aria-label="Email Clarise"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect width="20" height="16" x="2" y="4" rx="2"/>
-                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <rect width="20" height="16" x="2" y="4" rx="2" />
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
                   </svg>
                 </a>
 
                 {/* WhatsApp */}
-                <a 
-                  href="https://wa.me/62881011441173" 
-                  target="_blank" 
+                <a
+                  href="https://wa.me/62881011441173"
+                  target="_blank"
                   rel="noreferrer"
                   className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-soft dark:bg-white/5 text-ink dark:text-white transition-all duration-300 hover:bg-[#25D366] hover:text-white dark:hover:bg-[#25D366] hover:-translate-y-1 hover:shadow-lg hover:shadow-[#25D366]/20"
                   aria-label="WhatsApp Clarise"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
                   </svg>
                 </a>
 
                 {/* Instagram */}
-                <a 
-                  href="https://instagram.com/clariseofficial_" 
-                  target="_blank" 
+                <a
+                  href="https://instagram.com/clariseofficial_"
+                  target="_blank"
                   rel="noreferrer"
                   className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-soft dark:bg-white/5 text-ink dark:text-white transition-all duration-300 hover:bg-[#E1306C] hover:text-white dark:hover:bg-[#E1306C] hover:-translate-y-1 hover:shadow-lg hover:shadow-[#E1306C]/20"
                   aria-label="Instagram Clarise"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
-                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-                    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
                   </svg>
                 </a>
               </div>

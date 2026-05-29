@@ -9,7 +9,7 @@ const createVoucherSchema = z.object({
   trialDays: z.number().min(0).default(0),
   discountPct: z.number().min(0).max(100).default(0),
   maxUses: z.number().min(1),
-  expiresAt: z.string().datetime()
+  expiresAt: z.string().datetime(),
 });
 
 export async function GET(req: Request) {
@@ -22,11 +22,15 @@ export async function GET(req: Request) {
 
     const user = await prisma.user.findUnique({
       where: { clerkId: userId },
-      select: { role: true }
+      select: { role: true },
     });
 
     if (user?.role !== "ADMIN") {
-      return corsResponse({ error: "Forbidden: Admin access required" }, 403, origin);
+      return corsResponse(
+        { error: "Forbidden: Admin access required" },
+        403,
+        origin,
+      );
     }
 
     const vouchers = await prisma.voucher.findMany({
@@ -50,28 +54,41 @@ export async function POST(req: Request) {
 
     const user = await prisma.user.findUnique({
       where: { clerkId: userId },
-      select: { role: true }
+      select: { role: true },
     });
 
     if (user?.role !== "ADMIN") {
-      return corsResponse({ error: "Forbidden: Admin access required" }, 403, origin);
+      return corsResponse(
+        { error: "Forbidden: Admin access required" },
+        403,
+        origin,
+      );
     }
 
     const body = await req.json();
     const parsed = createVoucherSchema.safeParse(body);
 
     if (!parsed.success) {
-      return corsResponse({ error: "Invalid data", details: parsed.error.format() }, 400, origin);
+      return corsResponse(
+        { error: "Invalid data", details: parsed.error.format() },
+        400,
+        origin,
+      );
     }
 
-    const { code, type, trialDays, discountPct, maxUses, expiresAt } = parsed.data;
+    const { code, type, trialDays, discountPct, maxUses, expiresAt } =
+      parsed.data;
 
     const existing = await prisma.voucher.findUnique({
-      where: { code }
+      where: { code },
     });
 
     if (existing) {
-      return corsResponse({ error: "Voucher code already exists" }, 400, origin);
+      return corsResponse(
+        { error: "Voucher code already exists" },
+        400,
+        origin,
+      );
     }
 
     const voucher = await prisma.voucher.create({
@@ -82,7 +99,7 @@ export async function POST(req: Request) {
         discountPct: type === "DISCOUNT" ? discountPct : 0,
         maxUses,
         expiresAt: new Date(expiresAt),
-      }
+      },
     });
 
     return corsResponse({ voucher }, 200, origin);

@@ -21,7 +21,13 @@ const plans = [
     badgeClass: "bg-reward text-on-primary",
     price: "Rp 49.000",
     period: "/bulan",
-    features: ["Semua course", "AI unlimited", "Sertifikat resmi", "Download PDF", "Reward eksklusif"],
+    features: [
+      "Semua course",
+      "AI unlimited",
+      "Sertifikat resmi",
+      "Download PDF",
+      "Reward eksklusif",
+    ],
     cta: "Coba Premium",
     ctaClass: "bg-primary text-on-primary hover:bg-primary-active",
     featured: true,
@@ -41,7 +47,10 @@ export function Pricing() {
           Pilih paket yang sesuai kebutuhanmu.
         </p>
 
-        <div ref={ref} className="mt-16 grid gap-8 md:grid-cols-2 max-w-3xl mx-auto">
+        <div
+          ref={ref}
+          className="mt-16 grid gap-8 md:grid-cols-2 max-w-3xl mx-auto"
+        >
           {plans.map((plan) => (
             <div
               key={plan.name}
@@ -51,18 +60,27 @@ export function Pricing() {
                   : "border border-hairline"
               } ${inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
             >
-              <span className={`inline-block rounded-full px-3 py-1 text-xs font-bold ${plan.badgeClass}`}>
+              <span
+                className={`inline-block rounded-full px-3 py-1 text-xs font-bold ${plan.badgeClass}`}
+              >
                 {plan.badge}
               </span>
 
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="font-heading text-4xl font-black text-ink">{plan.price}</span>
-                {plan.period && <span className="text-sm text-muted">{plan.period}</span>}
+                <span className="font-heading text-4xl font-black text-ink">
+                  {plan.price}
+                </span>
+                {plan.period && (
+                  <span className="text-sm text-muted">{plan.period}</span>
+                )}
               </div>
 
               <ul className="mt-6 space-y-3">
                 {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-center gap-2 text-sm text-body">
+                  <li
+                    key={feature}
+                    className="flex items-center gap-2 text-sm text-body"
+                  >
                     <Check className="h-4 w-4 text-success shrink-0" />
                     {feature}
                   </li>
@@ -70,7 +88,9 @@ export function Pricing() {
               </ul>
 
               <a
-                href={process.env.NEXT_PUBLIC_APP_URL || "https://app.clarise.com"}
+                href={
+                  process.env.NEXT_PUBLIC_APP_URL || "https://app.clarise.com"
+                }
                 className={`mt-8 block w-full rounded-lg py-3 text-center text-sm font-bold transition-colors ${plan.ctaClass}`}
               >
                 {plan.cta}

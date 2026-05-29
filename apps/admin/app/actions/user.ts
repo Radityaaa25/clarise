@@ -41,6 +41,9 @@ export async function deleteUser(userId: string) {
     return { success: true };
   } catch (error: any) {
     console.error("Error deleteUser:", error);
-    return { success: false, error: error.message || "Gagal menghapus pengguna" };
+    return {
+      success: false,
+      error: error.message || "Gagal menghapus pengguna",
+    };
   }
 }

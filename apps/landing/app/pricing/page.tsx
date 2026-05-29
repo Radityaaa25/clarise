@@ -1,7 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CheckCircle2, Zap, X, Ticket, Loader2, ArrowRight } from "lucide-react";
+import {
+  CheckCircle2,
+  Zap,
+  X,
+  Ticket,
+  Loader2,
+  ArrowRight,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 
@@ -31,7 +38,7 @@ export default function PricingPage() {
 
     try {
       const res = await fetch(
-        `${APP_URL}/api/voucher/check/${encodeURIComponent(voucherCode.trim().toUpperCase())}`
+        `${APP_URL}/api/voucher/check/${encodeURIComponent(voucherCode.trim().toUpperCase())}`,
       );
       const data = await res.json();
 
@@ -39,12 +46,13 @@ export default function PricingPage() {
         setVoucherStatus("valid");
         setVoucherTrialDays(data.trialDays || 30);
         setVoucherMessage(
-          `Kode valid! Kamu akan mendapatkan akses Premium gratis selama ${data.trialDays || 30} hari.`
+          `Kode valid! Kamu akan mendapatkan akses Premium gratis selama ${data.trialDays || 30} hari.`,
         );
       } else {
         setVoucherStatus("invalid");
         setVoucherMessage(
-          data.error || "Kode voucher tidak valid atau sudah habis masa berlakunya."
+          data.error ||
+            "Kode voucher tidak valid atau sudah habis masa berlakunya.",
         );
       }
     } catch {
@@ -76,7 +84,7 @@ export default function PricingPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-6">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -90,53 +98,86 @@ export default function PricingPage() {
             Investasi buat masa depan.
           </h1>
           <p className="text-lg text-body dark:text-frost/60 leading-relaxed">
-            Pilih plan yang paling cocok buat lo. Mulai dari gratis buat nyobain, sampai premium buat akses tak terbatas.
+            Pilih plan yang paling cocok buat lo. Mulai dari gratis buat
+            nyobain, sampai premium buat akses tak terbatas.
           </p>
         </motion.div>
 
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {/* Free Tier */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
             className="rounded-3xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/5 p-8 backdrop-blur-md flex flex-col shadow-xl shadow-black/5 hover:-translate-y-2 transition-transform duration-300"
           >
-            <h3 className="text-2xl font-bold font-heading text-ink dark:text-white mb-2">Free</h3>
-            <p className="text-body dark:text-frost/50 mb-6">Cocok buat yang mau nyobain dulu.</p>
+            <h3 className="text-2xl font-bold font-heading text-ink dark:text-white mb-2">
+              Free
+            </h3>
+            <p className="text-body dark:text-frost/50 mb-6">
+              Cocok buat yang mau nyobain dulu.
+            </p>
             <div className="mb-8">
-              <span className="text-5xl font-black text-ink dark:text-white">Rp 0</span>
+              <span className="text-5xl font-black text-ink dark:text-white">
+                Rp 0
+              </span>
               <span className="text-body dark:text-frost/50">/selamanya</span>
             </div>
             <ul className="space-y-4 mb-8 flex-1">
-              {["1 course aktif (Level Dasar)", "10x tanya AI per hari", "XP, Level & Streak basic", "Public course visibility"].map((feature, i) => (
-                <li key={i} className="flex gap-3 items-start text-ink dark:text-frost/80 font-medium">
+              {[
+                "1 course aktif (Level Dasar)",
+                "10x tanya AI per hari",
+                "XP, Level & Streak basic",
+                "Public course visibility",
+              ].map((feature, i) => (
+                <li
+                  key={i}
+                  className="flex gap-3 items-start text-ink dark:text-frost/80 font-medium"
+                >
                   <CheckCircle2 className="h-5 w-5 text-black/20 dark:text-frost/30 shrink-0 mt-0.5" />
                   <span className="leading-tight">{feature}</span>
                 </li>
               ))}
             </ul>
-            <a href={`${APP_URL}/sign-up`} className="w-full py-4 rounded-xl border border-black/20 dark:border-white/20 font-bold text-ink dark:text-white text-center hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+            <a
+              href={`${APP_URL}/sign-up`}
+              className="w-full py-4 rounded-xl border border-black/20 dark:border-white/20 font-bold text-ink dark:text-white text-center hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+            >
               Mulai Gratis
             </a>
           </motion.div>
 
           {/* Premium Bulanan Tier — dengan Voucher Pop-up */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             className="rounded-3xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/5 p-8 backdrop-blur-md flex flex-col shadow-xl shadow-black/5 hover:-translate-y-2 transition-transform duration-300"
           >
-            <h3 className="text-2xl font-bold font-heading text-ink dark:text-white mb-2">Premium Bulanan</h3>
-            <p className="text-body dark:text-frost/50 mb-6">Akses penuh ke semua fitur Clarise secara fleksibel.</p>
+            <h3 className="text-2xl font-bold font-heading text-ink dark:text-white mb-2">
+              Premium Bulanan
+            </h3>
+            <p className="text-body dark:text-frost/50 mb-6">
+              Akses penuh ke semua fitur Clarise secara fleksibel.
+            </p>
             <div className="mb-8">
-              <span className="text-5xl font-black text-ink dark:text-white">Rp 79k</span>
+              <span className="text-5xl font-black text-ink dark:text-white">
+                Rp 79k
+              </span>
               <span className="text-body dark:text-frost/50">/bulan</span>
             </div>
             <ul className="space-y-4 mb-8 flex-1">
-              {["Unlimited course (Semua Level)", "AI Unlimited & Buat kursus AI", "Sertifikat & Download PDF", "Streak protection (1x/bulan)", "Pro badges & Priority support"].map((feature, i) => (
-                <li key={i} className="flex gap-3 items-start text-ink dark:text-frost/80 font-medium">
+              {[
+                "Unlimited course (Semua Level)",
+                "AI Unlimited & Buat kursus AI",
+                "Sertifikat & Download PDF",
+                "Streak protection (1x/bulan)",
+                "Pro badges & Priority support",
+              ].map((feature, i) => (
+                <li
+                  key={i}
+                  className="flex gap-3 items-start text-ink dark:text-frost/80 font-medium"
+                >
                   <CheckCircle2 className="h-5 w-5 text-core-blue dark:text-sky shrink-0 mt-0.5" />
                   <span className="leading-tight">{feature}</span>
                 </li>
@@ -157,7 +198,7 @@ export default function PricingPage() {
           </motion.div>
 
           {/* Premium Tahunan Tier */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
@@ -167,21 +208,39 @@ export default function PricingPage() {
             <div className="absolute top-4 right-4 bg-reward/10 dark:bg-reward/20 text-reward dark:text-reward text-xs font-bold px-3 py-1 rounded-full border border-reward/30">
               HEMAT ~37%
             </div>
-            <h3 className="text-2xl font-bold font-heading text-ink dark:text-white mb-2">Premium Tahunan</h3>
-            <p className="text-body dark:text-frost/50 mb-6">Investasi belajar terbaik dengan harga paling hemat.</p>
+            <h3 className="text-2xl font-bold font-heading text-ink dark:text-white mb-2">
+              Premium Tahunan
+            </h3>
+            <p className="text-body dark:text-frost/50 mb-6">
+              Investasi belajar terbaik dengan harga paling hemat.
+            </p>
             <div className="mb-8">
-              <span className="text-5xl font-black text-ink dark:text-white">Rp 599k</span>
+              <span className="text-5xl font-black text-ink dark:text-white">
+                Rp 599k
+              </span>
               <span className="text-body dark:text-frost/50">/tahun</span>
             </div>
             <ul className="space-y-4 mb-8 flex-1">
-              {["Semua fitur Premium Bulanan", "Hemat lebih dari Rp 340.000", "AI Recommendations khusus", "Clarise Wrapped Detailed Report", "Investasi belajar terbaik"].map((feature, i) => (
-                <li key={i} className="flex gap-3 items-start text-ink dark:text-frost/90 font-medium">
+              {[
+                "Semua fitur Premium Bulanan",
+                "Hemat lebih dari Rp 340.000",
+                "AI Recommendations khusus",
+                "Clarise Wrapped Detailed Report",
+                "Investasi belajar terbaik",
+              ].map((feature, i) => (
+                <li
+                  key={i}
+                  className="flex gap-3 items-start text-ink dark:text-frost/90 font-medium"
+                >
                   <CheckCircle2 className="h-5 w-5 text-reward shrink-0 mt-0.5" />
                   <span className="leading-tight">{feature}</span>
                 </li>
               ))}
             </ul>
-            <Link href="/coming-soon" className="w-full py-4 rounded-xl bg-core-blue text-white font-bold text-center hover:bg-core-blue/90 transition-all shadow-lg shadow-core-blue/20 hover:scale-[1.02] active:scale-95 block">
+            <Link
+              href="/coming-soon"
+              className="w-full py-4 rounded-xl bg-core-blue text-white font-bold text-center hover:bg-core-blue/90 transition-all shadow-lg shadow-core-blue/20 hover:scale-[1.02] active:scale-95 block"
+            >
               Paling Hemat
             </Link>
           </motion.div>
@@ -250,7 +309,9 @@ export default function PricingPage() {
                           setVoucherMessage("");
                         }
                       }}
-                      onKeyDown={(e) => e.key === "Enter" && handleCheckVoucher()}
+                      onKeyDown={(e) =>
+                        e.key === "Enter" && handleCheckVoucher()
+                      }
                       placeholder="Contoh: EARLYBIRD"
                       maxLength={30}
                       className="w-full px-4 py-3.5 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/5 text-ink dark:text-white placeholder:text-muted-soft font-mono text-lg tracking-wider focus:outline-none focus:ring-2 focus:ring-core-blue/50 focus:border-core-blue transition-all"
@@ -300,7 +361,9 @@ export default function PricingPage() {
                   ) : (
                     <button
                       onClick={handleCheckVoucher}
-                      disabled={!voucherCode.trim() || voucherStatus === "loading"}
+                      disabled={
+                        !voucherCode.trim() || voucherStatus === "loading"
+                      }
                       className="flex-1 py-3.5 rounded-xl bg-core-blue text-white font-bold hover:bg-core-blue/90 transition-all shadow-lg shadow-core-blue/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                       {voucherStatus === "loading" ? (
@@ -317,7 +380,8 @@ export default function PricingPage() {
 
                 {/* Footer hint */}
                 <p className="mt-4 text-center text-xs text-muted dark:text-frost/30">
-                  Kode voucher bisa didapatkan melalui event atau promosi Clarise.
+                  Kode voucher bisa didapatkan melalui event atau promosi
+                  Clarise.
                 </p>
               </div>
             </motion.div>

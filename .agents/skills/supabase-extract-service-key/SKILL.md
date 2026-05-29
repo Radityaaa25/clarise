@@ -8,6 +8,7 @@ description: CRITICAL - Detect if the Supabase service_role key is leaked in cli
 > 🔴 **CRITICAL: PROGRESSIVE FILE UPDATES REQUIRED**
 >
 > You MUST write to context files **AS YOU GO**, not just at the end.
+>
 > - Write to `.sb-pentest-context.json` **IMMEDIATELY after each discovery**
 > - Log to `.sb-pentest-audit.log` **BEFORE and AFTER each action**
 > - **DO NOT** wait until the skill completes to update files
@@ -32,23 +33,23 @@ This skill detects if the **service_role key** (admin key) is accidentally expos
 
 The **service_role key** bypasses ALL Row Level Security (RLS) policies. If exposed:
 
-| Impact | Description |
-|--------|-------------|
-| 🔴 Full DB Access | Read/write/delete all data in all tables |
-| 🔴 Auth Bypass | Access all user data without authentication |
-| 🔴 Storage Access | Read/write all files in all buckets |
-| 🔴 User Impersonation | Generate tokens for any user |
+| Impact                | Description                                 |
+| --------------------- | ------------------------------------------- |
+| 🔴 Full DB Access     | Read/write/delete all data in all tables    |
+| 🔴 Auth Bypass        | Access all user data without authentication |
+| 🔴 Storage Access     | Read/write all files in all buckets         |
+| 🔴 User Impersonation | Generate tokens for any user                |
 
 **This is a P0 (Critical) finding that requires immediate action.**
 
 ## Service Key vs Anon Key
 
-| Aspect | Anon Key | Service Key |
-|--------|----------|-------------|
-| Role claim | `"role": "anon"` | `"role": "service_role"` |
-| RLS | ✅ Respects RLS | ❌ Bypasses RLS |
-| Client-side | ✅ Expected | ❌ NEVER |
-| Server-side | ✅ Can use | ✅ Should use |
+| Aspect      | Anon Key         | Service Key              |
+| ----------- | ---------------- | ------------------------ |
+| Role claim  | `"role": "anon"` | `"role": "service_role"` |
+| RLS         | ✅ Respects RLS  | ❌ Bypasses RLS          |
+| Client-side | ✅ Expected      | ❌ NEVER                 |
+| Server-side | ✅ Can use       | ✅ Should use            |
 
 ## Detection Patterns
 
@@ -69,11 +70,11 @@ The skill searches for:
 
 ```javascript
 // Common naming patterns
-SUPABASE_SERVICE_KEY
-SUPABASE_SERVICE_ROLE_KEY
-SUPABASE_ADMIN_KEY
-SUPABASE_SECRET_KEY
-SERVICE_ROLE_KEY
+SUPABASE_SERVICE_KEY;
+SUPABASE_SERVICE_ROLE_KEY;
+SUPABASE_ADMIN_KEY;
+SUPABASE_SECRET_KEY;
+SERVICE_ROLE_KEY;
 ```
 
 ### 3. Accidental Exposure
@@ -81,9 +82,9 @@ SERVICE_ROLE_KEY
 ```javascript
 // Sometimes exposed alongside anon key
 const keys = {
-  anon: 'eyJ...',
-  service: 'eyJ...'  // ❌ Should not be here
-}
+  anon: "eyJ...",
+  service: "eyJ...", // ❌ Should not be here
+};
 ```
 
 ## Usage
@@ -234,11 +235,11 @@ To check source maps content:
 
 ## Common Causes
 
-| Cause | Solution |
-|-------|----------|
-| Wrong env variable | Use `NEXT_PUBLIC_` only for anon key |
-| Copy-paste error | Double-check which key you're using |
-| Debug code left in | Remove before production build |
+| Cause                 | Solution                                     |
+| --------------------- | -------------------------------------------- |
+| Wrong env variable    | Use `NEXT_PUBLIC_` only for anon key         |
+| Copy-paste error      | Double-check which key you're using          |
+| Debug code left in    | Remove before production build               |
 | Misconfigured bundler | Ensure service key env vars are not included |
 
 ## Remediation Code Examples
@@ -247,47 +248,47 @@ To check source maps content:
 
 ```javascript
 // ❌ WRONG - Service key in client
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_SERVICE_KEY  // ❌ NEVER DO THIS
-)
+  process.env.NEXT_PUBLIC_SUPABASE_SERVICE_KEY, // ❌ NEVER DO THIS
+);
 ```
 
 ### After (Correct)
 
 ```javascript
 // ✅ CORRECT - Only anon key in client
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY  // ✅ Safe for client
-)
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, // ✅ Safe for client
+);
 
 // For privileged operations, call an Edge Function:
-const { data } = await supabase.functions.invoke('admin-action', {
-  body: { action: 'delete-user', userId: '123' }
-})
+const { data } = await supabase.functions.invoke("admin-action", {
+  body: { action: "delete-user", userId: "123" },
+});
 ```
 
 ### Edge Function (Server-Side)
 
 ```typescript
 // supabase/functions/admin-action/index.ts
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from "@supabase/supabase-js";
 
 Deno.serve(async (req) => {
   // ✅ Service key only on server
   const supabase = createClient(
-    Deno.env.get('SUPABASE_URL'),
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')  // ✅ Safe on server
-  )
+    Deno.env.get("SUPABASE_URL"),
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"), // ✅ Safe on server
+  );
 
   // Perform privileged operation
   // ...
-})
+});
 ```
 
 ## MANDATORY: Progressive Context File Updates
@@ -307,6 +308,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 ### Required Actions (Progressive)
 
 1. **Update `.sb-pentest-context.json`** with findings:
+
    ```json
    {
      "supabase": {
@@ -325,6 +327,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
    ```
 
 2. **Log to `.sb-pentest-audit.log`**:
+
    ```
    [TIMESTAMP] [supabase-extract-service-key] [START] Checking for service key exposure
    [TIMESTAMP] [supabase-extract-service-key] [CRITICAL] Service key EXPOSED at path:line
@@ -341,11 +344,11 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 
 ### Evidence Files to Create (if service key found)
 
-| File | Content |
-|------|---------|
-| `service-key-exposure/location.txt` | File path and line number |
+| File                                        | Content                               |
+| ------------------------------------------- | ------------------------------------- |
+| `service-key-exposure/location.txt`         | File path and line number             |
 | `service-key-exposure/decoded-payload.json` | Decoded JWT proving it's service_role |
-| `service-key-exposure/code-snippet.txt` | Code context (redacted) |
+| `service-key-exposure/code-snippet.txt`     | Code context (redacted)               |
 
 ### Evidence Format (P0 Finding)
 
@@ -393,6 +396,7 @@ This ensures that if the skill is interrupted, crashes, or times out, all findin
 
 ```markdown
 ## [TIMESTAMP] - 🔴 P0 CRITICAL: Service Role Key Exposed
+
 - Service role key found in client-side code
 - Location: [file]:[line]
 - Impact: Full database access, RLS bypass
