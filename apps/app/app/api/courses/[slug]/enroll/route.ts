@@ -33,26 +33,39 @@ export async function POST(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  // 2. Premium course validation
-  if (course.isPremium && !(await isSubscriptionActive(user.id))) {
-    return NextResponse.json({ error: "Premium required" }, { status: 403 });
-  }
+  // 2. [REMOVED] Absolute premium course validation is removed here because 
+  // Free users are now allowed to take 1 Premium course as a trial.
 
   // 3. Free tier limit validation
   const isFreeUser = user.subscription?.plan === "FREE" || !user.subscription;
-  if (isFreeUser && !course.isPremium) {
+  if (isFreeUser) {
     const activeCourses = await prisma.userProgress.findMany({
       where: { userId: user.id },
       distinct: ["courseId"],
-      select: { courseId: true },
+      select: { courseId: true, course: { select: { isPremium: true } } },
     });
+    
     // Jika belum enroll kursus ini, cek limit
     const alreadyEnrolled = activeCourses.some((c) => c.courseId === course.id);
-    if (!alreadyEnrolled && activeCourses.length >= 1) {
-      return NextResponse.json(
-        { error: "Free tier limit reached" },
-        { status: 403 },
-      );
+    if (!alreadyEnrolled) {
+      // Rule 1: Max 2 courses total
+      if (activeCourses.length >= 2) {
+        return NextResponse.json(
+          { error: "Batas 2 kursus gratis tercapai. Yuk upgrade ke Premium untuk akses tanpa batas!" },
+          { status: 403 },
+        );
+      }
+
+      // Rule 2: Max 1 Premium course
+      if (course.isPremium) {
+        const premiumEnrolledCount = activeCourses.filter((c) => c.course.isPremium).length;
+        if (premiumEnrolledCount >= 1) {
+          return NextResponse.json(
+            { error: "Anda sudah mengambil 1 kursus Premium gratis. Upgrade untuk membuka kursus Premium lainnya!" },
+            { status: 403 },
+          );
+        }
+      }
     }
   }
 

@@ -79,6 +79,7 @@ export async function POST(req: NextRequest) {
   const course = await prisma.course.findUnique({
     where: { id: courseId },
     select: {
+      id: true,
       isPremium: true,
       visibility: true,
       authorId: true,
@@ -92,7 +93,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
   if (course.isPremium && !(await isSubscriptionActive(user.id))) {
-    return NextResponse.json({ error: "Premium required" }, { status: 403 });
+    // For free users, they are allowed to complete Premium courses ONLY IF they have already enrolled.
+    // We can check if they already have an existing progress for this course (from enroll route).
+    const isEnrolled = await prisma.userProgress.findFirst({
+      where: { userId: user.id, courseId: course.id }
+    });
+    if (!isEnrolled) {
+      return NextResponse.json({ error: "Premium required" }, { status: 403 });
+    }
   }
 
   // Check duplicate

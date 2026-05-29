@@ -48,7 +48,7 @@ export async function deleteUser(userId: string) {
   }
 }
 
-export async function updateUserTier(userId: string, tier: "FREE" | "PREMIUM") {
+export async function updateUserTier(userId: string, tier: "FREE" | "PREMIUM" | "PREMIUM_TRIAL") {
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -78,10 +78,13 @@ export async function updateUserTier(userId: string, tier: "FREE" | "PREMIUM") {
           },
         });
       }
-    } else if (tier === "PREMIUM") {
+    } else if (tier === "PREMIUM" || tier === "PREMIUM_TRIAL") {
       // Buat atau update subscription (misal kasih 1 bulan gratis, atau statis setahun)
       const now = new Date();
       const nextMonth = new Date(now.setMonth(now.getMonth() + 1));
+      
+      const now2 = new Date();
+      const trialEnd = new Date(now2.setDate(now2.getDate() + 7)); // 7 days trial
 
       // Harus di-delete dulu kalau unique constraint tidak ada di userId
       // Tapi karena subscription user 1-1, ini aman.
@@ -97,19 +100,19 @@ export async function updateUserTier(userId: string, tier: "FREE" | "PREMIUM") {
         await prisma.subscription.update({
           where: { id: existingSub.id },
           data: {
-            plan: "PREMIUM",
+            plan: tier,
             status: "ACTIVE",
-            endDate: nextMonth,
+            endDate: tier === "PREMIUM_TRIAL" ? trialEnd : nextMonth,
           }
         });
       } else {
         await prisma.subscription.create({
           data: {
             userId,
-            plan: "PREMIUM",
+            plan: tier,
             status: "ACTIVE",
             startDate: new Date(),
-            endDate: nextMonth,
+            endDate: tier === "PREMIUM_TRIAL" ? trialEnd : nextMonth,
           }
         });
       }

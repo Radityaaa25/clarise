@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
       .toUpperCase();
 
     if (eventType === "user.created") {
-      await prisma.user.create({
+      const newUser = await prisma.user.create({
         data: {
           clerkId: id,
           email: primaryEmail,
@@ -76,6 +76,15 @@ export async function POST(req: NextRequest) {
               startDate: new Date(),
             },
           },
+        },
+      });
+
+      await prisma.notification.create({
+        data: {
+          userId: newUser.id,
+          type: "ANNOUNCEMENT",
+          title: "Selamat datang di Clarise! 🎉",
+          body: "Sebagai pengguna baru, Anda berhak mengklaim 2 kursus GRATIS (maks. 1 Kursus Premium). Kunjungi halaman Explore untuk memilih materi Anda!",
         },
       });
     } else {
