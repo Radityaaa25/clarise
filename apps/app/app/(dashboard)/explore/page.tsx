@@ -103,6 +103,11 @@ export default function ExplorePage() {
 
   const handleCourseClick = (e: React.MouseEvent, course: any) => {
     e.preventDefault();
+    const isEnrolled = activeCourses.some((c: any) => c.slug === course.slug);
+    if (isEnrolled) {
+      router.push(`/course/${course.slug}`);
+      return;
+    }
     setSelectedCourse(course);
     setModalOpen(true);
   };
@@ -118,17 +123,20 @@ export default function ExplorePage() {
 
         if (res.ok && data.success) {
           await mutateActiveCourses(); // Update the active courses list
-          setModalOpen(false);
           router.push(`/course/${selectedCourse.slug}`);
+          // Jangan matikan isLoading agar tombol tetap bertuliskan 'Memproses...'
+          // sampai navigasi selesai.
         } else {
           console.error("Enrollment failed:", data.error);
           toast.error(data.error || "Gagal mengambil kursus");
+          setIsLoading(false);
         }
+      } else {
+        setIsLoading(false);
       }
     } catch (error) {
       console.error("Error enrolling:", error);
       toast.error("Terjadi kesalahan saat mengambil kursus");
-    } finally {
       setIsLoading(false);
     }
   };
@@ -209,47 +217,63 @@ export default function ExplorePage() {
         </div>
       ) : filteredCourses.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredCourses.map((course: any) => (
-            <button
-              key={course.slug}
-              onClick={(e) => handleCourseClick(e, course)}
-              className="group rounded-xl border border-hairline shadow-sm bg-canvas dark:bg-void-elevated p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative text-left flex flex-col w-full h-full"
-            >
-              {course.isPremium && (
-                <div className="absolute top-4 right-4">
-                  <span className="inline-flex items-center rounded-full bg-spark/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-spark">
-                    Premium
+          {filteredCourses.map((course: any) => {
+            const isEnrolled = activeCourses.some((c: any) => c.slug === course.slug);
+            return (
+              <button
+                key={course.slug}
+                onClick={(e) => handleCourseClick(e, course)}
+                className="group rounded-xl border border-hairline shadow-sm bg-canvas dark:bg-void-elevated p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative text-left flex flex-col w-full h-full"
+              >
+                {course.isPremium && !isEnrolled && (
+                  <div className="absolute top-4 right-4">
+                    <span className="inline-flex items-center rounded-full bg-spark/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-spark">
+                      Premium
+                    </span>
+                  </div>
+                )}
+                {isEnrolled && (
+                  <div className="absolute top-4 right-4">
+                    <span className="inline-flex items-center rounded-full bg-core-blue/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-core-blue">
+                      Telah Diambil
+                    </span>
+                  </div>
+                )}
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-xs font-medium text-muted bg-surface-soft dark:bg-white/5 px-2 py-0.5 rounded-full capitalize">
+                    {typeof course.category === "object"
+                      ? course.category.name
+                      : course.category}
                   </span>
+                  {difficultyBadge(course.difficulty)}
                 </div>
-              )}
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-xs font-medium text-muted bg-surface-soft dark:bg-white/5 px-2 py-0.5 rounded-full capitalize">
-                  {typeof course.category === "object"
-                    ? course.category.name
-                    : course.category}
-                </span>
-                {difficultyBadge(course.difficulty)}
-              </div>
-              <h3 className="text-lg font-bold text-ink dark:text-white mb-2 group-hover:text-core-blue dark:group-hover:text-sky transition-colors">
-                {course.title}
-              </h3>
-              <p className="text-sm text-muted leading-relaxed mb-5 line-clamp-2">
-                {course.description}
-              </p>
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-1 text-muted">
-                  <BookOpen className="h-4 w-4" />
-                  <span>{course.totalModules || 0} modul</span>
+                <h3 className="text-lg font-bold text-ink dark:text-white mb-2 group-hover:text-core-blue dark:group-hover:text-sky transition-colors">
+                  {course.title}
+                </h3>
+                <p className="text-sm text-muted leading-relaxed mb-5 line-clamp-2">
+                  {course.description}
+                </p>
+                <div className="flex items-center justify-between text-sm mt-auto">
+                  <div className="flex items-center gap-1 text-muted">
+                    <BookOpen className="h-4 w-4" />
+                    <span>{course.totalModules || 0} modul</span>
+                  </div>
+                  {isEnrolled ? (
+                    <div className="flex items-center gap-1 text-core-blue font-bold">
+                      <span>Lanjutkan</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1 text-spark">
+                      <Star className="h-4 w-4 fill-current" />
+                      <span className="font-medium">
+                        {course.rating?.toFixed(1) || "5.0"}
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <div className="flex items-center gap-1 text-spark">
-                  <Star className="h-4 w-4 fill-current" />
-                  <span className="font-medium">
-                    {course.rating?.toFixed(1) || "5.0"}
-                  </span>
-                </div>
-              </div>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
       ) : (
         <div className="rounded-xl border border-hairline shadow-sm bg-canvas dark:bg-void-elevated p-12 text-center">

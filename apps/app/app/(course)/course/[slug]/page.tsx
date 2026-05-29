@@ -377,7 +377,9 @@ export default function CoursePage({
 
                 {/* Slide Body */}
                 {(activeSlide.content.type === "text" ||
-                  activeSlide.content.type === "markdown") &&
+                  activeSlide.content.type === "markdown" ||
+                  activeSlide.content.type === "lesson" ||
+                  activeSlide.content.type === "example") &&
                   activeSlide.content.body && (
                     <div className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-heading prose-headings:font-bold prose-a:text-core-blue hover:prose-a:text-core-blue/80 prose-img:rounded-xl">
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -385,6 +387,30 @@ export default function CoursePage({
                       </ReactMarkdown>
                     </div>
                   )}
+
+                {/* Example Slide Code */}
+                {activeSlide.content.type === "example" && activeSlide.content.codeExample && (
+                  <div className="mt-6 space-y-6">
+                    <CodeBlockWithTooltips
+                      code={activeSlide.content.codeExample}
+                      language={activeSlide.content.language || "javascript"}
+                      tooltips={activeSlide.content.tooltips}
+                    />
+                  </div>
+                )}
+
+                {/* Key Takeaway */}
+                {activeSlide.content.keyTakeaway && (
+                  <div className="mt-8 bg-sky/10 border border-sky/20 rounded-xl p-6">
+                    <h4 className="font-bold text-sky mb-2 flex items-center gap-2">
+                      <Star className="w-5 h-5 fill-current" />
+                      Key Takeaway
+                    </h4>
+                    <p className="text-body dark:text-white/80">
+                      {activeSlide.content.keyTakeaway}
+                    </p>
+                  </div>
+                )}
 
                 {activeSlide.content.type === "code" &&
                   activeSlide.content.body && (

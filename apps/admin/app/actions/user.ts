@@ -47,3 +47,92 @@ export async function deleteUser(userId: string) {
     };
   }
 }
+
+export async function updateUserTier(userId: string, tier: "FREE" | "PREMIUM") {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { clerkId: true },
+    });
+
+    if (!user) {
+      return { success: false, error: "User tidak ditemukan" };
+    }
+
+    if (tier === "FREE") {
+      // Hapus subscription jika ada
+      await prisma.subscription.deleteMany({
+        where: { userId },
+      });
+      
+      // Update role
+      await prisma.user.update({
+        where: { id: userId },
+        data: { role: "USER" },
+      });
+
+      if (user.clerkId) {
+        await clerkClient.users.updateUserMetadata(user.clerkId, {
+          publicMetadata: {
+            role: "user",
+          },
+        });
+      }
+    } else if (tier === "PREMIUM") {
+      // Buat atau update subscription (misal kasih 1 bulan gratis, atau statis setahun)
+      const now = new Date();
+      const nextMonth = new Date(now.setMonth(now.getMonth() + 1));
+
+      // Harus di-delete dulu kalau unique constraint tidak ada di userId
+      // Tapi karena subscription user 1-1, ini aman.
+      // Wait, relation di schema: `subscription Subscription?` -> 1 to 1.
+      // Upsert membutuhkan unique field `userId`.
+
+      // Workaround: prisma.subscription.findUnique lalu update/create
+      const existingSub = await prisma.subscription.findFirst({
+        where: { userId }
+      });
+
+      if (existingSub) {
+        await prisma.subscription.update({
+          where: { id: existingSub.id },
+          data: {
+            plan: "PREMIUM",
+            status: "ACTIVE",
+            endDate: nextMonth,
+          }
+        });
+      } else {
+        await prisma.subscription.create({
+          data: {
+            userId,
+            plan: "PREMIUM",
+            status: "ACTIVE",
+            startDate: new Date(),
+            endDate: nextMonth,
+          }
+        });
+      }
+
+      // Update role removed since PREMIUM is not a role in Prisma, only USER and ADMIN are roles.
+      // We don't touch role here because they remain USER, just their subscription becomes PREMIUM.
+      
+      if (user.clerkId) {
+        await clerkClient.users.updateUserMetadata(user.clerkId, {
+          publicMetadata: {
+            role: "premium",
+          },
+        });
+      }
+    }
+
+    revalidatePath("/users");
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error updateUserTier:", error);
+    return {
+      success: false,
+      error: error.message || "Gagal mengubah tier pengguna",
+    };
+  }
+}

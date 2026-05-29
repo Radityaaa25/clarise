@@ -146,6 +146,22 @@ const dmSans = DM_Sans({
   - Gemini generate: judul, deskripsi, modul-modul, konten per modul
   - Prioritaskan sumber & video berbahasa Indonesia jika prompt dalam bahasa Indonesia
   - Simpan sebagai Course baru dengan `isAiGenerated: true` dan `creatorId`
+  
+  - [ ] Implementasi quality gate di POST `/api/ai/generate-course`:
+        STEP 1: Generate konten dengan Groq
+        STEP 2: Parse dan validasi JSON output
+        STEP 3: Cek minimum requirements (slide >= 10, ada challenge, ada quiz, dsb)
+        STEP 4: Jika lolos → simpan ke DB dengan status PENDING_REVIEW
+        STEP 5: Jika gagal → regenerate otomatis (max 2x retry)
+        STEP 6: Jika 2x retry masih gagal → return error ke user
+  
+  - [ ] Implementasi quality scoring:
+        Score < 60 → reject
+        Score 60-79 → simpan tapi flagged
+        Score 80+ → langsung published
+  
+  - [ ] Implementasi content enhancer di `lib/course-enhancer.ts`:
+        Fungsi `enhanceSlideContent(slide)` berjalan setelah generate utama.
 
 ### 3.3 🛡️ Batasan & Etika AI
 

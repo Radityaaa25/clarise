@@ -300,6 +300,40 @@ Required env vars for **apps/app**:
 
 - [x] POST /api/admin/ai/copilot - Endpoint khusus Admin AI - Integrasi Gemini dengan Function Calling (getPlatformStats, generateAndSaveCourse, createVoucher)
 
+#### AI Course Generator (Premium Feature)
+
+**Solusi 1 — Master Template**
+Saat user premium generate course via `/api/ai/generate-course`, system prompt yang dikirim ke Groq HARUS menggunakan template dari `apps/app/lib/course-template.ts` — BUKAN prompt improvised.
+Template ini identik dengan standar kursus default Clarise:
+- Minimal 10 slide per modul
+- Wajib ada CHALLENGE dan QUIZ
+- Format JSON yang ketat
+- Kriteria kualitas yang sama
+
+**Solusi 3 — Prompt Injection ke User Input**
+Di `/api/ai/generate-course`, user input di-augmentasi sebelum dikirim ke Groq:
+```javascript
+// User ketik: "belajar python"
+// Yang dikirim ke AI:
+{
+  topic: "belajar python",
+  requirements: QUALITY_TEMPLATE, // template dari course-template.ts
+  targetAudience: user.learningGoal,
+  userLevel: user.currentLevel,
+  language: "id",
+  enforceStructure: true
+}
+```
+Jangan pernah kirim user input langsung sebagai prompt. Selalu wrap dengan quality template.
+
+**Solusi 5 — User Guidance di UI (Frontend)**
+Form generate course harus punya:
+- Input topik dengan placeholder: "Contoh: 'Belajar React untuk membuat aplikasi todo list' (semakin spesifik topiknya, semakin bagus hasilnya)"
+- Dropdown: target audience (Pemula/Menengah/Lanjutan)
+- Dropdown: durasi estimasi (1 jam / 3 jam / 5 jam+)
+- Tombol "Tips topik yang bagus" → expand dengan panduan
+Topik yang spesifik = AI punya konteks lebih banyak = hasil lebih berkualitas
+
 #### Voucher & Early Access
 
 - [x] POST /api/voucher/redeem

@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
-import { MoreHorizontal, ShieldAlert, ShieldCheck, Trash2 } from "lucide-react";
-import { deleteUser } from "@/app/actions/user";
+import { MoreHorizontal, ShieldAlert, ShieldCheck, Trash2, ArrowUpCircle } from "lucide-react";
+import { deleteUser, updateUserTier } from "@/app/actions/user";
 import { useRouter } from "next/navigation";
 
 export function UsersClient({ initialUsers }: { initialUsers: any[] }) {
@@ -25,6 +25,25 @@ export function UsersClient({ initialUsers }: { initialUsers: any[] }) {
       alert(res.error);
     } else {
       router.refresh(); // Segarkan data server komponen
+    }
+  };
+
+  const handleUpdateTier = async (id: string, name: string, currentPlan: string) => {
+    const targetPlan = currentPlan === "PREMIUM" ? "FREE" : "PREMIUM";
+    if (
+      !confirm(
+        `Apakah Anda yakin ingin mengubah tier pengguna ${name || "ini"} menjadi ${targetPlan}?`
+      )
+    ) {
+      return;
+    }
+    setLoadingId(id + "-tier");
+    const res = await updateUserTier(id, targetPlan as "FREE" | "PREMIUM");
+    setLoadingId(null);
+    if (!res.success) {
+      alert(res.error);
+    } else {
+      router.refresh();
     }
   };
 
@@ -141,7 +160,19 @@ export function UsersClient({ initialUsers }: { initialUsers: any[] }) {
                   <td className="px-6 py-4 text-sm text-muted-foreground font-bold border-r-2 border-border">
                     {user.joined}
                   </td>
-                  <td className="px-6 py-4 text-right">
+                  <td className="px-6 py-4 text-right flex justify-end gap-2">
+                    <button
+                      onClick={() => handleUpdateTier(user.id, user.name, user.plan)}
+                      disabled={loadingId === user.id + "-tier"}
+                      className="neo-btn bg-accent text-accent-foreground p-2 disabled:opacity-50"
+                      title={user.plan === "PREMIUM" ? "Ubah ke Free" : "Ubah ke Premium"}
+                    >
+                      {loadingId === user.id + "-tier" ? (
+                        <MoreHorizontal className="w-5 h-5 animate-pulse" />
+                      ) : (
+                        <ArrowUpCircle className="w-5 h-5" />
+                      )}
+                    </button>
                     <button
                       onClick={() => handleDelete(user.id, user.name)}
                       disabled={loadingId === user.id}

@@ -1,0 +1,1 @@
+SELECT cat.name AS kategori, co.title, co."isPremium", COUNT(m.id) AS modul FROM "Course" co JOIN "Category" cat ON co."categoryId" = cat.id LEFT JOIN "Module" m ON m."courseId" = co.id GROUP BY cat.name, co.title, co."isPremium" ORDER BY cat.name;

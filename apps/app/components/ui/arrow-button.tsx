@@ -18,9 +18,9 @@ export function ArrowButton({
   return (
     <Tag
       href={href}
-      onClick={onClick}
+      onClick={disabled ? undefined : onClick}
       disabled={disabled}
-      className={`ab ${className} ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+      className={`ab ${className} ${disabled ? "opacity-50 cursor-not-allowed pointer-events-none" : ""}`}
     >
       {/* Arrow ada PERTAMA dan di-absolute ke tengah button */}
       <span className="ab-arrow" aria-hidden="true">
