@@ -23,17 +23,17 @@ export default function MyCoursesPage() {
     <div className="space-y-8 max-w-6xl">
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-black font-heading text-ink dark:text-white mb-2">
+        <h1 className="text-2xl md:text-3xl font-black font-heading text-ink dark:text-white mb-2">
           Kursus Saya
         </h1>
-        <p className="text-muted">
+        <p className="text-muted text-sm md:text-base">
           Kelola dan pantau progres kursus yang sedang kamu pelajari.
         </p>
       </div>
 
       {/* Active Course */}
       <section>
-        <h2 className="text-xl font-bold font-heading text-ink dark:text-white mb-5">
+        <h2 className="text-lg md:text-xl font-bold font-heading text-ink dark:text-white mb-5">
           Kursus Aktif
         </h2>
 

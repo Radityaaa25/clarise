@@ -42,10 +42,10 @@ export default function AchievementPage() {
     <div className="space-y-8 max-w-6xl">
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-black font-heading text-ink dark:text-white mb-2">
+        <h1 className="text-2xl md:text-3xl font-black font-heading text-ink dark:text-white mb-2">
           Pencapaian
         </h1>
-        <p className="text-muted dark:text-frost/80">
+        <p className="text-muted dark:text-frost/80 text-sm md:text-base">
           Pantau progresmu, kumpulkan lencana, dan jaga streak belajarmu!
         </p>
       </div>

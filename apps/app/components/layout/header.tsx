@@ -24,21 +24,22 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-hairline bg-canvas/80 dark:bg-void/80 px-6 backdrop-blur-md">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-hairline bg-canvas/80 dark:bg-void/80 px-4 md:px-6 backdrop-blur-md gap-3">
       {/* Search Bar */}
-      <div className="flex items-center flex-1 max-w-md">
+      <div className="flex items-center flex-1 min-w-0 max-w-md">
         <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
           <input
             type="text"
-            placeholder="Cari kursus, materi, atau topik..."
+            placeholder="Cari kursus..."
+            aria-label="Cari kursus"
             className="w-full h-10 rounded-lg border border-hairline bg-surface-soft dark:bg-void-elevated pl-10 pr-4 text-sm text-ink dark:text-white placeholder:text-muted-soft focus:border-core-blue focus:ring-2 focus:ring-core-blue/20 outline-none transition-all"
           />
         </div>
       </div>
 
       {/* Right Actions */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 shrink-0">
         {/* Notifications */}
         <div className="relative">
           <button
@@ -127,7 +128,7 @@ export function Header() {
         <ThemeToggle />
 
         {/* Divider */}
-        <div className="h-6 w-px bg-hairline" />
+        <div className="hidden sm:block h-6 w-px bg-hairline" />
 
         {/* Premium Badge */}
         {isPremium && (

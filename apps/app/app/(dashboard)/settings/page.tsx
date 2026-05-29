@@ -367,7 +367,10 @@ export default function SettingsPage() {
                   Punya kode promo atau akses trial? Masukkan kodenya di bawah
                   ini.
                 </p>
-                <form onSubmit={handleRedeemVoucher} className="flex gap-3">
+                <form
+                  onSubmit={handleRedeemVoucher}
+                  className="flex flex-col sm:flex-row gap-3"
+                >
                   <input
                     type="text"
                     value={voucherCode}
@@ -375,13 +378,13 @@ export default function SettingsPage() {
                       setVoucherCode(e.target.value.toUpperCase())
                     }
                     placeholder="Contoh: PROMOAI"
-                    className="flex-1 h-11 rounded-xl border border-hairline bg-canvas dark:bg-void-elevated dark:border-white/10 px-4 text-sm font-bold text-ink dark:text-white focus:border-core-blue focus:ring-1 focus:ring-core-blue outline-none transition-all uppercase"
+                    className="flex-1 min-w-0 h-11 rounded-xl border border-hairline bg-canvas dark:bg-void-elevated dark:border-white/10 px-4 text-sm font-bold text-ink dark:text-white focus:border-core-blue focus:ring-1 focus:ring-core-blue outline-none transition-all uppercase"
                     disabled={isRedeeming}
                   />
                   <button
                     type="submit"
                     disabled={isRedeeming || !voucherCode.trim()}
-                    className="h-11 px-6 rounded-xl bg-ink dark:bg-white text-white dark:text-ink font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
+                    className="h-11 px-6 rounded-xl bg-ink dark:bg-white text-white dark:text-ink font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2 shrink-0"
                   >
                     {isRedeeming && (
                       <Loader2 className="w-4 h-4 animate-spin" />

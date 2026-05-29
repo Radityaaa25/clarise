@@ -74,7 +74,7 @@ export function Sidebar({
           onClick={() => setCollapsed(!collapsed)}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           aria-expanded={!collapsed}
-          className={`hidden lg:flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
+          className={`hidden md:flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
             collapsed
               ? "bg-sky text-white hover:bg-sky/90 shadow-sm"
               : "hover:bg-surface-soft dark:hover:bg-void-elevated text-muted hover:text-ink dark:hover:text-white"

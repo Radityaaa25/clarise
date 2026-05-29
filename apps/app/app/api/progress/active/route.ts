@@ -3,7 +3,6 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
-  console.log("HIT /api/courses/active !");
   const { userId: clerkId } = await auth();
   if (!clerkId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

@@ -32,7 +32,7 @@ export function AIChatFAB() {
         onClick={() => setIsOpen(true)}
         aria-label="Buka Clarise AI"
         aria-expanded={isOpen}
-        className="fixed bottom-24 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-sky text-white shadow-lg shadow-sky/30 transition-transform hover:scale-110 active:scale-95"
+        className="fixed bottom-24 md:bottom-6 right-4 sm:right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-sky text-white shadow-lg shadow-sky/30 transition-transform hover:scale-110 active:scale-95"
       >
         <Sparkles className="h-6 w-6" />
       </button>
@@ -47,8 +47,8 @@ export function AIChatFAB() {
       className={cn(
         "fixed z-50 flex flex-col overflow-hidden border border-hairline bg-canvas dark:bg-void-elevated shadow-2xl transition-all duration-300",
         isExpanded
-          ? "bottom-0 right-0 w-full h-[100dvh] md:w-[calc(100vw-320px)] md:rounded-tl-2xl rounded-none"
-          : "bottom-24 right-6 w-[350px] h-[500px] rounded-2xl",
+          ? "bottom-0 right-0 w-full h-[100dvh] md:w-[calc(100vw-260px)] md:rounded-tl-2xl rounded-none"
+          : "bottom-24 md:bottom-6 right-4 sm:right-6 w-[calc(100vw-2rem)] max-w-[360px] h-[min(500px,calc(100dvh-7rem))] rounded-2xl",
       )}
     >
       {/* Header */}

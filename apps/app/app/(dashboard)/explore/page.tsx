@@ -18,7 +18,7 @@ import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { useUser } from "@/hooks/use-user";
 import { toast } from "sonner";
-import useSWR from "swr";
+import useSWR, { preload } from "swr";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -122,7 +122,16 @@ export default function ExplorePage() {
         const data = await res.json();
 
         if (res.ok && data.success) {
-          await mutateActiveCourses(); // Update the active courses list
+          // Preload course detail ke SWR cache sebelum navigasi.
+          // Saat course page mount, useSWR langsung dapat cache hit
+          // (atau subscribe ke fetch yang sedang in-flight) — hemat
+          // satu round-trip dari perspektif user.
+          preload(`/api/courses/${selectedCourse.slug}`, fetcher);
+
+          // Fire-and-forget — refresh active courses tidak perlu di-await
+          // sebelum navigasi. SWR akan revalidate di background.
+          mutateActiveCourses();
+
           router.push(`/course/${selectedCourse.slug}`);
           // Jangan matikan isLoading agar tombol tetap bertuliskan 'Memproses...'
           // sampai navigasi selesai.
@@ -147,11 +156,11 @@ export default function ExplorePage() {
     <div className="space-y-8 max-w-6xl">
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-black font-heading text-ink dark:text-white mb-2">
+        <div className="min-w-0">
+          <h1 className="text-2xl md:text-3xl font-black font-heading text-ink dark:text-white mb-2">
             Jelajahi Kursus
           </h1>
-          <p className="text-muted">
+          <p className="text-muted text-sm md:text-base">
             Temukan materi yang sesuai dengan tujuan belajarmu.
           </p>
         </div>
@@ -160,10 +169,11 @@ export default function ExplorePage() {
         {!isFreeUser && (
           <Link
             href="/generate"
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-spark to-core-blue hover:from-spark/90 hover:to-core-blue/90 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-spark/20 transition-all hover:-translate-y-0.5"
+            className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-spark to-core-blue hover:from-spark/90 hover:to-core-blue/90 text-white px-5 h-11 rounded-xl font-bold shadow-lg shadow-spark/20 transition-all hover:-translate-y-0.5 shrink-0 w-full md:w-auto"
           >
             <Sparkles className="w-5 h-5" />
-            Buat Kursus dengan AI
+            <span className="hidden sm:inline">Buat Kursus dengan AI</span>
+            <span className="sm:hidden">Buat dengan AI</span>
           </Link>
         )}
       </div>

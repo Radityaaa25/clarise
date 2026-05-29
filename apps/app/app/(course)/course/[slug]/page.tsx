@@ -20,6 +20,16 @@ import useSWR from "swr";
 import { useUserProgress } from "@/hooks/use-user-progress";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -215,6 +225,7 @@ export default function CoursePage({
   const [quizAnswers, setQuizAnswers] = useState<number[]>([]);
   const [showQuizResult, setShowQuizResult] = useState(false);
   const [quizScore, setQuizScore] = useState(0);
+  const [showExitQuizConfirm, setShowExitQuizConfirm] = useState(false);
 
   // Challenge state
   const [challengeAnswer, setChallengeAnswer] = useState("");
@@ -265,6 +276,37 @@ export default function CoursePage({
   });
   const activeSlide = slides[activeSlideIdx];
   const totalSlides = slides.length;
+
+  // Helper: load (or reload) quiz untuk modul aktif.
+  // Dipakai dari beberapa entry-point (tombol "Mulai Kuis" di slide,
+  // tombol "Buka Kuis" di navigasi bawah, dan "Coba Lagi" setelah hasil)
+  // supaya tidak ada path yang membuka modal tanpa fetch soal.
+  const loadQuiz = async () => {
+    if (!activeModule?.id) return;
+    setIsGeneratingQuiz(true);
+    setQuizData([]);
+    setQuizAnswers([]);
+    setShowQuizResult(false);
+    try {
+      const res = await fetch("/api/ai/generate-quiz", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ moduleId: activeModule.id }),
+      });
+      const data = await res.json();
+      if (res.ok && Array.isArray(data.questions) && data.questions.length) {
+        setQuizData(data.questions);
+      } else {
+        toast.error(data?.error || "Gagal memuat kuis. Coba lagi.");
+        setShowQuizModal(false);
+      }
+    } catch {
+      toast.error("Gagal memuat kuis. Coba lagi.");
+      setShowQuizModal(false);
+    } finally {
+      setIsGeneratingQuiz(false);
+    }
+  };
 
   if (isCourseLoading) {
     return (
@@ -380,7 +422,7 @@ export default function CoursePage({
             className={`flex-1 transition-all duration-300 ${showChat ? "lg:mr-[360px]" : ""}`}
           >
             {activeSlide ? (
-              <div className="max-w-3xl mx-auto px-6 py-10 space-y-8">
+              <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-8">
                 {/* Slide Title */}
                 <h1 className="text-3xl font-black font-heading text-ink dark:text-white">
                   {activeSlide.title}
@@ -457,27 +499,9 @@ export default function CoursePage({
                         khusus untukmu.
                       </p>
                       <button
-                        onClick={async () => {
+                        onClick={() => {
                           setShowQuizModal(true);
-                          setIsGeneratingQuiz(true);
-                          setQuizData([]);
-                          setQuizAnswers([]);
-                          setShowQuizResult(false);
-                          try {
-                            const res = await fetch("/api/ai/generate-quiz", {
-                              method: "POST",
-                              headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({
-                                moduleId: activeModule.id,
-                              }),
-                            });
-                            const data = await res.json();
-                            if (data.questions) setQuizData(data.questions);
-                          } catch (e) {
-                            toast.error("Gagal memuat kuis.");
-                          } finally {
-                            setIsGeneratingQuiz(false);
-                          }
+                          loadQuiz();
                         }}
                         className="inline-flex items-center gap-2 rounded-full bg-sky px-8 py-3 text-sm font-bold text-white hover:bg-sky/90 transition-colors shadow-sm"
                       >
@@ -932,7 +956,7 @@ export default function CoursePage({
         </div>
 
         {/* Bottom Navigation */}
-        <div className="sticky bottom-0 flex items-center justify-between h-16 px-6 border-t border-hairline bg-canvas/80 dark:bg-void/80 backdrop-blur-md">
+        <div className="sticky bottom-0 flex items-center justify-between gap-2 h-16 px-3 sm:px-4 md:px-6 border-t border-hairline bg-canvas/80 dark:bg-void/80 backdrop-blur-md">
           <button
             onClick={() => {
               setActiveSlideIdx(Math.max(0, activeSlideIdx - 1));
@@ -942,14 +966,15 @@ export default function CoursePage({
               setShowChallengeAnswer(false);
             }}
             disabled={activeSlideIdx === 0}
-            className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-body dark:text-white/70 hover:bg-surface-soft dark:hover:bg-void-elevated disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            aria-label="Slide sebelumnya"
+            className="flex items-center gap-2 rounded-full px-3 sm:px-4 h-10 text-sm font-medium text-body dark:text-white/70 hover:bg-surface-soft dark:hover:bg-void-elevated disabled:opacity-30 disabled:cursor-not-allowed transition-colors shrink-0"
           >
             <ChevronLeft className="h-4 w-4" />
-            Sebelumnya
+            <span className="hidden sm:inline">Sebelumnya</span>
           </button>
 
           {/* Slide dots */}
-          <div className="flex gap-1.5">
+          <div className="flex gap-1.5 overflow-x-auto scrollbar-hide max-w-[40%] sm:max-w-none">
             {slides.map((_: any, idx: number) => (
               <button
                 key={idx}
@@ -960,7 +985,8 @@ export default function CoursePage({
                   setChallengeAttempts(0);
                   setShowChallengeAnswer(false);
                 }}
-                className={`h-2 rounded-full transition-all duration-300 ${
+                aria-label={`Pergi ke slide ${idx + 1}`}
+                className={`h-2 shrink-0 rounded-full transition-all duration-300 ${
                   idx === activeSlideIdx
                     ? "w-6 bg-core-blue"
                     : "w-2 bg-muted-soft/50 hover:bg-muted"
@@ -977,15 +1003,19 @@ export default function CoursePage({
                 setChallengeAttempts(0);
                 setShowChallengeAnswer(false);
               }}
-              className="flex items-center gap-2 rounded-full bg-core-blue px-4 py-2 text-sm font-bold text-white hover:bg-core-blue/90 transition-colors shadow-sm"
+              className="flex items-center gap-2 rounded-full bg-core-blue px-4 sm:px-5 h-10 text-sm font-bold text-white hover:bg-core-blue/90 transition-colors shadow-sm shrink-0"
             >
-              Selanjutnya
+              <span className="hidden sm:inline">Selanjutnya</span>
+              <span className="sm:hidden">Lanjut</span>
               <ChevronRight className="h-4 w-4" />
             </button>
           ) : activeSlide?.content?.type === "quiz" ? (
             <button
-              onClick={() => setShowQuizModal(true)}
-              className="flex items-center gap-2 rounded-full bg-sky px-6 py-2 text-sm font-bold text-white hover:bg-sky/90 transition-colors shadow-sm"
+              onClick={() => {
+                setShowQuizModal(true);
+                loadQuiz();
+              }}
+              className="flex items-center gap-2 rounded-full bg-sky px-4 sm:px-6 h-10 text-sm font-bold text-white hover:bg-sky/90 transition-colors shadow-sm shrink-0"
             >
               Buka Kuis
             </button>
@@ -993,22 +1023,23 @@ export default function CoursePage({
             !challengeFeedback?.isCorrect ? (
             <button
               disabled
-              className="flex items-center gap-2 rounded-full bg-muted-soft px-6 py-2.5 text-sm font-bold text-muted cursor-not-allowed"
+              className="flex items-center gap-2 rounded-full bg-muted-soft px-4 sm:px-6 h-10 text-sm font-bold text-muted cursor-not-allowed shrink-0"
             >
               <CheckCircle2 className="h-4 w-4" />
-              Selesaikan Tantangan
+              <span className="hidden sm:inline">Selesaikan Tantangan</span>
+              <span className="sm:hidden">Selesaikan</span>
             </button>
           ) : progress?.completedModules?.includes(activeModule?.id) ? (
             <button
               disabled
-              className="flex items-center gap-2 rounded-full bg-muted-soft px-6 py-2.5 text-sm font-bold text-muted cursor-not-allowed"
+              className="flex items-center gap-2 rounded-full bg-muted-soft px-4 sm:px-6 h-10 text-sm font-bold text-muted cursor-not-allowed shrink-0"
             >
               <CheckCircle2 className="h-4 w-4" />
               Selesai
             </button>
           ) : (
             <button
-              className={`flex items-center gap-2 rounded-full px-6 py-2 text-sm font-bold text-white transition-colors shadow-sm ${
+              className={`flex items-center gap-2 rounded-full px-4 sm:px-6 h-10 text-sm font-bold text-white transition-colors shadow-sm shrink-0 ${
                 activeSlide?.content?.type === "quiz" &&
                 isQuizSubmitted &&
                 selectedAnswer !==
@@ -1381,20 +1412,7 @@ export default function CoursePage({
             </div>
             {!showQuizResult && (
               <button
-                onClick={() => {
-                  toast("Yakin ingin keluar?", {
-                    description:
-                      "Progres kuis akan hilang dan soal akan diacak ulang saat kamu kembali.",
-                    action: {
-                      label: "Keluar",
-                      onClick: () => setShowQuizModal(false),
-                    },
-                    cancel: {
-                      label: "Batal",
-                      onClick: () => {},
-                    },
-                  });
-                }}
+                onClick={() => setShowExitQuizConfirm(true)}
                 className="text-sm text-red-500 hover:text-red-600 font-medium"
               >
                 Keluar Ujian
@@ -1433,27 +1451,7 @@ export default function CoursePage({
                   <div className="flex flex-col md:flex-row justify-center gap-4">
                     {quizScore < 100 && (
                       <button
-                        onClick={async () => {
-                          setIsGeneratingQuiz(true);
-                          setQuizData([]);
-                          setQuizAnswers([]);
-                          setShowQuizResult(false);
-                          try {
-                            const res = await fetch("/api/ai/generate-quiz", {
-                              method: "POST",
-                              headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({
-                                moduleId: activeModule.id,
-                              }),
-                            });
-                            const data = await res.json();
-                            if (data.questions) setQuizData(data.questions);
-                          } catch (e) {
-                            toast.error("Gagal memuat kuis.");
-                          } finally {
-                            setIsGeneratingQuiz(false);
-                          }
-                        }}
+                        onClick={() => loadQuiz()}
                         className="btn-outline"
                       >
                         Coba Lagi (Soal Baru)
@@ -1553,6 +1551,39 @@ export default function CoursePage({
               )}
             </div>
           </div>
+
+          {/* Confirmation untuk keluar ujian — pakai AlertDialog supaya
+              modal blocking & sejajar di atas overlay quiz fullscreen
+              (toast Sonner default-nya ke-block sama z-[200] modal). */}
+          <AlertDialog
+            open={showExitQuizConfirm}
+            onOpenChange={setShowExitQuizConfirm}
+          >
+            <AlertDialogContent size="sm" className="z-[300]">
+              <AlertDialogHeader>
+                <AlertDialogTitle>Yakin ingin keluar ujian?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Progres jawabanmu akan hilang dan soal akan diacak ulang
+                  saat kamu kembali masuk ke ujian ini.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Batal</AlertDialogCancel>
+                <AlertDialogAction
+                  variant="destructive"
+                  onClick={() => {
+                    setShowExitQuizConfirm(false);
+                    setShowQuizModal(false);
+                    setQuizData([]);
+                    setQuizAnswers([]);
+                    setShowQuizResult(false);
+                  }}
+                >
+                  Keluar Ujian
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       )}
 

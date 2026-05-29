@@ -97,7 +97,7 @@ h1, h2, h3, h4, h5, h6 {
   text-decoration: none;
   overflow: hidden;
   min-width: 150px;
-  height: 42px;
+  height: 44px;
   transition: background 0.35s ease, box-shadow 0.35s ease;
   white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
@@ -221,6 +221,9 @@ h1, h2, h3, h4, h5, h6 {
   transition: all 0.25s ease;
   transform: translateY(0);
   box-shadow: 0 3px 0 rgba(26,127,204,0.2);
+  min-height: 44px;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
 }
 .btn-outline:hover, .btn-outline-capsule:hover {
   background: #1A7FCC;
