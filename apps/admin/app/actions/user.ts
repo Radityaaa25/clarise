@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { createClerkClient } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { checkAdmin } from "@/lib/auth-guard";
 
 const clerkClient = createClerkClient({
   secretKey: process.env.CLERK_SECRET_KEY,
@@ -10,6 +11,14 @@ const clerkClient = createClerkClient({
 });
 
 export async function deleteUser(userId: string) {
+  const guard = await checkAdmin();
+  if (!guard.ok) {
+    return {
+      success: false,
+      error: guard.error === "UNAUTHORIZED" ? "Tidak terautentikasi" : "Akses ditolak",
+    };
+  }
+
   try {
     // Cari user di database kita untuk mendapatkan clerkId
     const user = await prisma.user.findUnique({
@@ -49,6 +58,14 @@ export async function deleteUser(userId: string) {
 }
 
 export async function updateUserTier(userId: string, tier: "FREE" | "PREMIUM" | "PREMIUM_TRIAL") {
+  const guard = await checkAdmin();
+  if (!guard.ok) {
+    return {
+      success: false,
+      error: guard.error === "UNAUTHORIZED" ? "Tidak terautentikasi" : "Akses ditolak",
+    };
+  }
+
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },

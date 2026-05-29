@@ -3,11 +3,20 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { ReportStatus } from "@prisma/client";
+import { checkAdmin } from "@/lib/auth-guard";
 
 export async function updateReportStatus(
   reportId: string,
   status: ReportStatus,
 ) {
+  const guard = await checkAdmin();
+  if (!guard.ok) {
+    return {
+      success: false,
+      error: guard.error === "UNAUTHORIZED" ? "Tidak terautentikasi" : "Akses ditolak",
+    };
+  }
+
   try {
     const report = await prisma.report.findUnique({
       where: { id: reportId },

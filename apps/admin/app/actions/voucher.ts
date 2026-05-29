@@ -2,8 +2,17 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { checkAdmin } from "@/lib/auth-guard";
 
 export async function deleteVoucher(voucherId: string) {
+  const guard = await checkAdmin();
+  if (!guard.ok) {
+    return {
+      success: false,
+      error: guard.error === "UNAUTHORIZED" ? "Tidak terautentikasi" : "Akses ditolak",
+    };
+  }
+
   try {
     await prisma.voucher.delete({
       where: { id: voucherId },
@@ -23,6 +32,14 @@ export async function deleteVoucher(voucherId: string) {
 }
 
 export async function deactivateVoucher(voucherId: string) {
+  const guard = await checkAdmin();
+  if (!guard.ok) {
+    return {
+      success: false,
+      error: guard.error === "UNAUTHORIZED" ? "Tidak terautentikasi" : "Akses ditolak",
+    };
+  }
+
   try {
     // Set expiresAt to current time to deactivate it immediately
     await prisma.voucher.update({

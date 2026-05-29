@@ -2,12 +2,21 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { checkAdmin } from "@/lib/auth-guard";
 
 export async function createAnnouncement(data: {
   title: string;
   target: string;
   body: string;
 }) {
+  const guard = await checkAdmin();
+  if (!guard.ok) {
+    return {
+      success: false,
+      error: guard.error === "UNAUTHORIZED" ? "Tidak terautentikasi" : "Akses ditolak",
+    };
+  }
+
   try {
     await prisma.announcement.create({
       data: {
@@ -31,6 +40,14 @@ export async function createAnnouncement(data: {
 }
 
 export async function deleteAnnouncement(id: string) {
+  const guard = await checkAdmin();
+  if (!guard.ok) {
+    return {
+      success: false,
+      error: guard.error === "UNAUTHORIZED" ? "Tidak terautentikasi" : "Akses ditolak",
+    };
+  }
+
   try {
     await prisma.announcement.delete({
       where: { id },
