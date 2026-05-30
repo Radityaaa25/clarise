@@ -40,16 +40,26 @@ export async function POST(req: Request) {
 
     const module = await prisma.module.findUnique({
       where: { id: moduleId },
-      include: { course: true },
+      include: {
+        course: {
+          include: {
+            category: { select: { slug: true } },
+          },
+        },
+      },
     });
 
     if (!module)
       return NextResponse.json({ error: "Module not found" }, { status: 404 });
 
     if (!module.course.isPremium) {
-      // Free course: use static quizzes
+      // Free course: ambil dari static-quizzes.ts (TIDAK panggil AI/Groq).
+      // Lookup berlapis: courseSlug → categorySlug → default.
       const staticQuestions = getRandomStaticQuizzes(
-        module.course.categoryId,
+        {
+          courseSlug: module.course.slug,
+          categorySlug: module.course.category?.slug,
+        },
         5,
       );
       return NextResponse.json({ questions: staticQuestions });

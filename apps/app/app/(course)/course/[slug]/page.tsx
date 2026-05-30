@@ -333,7 +333,7 @@ export default function CoursePage({
   }
 
   return (
-    <div className="min-h-screen bg-canvas dark:bg-void text-body dark:text-white/70 flex">
+    <div className="min-h-screen bg-canvas dark:bg-void text-body dark:text-white/70 flex overflow-x-hidden">
       {/* Sidebar — Module List */}
       <aside className="hidden lg:flex w-[300px] shrink-0 border-r border-hairline bg-canvas dark:bg-void flex-col h-screen sticky top-0">
         {/* Course header */}
@@ -395,31 +395,31 @@ export default function CoursePage({
       </aside>
 
       {/* Main Content — Slide Viewer */}
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col min-h-screen min-w-0">
         {/* Top bar */}
-        <div className="sticky top-0 z-20 flex items-center justify-between h-14 px-4 md:px-6 border-b border-hairline bg-canvas/80 dark:bg-void/80 backdrop-blur-md">
-          <div className="flex items-center gap-2 md:gap-3">
+        <div className="sticky top-0 z-20 flex items-center justify-between gap-3 h-14 px-4 md:px-6 border-b border-hairline bg-canvas/80 dark:bg-void/80 backdrop-blur-md">
+          <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
             <Link
               href="/explore"
-              className="lg:hidden flex items-center justify-center h-8 w-8 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+              className="lg:hidden flex items-center justify-center h-8 w-8 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors shrink-0"
             >
               <ChevronLeft className="h-5 w-5 text-muted hover:text-ink dark:hover:text-white transition-colors" />
             </Link>
-            <div className="text-sm font-medium text-ink dark:text-white truncate">
+            <div className="text-sm font-medium text-ink dark:text-white truncate min-w-0">
               {activeModule?.title}
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-muted">
+          <div className="flex items-center gap-3 shrink-0">
+            <span className="text-xs text-muted whitespace-nowrap">
               Slide {activeSlideIdx + 1} / {totalSlides || 1}
             </span>
           </div>
         </div>
 
         {/* Slide Content */}
-        <div className="flex-1 flex">
+        <div className="flex-1 flex min-w-0">
           <div
-            className={`flex-1 transition-all duration-300 ${showChat ? "lg:mr-[360px]" : ""}`}
+            className={`flex-1 min-w-0 transition-all duration-300 ${showChat ? "lg:mr-[360px]" : ""}`}
           >
             {activeSlide ? (
               <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-8">
@@ -434,7 +434,7 @@ export default function CoursePage({
                   activeSlide.content.type === "lesson" ||
                   activeSlide.content.type === "example") &&
                   activeSlide.content.body && (
-                    <div className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-heading prose-headings:font-bold prose-a:text-core-blue hover:prose-a:text-core-blue/80 prose-img:rounded-xl">
+                    <div className="prose prose-lg dark:prose-invert max-w-none break-words prose-headings:font-heading prose-headings:font-bold prose-a:text-core-blue hover:prose-a:text-core-blue/80 prose-img:rounded-xl prose-pre:overflow-x-auto prose-pre:max-w-full">
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>
                         {activeSlide.content.body}
                       </ReactMarkdown>
@@ -469,7 +469,7 @@ export default function CoursePage({
                   activeSlide.content.body && (
                     <div className="space-y-6">
                       {activeSlide.content.explanation && (
-                        <div className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-heading prose-headings:font-bold prose-a:text-core-blue hover:prose-a:text-core-blue/80 prose-img:rounded-xl">
+                        <div className="prose prose-lg dark:prose-invert max-w-none break-words prose-headings:font-heading prose-headings:font-bold prose-a:text-core-blue hover:prose-a:text-core-blue/80 prose-img:rounded-xl prose-pre:overflow-x-auto prose-pre:max-w-full">
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>
                             {activeSlide.content.explanation}
                           </ReactMarkdown>
@@ -586,7 +586,7 @@ export default function CoursePage({
 
                       {challengeData && (
                         <div className="space-y-6 animate-in fade-in duration-500">
-                          <div className="prose prose-sm dark:prose-invert max-w-none bg-canvas dark:bg-void-elevated p-4 rounded-xl border border-hairline">
+                          <div className="prose prose-sm dark:prose-invert max-w-none break-words bg-canvas dark:bg-void-elevated p-4 rounded-xl border border-hairline prose-pre:overflow-x-auto prose-pre:max-w-full">
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>
                               {challengeData.content || ""}
                             </ReactMarkdown>
@@ -753,7 +753,7 @@ export default function CoursePage({
                                 </div>
 
                                 <div className="space-y-4">
-                                  <div className="prose prose-sm dark:prose-invert max-w-none text-sm opacity-90">
+                                  <div className="prose prose-sm dark:prose-invert max-w-none break-words text-sm opacity-90 prose-pre:overflow-x-auto prose-pre:max-w-full">
                                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                       {challengeFeedback.feedback}
                                     </ReactMarkdown>
@@ -812,7 +812,7 @@ export default function CoursePage({
                                             <p className="text-xs font-bold text-muted-soft mb-2 uppercase tracking-wider">
                                               Referensi Jawaban:
                                             </p>
-                                            <div className="prose prose-sm dark:prose-invert max-w-none">
+                                            <div className="prose prose-sm dark:prose-invert max-w-none break-words prose-pre:overflow-x-auto prose-pre:max-w-full">
                                               <ReactMarkdown
                                                 remarkPlugins={[remarkGfm]}
                                               >
@@ -853,10 +853,10 @@ export default function CoursePage({
                             href={src.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-3 rounded-lg border border-hairline bg-surface-soft dark:bg-void-elevated p-3 hover:border-core-blue/30 transition-colors group"
+                            className="flex items-center gap-3 rounded-lg border border-hairline bg-surface-soft dark:bg-void-elevated p-3 hover:border-core-blue/30 transition-colors group min-w-0"
                           >
                             <SourceBadge type={src.type} />
-                            <span className="text-sm text-body dark:text-white/70 group-hover:text-core-blue dark:group-hover:text-sky transition-colors truncate">
+                            <span className="text-sm text-body dark:text-white/70 group-hover:text-core-blue dark:group-hover:text-sky transition-colors truncate min-w-0 flex-1">
                               {src.title}
                             </span>
                           </a>
