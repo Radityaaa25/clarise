@@ -1,4 +1,5 @@
 import { PrismaClient, Difficulty } from "@prisma/client";
+import { batch5Courses } from "./data/batch5-pemrograman";
 
 const prisma = new PrismaClient();
 
@@ -93,6 +94,9 @@ async function main() {
 
   // Call Batch 4
   await seedBatch4(prisma);
+
+  // Call Batch 5
+  await seedBatch5(prisma);
 
   console.log("✅ Seed completed successfully");
 }
@@ -268,6 +272,56 @@ async function seedBatch4(prisma: PrismaClient) {
   }
 
   console.log("✅ Batch 4 (Dasar TypeScript & JavaScript Menengah) berhasil ditambahkan.");
+}
+
+async function seedBatch5(prisma: PrismaClient) {
+  console.log("Sedang melakukan seeding Batch 5: Pemrograman (Rust Dasar + TypeScript Lanjutan)...");
+
+  const catPemrograman = await prisma.category.findUnique({
+    where: { slug: "pemrograman" },
+  });
+  if (!catPemrograman) {
+    console.warn("⚠️  Kategori 'pemrograman' tidak ditemukan, skip Batch 5.");
+    return;
+  }
+
+  for (const c of batch5Courses) {
+    const course = await prisma.course.upsert({
+      where: { slug: c.slug },
+      update: {},
+      create: {
+        title: c.title,
+        slug: c.slug,
+        description: c.description,
+        categoryId: catPemrograman.id,
+        difficulty: c.difficulty,
+        isPremium: c.isPremium,
+        language: c.language,
+        isPublished: c.isPublished,
+        totalModules: c.totalModules,
+        visibility: "PUBLIC",
+      },
+    });
+
+    for (const m of c.modules) {
+      await prisma.module.upsert({
+        where: { courseId_slug: { courseId: course.id, slug: m.slug } },
+        update: {},
+        create: {
+          title: m.title,
+          slug: m.slug,
+          courseId: course.id,
+          order: m.order,
+          xpReward: m.xpReward,
+          content: JSON.stringify(m.contentObject),
+        },
+      });
+    }
+  }
+
+  console.log(
+    `✅ Batch 5 berhasil ditambahkan (${batch5Courses.length} course).`,
+  );
 }
 
 main()

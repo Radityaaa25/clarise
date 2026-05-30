@@ -22,6 +22,98 @@ export type StaticQuizLookup = {
 // POOL — kunci bisa course slug ATAU category slug.
 // ──────────────────────────────────────────────────────────────────────────
 export const STATIC_QUIZ_POOL: Record<string, StaticQuizQuestion[]> = {
+  // ───── COURSE SLUG: belajar-rust-dasar (Pemrograman, Free) ─────
+  "belajar-rust-dasar": [
+    {
+      question: "Apa kegunaan macro `println!` di Rust?",
+      options: [
+        "Membuka koneksi internet",
+        "Mencetak teks ke layar (stdout)",
+        "Mendefinisikan variabel baru",
+        "Membuat loop infinite",
+      ],
+      correctAnswer: 1,
+    },
+    {
+      question:
+        "Bagaimana cara mendeklarasikan variabel yang BISA diubah di Rust?",
+      options: [
+        "let x = 5",
+        "let mut x = 5",
+        "var x = 5",
+        "const x = 5",
+      ],
+      correctAnswer: 1,
+    },
+    {
+      question: "Karakter apa yang menandai pemanggilan macro di Rust?",
+      options: ["?", "!", "#", "@"],
+      correctAnswer: 1,
+    },
+    {
+      question: "Apa tipe data integer 32-bit signed default di Rust?",
+      options: ["int", "integer", "i32", "number"],
+      correctAnswer: 2,
+    },
+    {
+      question: "Apa yang dimaksud dengan ownership di Rust?",
+      options: [
+        "Hak akses file di sistem operasi",
+        "Setiap nilai punya satu pemilik, dan memori dibebaskan saat pemilik keluar dari scope",
+        "Sistem login multi-user",
+        "Cara enkripsi data privat",
+      ],
+      correctAnswer: 1,
+    },
+    {
+      question: "Tanda apa yang dipakai untuk meminjam (borrow) sebuah nilai?",
+      options: ["*", "&", "#", "@"],
+      correctAnswer: 1,
+    },
+    {
+      question: "Bagaimana cara menulis return type pada fungsi Rust?",
+      options: [
+        "function name() returns Type {}",
+        "fn name() => Type {}",
+        "fn name() -> Type {}",
+        "fn name(): Type {}",
+      ],
+      correctAnswer: 2,
+    },
+    {
+      question: "Manakah yang BENAR tentang aturan borrowing di Rust?",
+      options: [
+        "Boleh punya banyak mutable borrow bersamaan",
+        "Tidak boleh ada mutable borrow sama sekali",
+        "Boleh banyak immutable borrow ATAU satu mutable borrow—tidak bisa keduanya bersamaan",
+        "Boleh bebas tanpa batasan",
+      ],
+      correctAnswer: 2,
+    },
+    {
+      question:
+        "Apa yang terjadi jika sebuah `String` di-move ke variabel atau fungsi lain?",
+      options: [
+        "Variabel asli masih bisa dipakai seperti semula",
+        "Variabel asli jadi tidak valid—Rust mencegah double-free dengan move semantics",
+        "Rust otomatis menyalin (clone) dan keduanya valid",
+        "Selalu compile error tanpa pengecualian",
+      ],
+      correctAnswer: 1,
+    },
+    {
+      question:
+        "Apa output dari kode `let x = 5; let x = x + 1; let x = x * 2; println!(\"{}\", x);`?",
+      options: [
+        "Compile error karena re-declare x",
+        "5",
+        "12",
+        "11",
+      ],
+      correctAnswer: 2,
+    },
+  ],
+
   // ───── COURSE SLUG: dasar-html-css (Web Development, Free) ─────
   "dasar-html-css": [
     {
