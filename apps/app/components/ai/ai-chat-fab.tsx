@@ -14,6 +14,8 @@ import { cn } from "@/lib/utils";
 import { useAiChat } from "@/hooks/use-ai-chat";
 import ReactMarkdown from "react-markdown";
 
+import { motion } from "framer-motion";
+
 export function AIChatFAB() {
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -26,23 +28,28 @@ export function AIChatFAB() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
-  if (!isOpen) {
-    return (
-      <button
+  return (
+    <>
+      <motion.button
+        drag
+        dragMomentum={false}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(true)}
         aria-label="Buka Clarise AI"
         aria-expanded={isOpen}
-        className="fixed bottom-24 md:bottom-6 right-4 sm:right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-sky text-white shadow-lg shadow-sky/30 transition-transform hover:scale-110 active:scale-95"
+        className={cn(
+          "fixed bottom-24 md:bottom-6 right-4 sm:right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-sky text-white shadow-lg shadow-sky/30",
+          isOpen ? "opacity-0 pointer-events-none" : "opacity-100 transition-opacity duration-300"
+        )}
       >
         <Sparkles className="h-6 w-6" />
-      </button>
-    );
-  }
+      </motion.button>
 
-  return (
-    <div
-      role="dialog"
-      aria-label="Clarise AI Chat"
+      {isOpen && (
+        <div
+          role="dialog"
+          aria-label="Clarise AI Chat"
       aria-modal="true"
       className={cn(
         "fixed z-50 flex flex-col overflow-hidden border border-hairline bg-canvas dark:bg-void-elevated shadow-2xl transition-all duration-300",
@@ -201,5 +208,8 @@ export function AIChatFAB() {
         </form>
       </div>
     </div>
+      )}
+    </>
   );
 }
+
