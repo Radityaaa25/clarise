@@ -133,13 +133,10 @@ export default function RootLayout({
               "@type": "EducationalOrganization",
               name: "Clarise",
               url: "https://clarise.my.id",
-              logo: "https://clarise.my.id/logo.png",
+              logo: "https://clarise.my.id/logoLM.png",
               description:
                 "Clarise adalah platform pembelajaran interaktif berbasis Artificial Intelligence (AI) yang menyediakan jalur belajar personal untuk penggunanya di Indonesia.",
-              sameAs: [
-                "https://twitter.com/clarise_id",
-                "https://instagram.com/clarise.ai",
-              ],
+              sameAs: ["https://instagram.com/clariseofficial_"],
             }),
           }}
         />

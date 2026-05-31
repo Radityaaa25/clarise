@@ -120,7 +120,7 @@ export default async function AdminDashboard() {
           <div className="space-y-4 flex-1">
             {recentUsers.length > 0 ? (
               recentUsers.map(
-                (user: (typeof recentUsers)[number], i: number) => (
+                (user: (typeof recentUsers)[number]) => (
                   <div
                     key={user.id}
                     className="flex items-center gap-3 bg-background border-2 border-border p-3 neo-shadow-sm"

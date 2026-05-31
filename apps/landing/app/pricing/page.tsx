@@ -21,7 +21,6 @@ export default function PricingPage() {
     "idle" | "loading" | "valid" | "invalid"
   >("idle");
   const [voucherMessage, setVoucherMessage] = useState("");
-  const [voucherTrialDays, setVoucherTrialDays] = useState(0);
   const [isVoucherEnabled, setIsVoucherEnabled] = useState(true);
 
   useEffect(() => {
@@ -44,7 +43,6 @@ export default function PricingPage() {
 
       if (res.ok && data.isValid) {
         setVoucherStatus("valid");
-        setVoucherTrialDays(data.trialDays || 30);
         setVoucherMessage(
           `Kode valid! Kamu akan mendapatkan akses Premium gratis selama ${data.trialDays || 30} hari.`,
         );

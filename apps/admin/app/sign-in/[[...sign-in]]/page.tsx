@@ -1,4 +1,5 @@
 import { SignIn } from "@clerk/nextjs";
+import Image from "next/image";
 
 export default function AdminSignInPage() {
   return (
@@ -9,14 +10,18 @@ export default function AdminSignInPage() {
 
       <div className="relative z-10 w-full max-w-md mx-auto p-6 flex flex-col items-center">
         <div className="mb-4 flex flex-col items-center">
-          <img
+          <Image
             src="/logoDM.png"
             alt="Clarise Admin"
+            width={200}
+            height={64}
             className="h-50 w-auto object-contain -mb-16 -mt-20 dark:hidden"
           />
-          <img
+          <Image
             src="/logoLM.png"
             alt="Clarise Admin"
+            width={200}
+            height={64}
             className="h-50 w-auto object-contain -mb-16 -mt-20 hidden dark:block"
           />
           <p className="text-muted-foreground mt-2 text-center">

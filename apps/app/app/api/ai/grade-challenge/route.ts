@@ -54,7 +54,7 @@ export async function POST(req: Request) {
 
     // Rate limiting
     const limiter = isPremium ? premiumRatelimit : freeRatelimit;
-    const { success, remaining, reset } = await limiter.limit(clerkId);
+    const { success, reset } = await limiter.limit(clerkId);
     if (!success) {
       return NextResponse.json(
         { error: "Rate limit exceeded" },
@@ -76,8 +76,6 @@ export async function POST(req: Request) {
       instruction,
       expectedConcepts,
       evaluationCriteria,
-      courseId,
-      moduleId,
     } = parsed.data;
     let { answer } = parsed.data;
 
@@ -146,7 +144,7 @@ ${answer}`;
         .trim();
       const jsonResponse = JSON.parse(responseText);
       return NextResponse.json(jsonResponse);
-    } catch (e) {
+    } catch {
       console.error("Failed to parse AI JSON:", responseText);
       return NextResponse.json(
         { error: "AI returned invalid format" },

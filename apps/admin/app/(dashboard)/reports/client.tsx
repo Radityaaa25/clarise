@@ -5,7 +5,15 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateReportStatus } from "@/app/actions/report";
 
-export function ReportsClient({ initialReports }: { initialReports: any[] }) {
+interface ReportItem {
+  id: string;
+  course: string;
+  reporter: string;
+  reason: string;
+  status: string;
+}
+
+export function ReportsClient({ initialReports }: { initialReports: ReportItem[] }) {
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const router = useRouter();
 

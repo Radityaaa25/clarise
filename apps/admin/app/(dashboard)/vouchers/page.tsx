@@ -1,12 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
-  MoreHorizontal,
   Plus,
   Tag,
   Trash,
-  Power,
   PowerOff,
 } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
@@ -48,7 +46,7 @@ export default function VouchersPage() {
 
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
-  const fetchVouchers = async () => {
+  const fetchVouchers = useCallback(async () => {
     try {
       const token = await getToken();
       const res = await fetch(`${apiUrl}/api/admin/vouchers`, {
@@ -75,12 +73,12 @@ export default function VouchersPage() {
           },
         ]);
       }
-    } catch (e) {
+    } catch {
       setVouchers([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [apiUrl, getToken]);
 
   const handleDelete = async (id: string, code: string) => {
     if (!confirm(`Yakin ingin menghapus voucher ${code}?`)) return;
@@ -108,7 +106,7 @@ export default function VouchersPage() {
 
   useEffect(() => {
     fetchVouchers();
-  }, []);
+  }, [fetchVouchers]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,7 +133,7 @@ export default function VouchersPage() {
       } else {
         alert("Gagal membuat voucher");
       }
-    } catch (e) {
+    } catch {
       alert("Error saat membuat voucher");
     }
   };

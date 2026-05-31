@@ -5,7 +5,6 @@ import {
   Sparkles,
   Lock,
   ArrowRight,
-  BookOpen,
   Wand2,
   CheckCircle2,
   Loader2,

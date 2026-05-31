@@ -87,13 +87,13 @@ export function AdminCopilotFAB() {
           },
         ]);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       setMessages((prev) => [
         ...prev,
         {
           id: Date.now().toString(),
           role: "model",
-          text: `Gagal terhubung ke server: ${error.message}`,
+          text: `Gagal terhubung ke server: ${error instanceof Error ? error.message : "Unknown error"}`,
         },
       ]);
     } finally {

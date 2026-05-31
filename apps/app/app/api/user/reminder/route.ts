@@ -1,8 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-
+import { NextRequest, NextResponse } from "next/server";
 const reminderSchema = z
   .object({
     enabled: z.boolean(),
@@ -13,7 +12,7 @@ const reminderSchema = z
   })
   .strict();
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const { userId: clerkId } = await auth();
     if (!clerkId) {

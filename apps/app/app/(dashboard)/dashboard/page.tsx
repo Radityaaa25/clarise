@@ -112,7 +112,7 @@ export default function DashboardPage() {
           },
           {
             label: "Modul Selesai",
-            value: isUserLoading ? "..." : user?.completedModules || "0", // Need to fetch completed modules count, but for now we can rely on activeCourses calculation or leave 0 until we add it to user API
+            value: isUserLoading ? "..." : user?.completedModules ?? "0",
             icon: BookOpen,
             color: "text-success",
             bg: "bg-success/10",
@@ -147,7 +147,7 @@ export default function DashboardPage() {
       {/* Continue Learning Section */}
       <section>
         <div className="flex items-center justify-between mb-4 md:mb-6">
-          <h2 className="text-[20px] md:text-2xl font-bold font-heading text-ink">
+          <h2 className="text-[20px] md:text-2xl font-bold font-heading text-ink dark:text-white">
             Sedang Dipelajari
           </h2>
           <Link
@@ -178,7 +178,7 @@ export default function DashboardPage() {
               </div>
             ))
           ) : activeCourses.length > 0 ? (
-            activeCourses.map((course: any) => (
+            activeCourses.map((course: { id: string; slug: string; title: string; categoryName: string; progressPercent: number }) => (
               <Link key={course.id} href={`/course/${course.slug}`}>
                 <div className="rounded-xl border border-hairline bg-canvas dark:bg-void-elevated p-5 md:p-6 w-full flex flex-col transition-colors hover:border-core-blue/50 cursor-pointer h-full">
                   <div className="flex items-center gap-2 mb-3">

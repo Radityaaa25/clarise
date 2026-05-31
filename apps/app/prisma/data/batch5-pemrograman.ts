@@ -21,6 +21,7 @@ export type Batch5Course = {
     slug: string;
     order: number;
     xpReward: number;
+    sources?: Array<{ type: string; title: string; url: string }>;
     contentObject: {
       slides: Array<Record<string, unknown>>;
       quizBank: Array<Record<string, unknown>>;
@@ -503,6 +504,23 @@ const rustDasarCourse: Batch5Course = {
       slug: "pondasi-rust",
       order: 1,
       xpReward: 50,
+      sources: [
+        {
+          type: "YOUTUBE",
+          title: "Tutorial Rust — Programmer Zaman Now (Bahasa Indonesia)",
+          url: "https://www.youtube.com/playlist?list=PL-CtdCApEFH-eZEVNvpvKULzy460jbynw",
+        },
+        {
+          type: "DOCUMENTATION",
+          title: "The Rust Programming Language — Official Book",
+          url: "https://doc.rust-lang.org/book/",
+        },
+        {
+          type: "ARTICLE",
+          title: "Dasar Pemrograman Rust — Noval Agung (Bahasa Indonesia)",
+          url: "https://dasarpemrogramanrust.novalagung.com",
+        },
+      ],
       contentObject: {
         slides: rustDasarSlides,
         quizBank: rustDasarQuizBank,
@@ -533,6 +551,23 @@ const typescriptLanjutanCourse: Batch5Course = {
       slug: tsLanjutanModule1.slug,
       order: tsLanjutanModule1.order,
       xpReward: tsLanjutanModule1.xpReward,
+      sources: [
+        {
+          type: "YOUTUBE",
+          title: "Tutorial TypeScript — Programmer Zaman Now (Bahasa Indonesia)",
+          url: "https://www.youtube.com/playlist?list=PL-CtdCApEFH9jIdygiF4vTIs4Xpo_cHhC",
+        },
+        {
+          type: "DOCUMENTATION",
+          title: "TypeScript Handbook — Generics",
+          url: "https://www.typescriptlang.org/docs/handbook/2/generics.html",
+        },
+        {
+          type: "ARTICLE",
+          title: "TypeScript Generics Explained — Zero To Mastery",
+          url: "https://zerotomastery.io/blog/typescript-generics-explained/",
+        },
+      ],
       contentObject: {
         slides: tsLanjutanModule1.slides,
         quizBank: tsLanjutanModule1.quizBank,
@@ -543,6 +578,23 @@ const typescriptLanjutanCourse: Batch5Course = {
       slug: tsLanjutanModule2.slug,
       order: tsLanjutanModule2.order,
       xpReward: tsLanjutanModule2.xpReward,
+      sources: [
+        {
+          type: "YOUTUBE",
+          title: "Tutorial TypeScript — Programmer Zaman Now (Bahasa Indonesia)",
+          url: "https://www.youtube.com/playlist?list=PL-CtdCApEFH9jIdygiF4vTIs4Xpo_cHhC",
+        },
+        {
+          type: "DOCUMENTATION",
+          title: "TypeScript Handbook — Utility Types",
+          url: "https://www.typescriptlang.org/docs/handbook/utility-types.html",
+        },
+        {
+          type: "ARTICLE",
+          title: "TypeScript Utility Types — W3Schools",
+          url: "https://www.w3schools.com/typescript/typescript_utility_types.php",
+        },
+      ],
       contentObject: {
         slides: tsLanjutanModule2.slides,
         quizBank: tsLanjutanModule2.quizBank,
@@ -553,6 +605,23 @@ const typescriptLanjutanCourse: Batch5Course = {
       slug: tsLanjutanModule3.slug,
       order: tsLanjutanModule3.order,
       xpReward: tsLanjutanModule3.xpReward,
+      sources: [
+        {
+          type: "YOUTUBE",
+          title: "Tutorial TypeScript — Programmer Zaman Now (Bahasa Indonesia)",
+          url: "https://www.youtube.com/playlist?list=PL-CtdCApEFH9jIdygiF4vTIs4Xpo_cHhC",
+        },
+        {
+          type: "DOCUMENTATION",
+          title: "TypeScript Handbook — Mapped Types",
+          url: "https://www.typescriptlang.org/docs/handbook/2/mapped-types.html",
+        },
+        {
+          type: "DOCUMENTATION",
+          title: "TypeScript Handbook — Conditional & Template Literal Types",
+          url: "https://www.typescriptlang.org/docs/handbook/2/conditional-types.html",
+        },
+      ],
       contentObject: {
         slides: tsLanjutanModule3.slides,
         quizBank: tsLanjutanModule3.quizBank,

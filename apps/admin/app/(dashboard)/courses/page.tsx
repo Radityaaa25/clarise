@@ -22,7 +22,7 @@ export default async function CoursesPage() {
     slug: course.slug,
     isAiGenerated: course.isAiGenerated,
     isPublished: course.isPublished,
-    authorName: course.author?.name,
+    authorName: course.author?.name ?? null,
   }));
 
   return <CoursesClient initialCourses={formattedCourses} />;

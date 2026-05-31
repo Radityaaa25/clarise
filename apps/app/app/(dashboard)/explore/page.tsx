@@ -5,7 +5,6 @@ import {
   Search,
   BookOpen,
   Star,
-  Filter,
   Sparkles,
   MoreHorizontal,
   X,
@@ -43,6 +42,15 @@ export default function ExplorePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
+  // Sinkron dengan ?q= dari search bar header (dijalankan sekali saat mount).
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("q");
+    if (q) {
+      setSearchQuery(q);
+      setDebouncedSearch(q);
+    }
+  }, []);
+
   // Debounce search query
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -69,7 +77,7 @@ export default function ExplorePage() {
   // Derived arrays
   const categoriesList = [
     { name: "Semua", slug: "all" },
-    ...allCategories.map((c: any) => ({ name: c.name, slug: c.slug })),
+    ...allCategories.map((c: { name: string; slug: string }) => ({ name: c.name, slug: c.slug })),
   ];
 
   // Pisahkan kategori teratas (top 4) dan sisanya
@@ -85,7 +93,7 @@ export default function ExplorePage() {
 
   // Enroll Modal State
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedCourse, setSelectedCourse] = useState<any>(null);
+  const [selectedCourse, setSelectedCourse] = useState<{ title: string; slug: string; isPremium: boolean } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -101,9 +109,9 @@ export default function ExplorePage() {
   const isFreeUser = user?.subscription?.plan === "FREE" || !user?.subscription;
   const hasReachedLimit = activeCourses.length >= 2; // Free tier: max 2 kursus (1 free + 1 premium, atau 2 free)
 
-  const handleCourseClick = (e: React.MouseEvent, course: any) => {
+  const handleCourseClick = (e: React.MouseEvent, course: { slug: string; title: string; isPremium: boolean }) => {
     e.preventDefault();
-    const isEnrolled = activeCourses.some((c: any) => c.slug === course.slug);
+    const isEnrolled = activeCourses.some((c: { slug: string }) => c.slug === course.slug);
     if (isEnrolled) {
       router.push(`/course/${course.slug}`);
       return;
@@ -227,8 +235,8 @@ export default function ExplorePage() {
         </div>
       ) : filteredCourses.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredCourses.map((course: any) => {
-            const isEnrolled = activeCourses.some((c: any) => c.slug === course.slug);
+          {filteredCourses.map((course: { slug: string; isPremium: boolean; category: { name: string } | string; difficulty: string; title: string; description: string; totalModules: number; rating: number }) => {
+            const isEnrolled = activeCourses.some((c: { slug: string }) => c.slug === course.slug);
             return (
               <button
                 key={course.slug}

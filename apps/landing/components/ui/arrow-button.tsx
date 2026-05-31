@@ -14,7 +14,7 @@ export function ArrowButton({
   className?: string;
   disabled?: boolean;
 }) {
-  const Tag = (href ? "a" : "button") as any;
+  const Tag = (href ? "a" : "button") as React.ElementType;
   return (
     <Tag
       href={href}

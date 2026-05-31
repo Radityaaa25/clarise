@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 // Audit: ambil semua Category beserta jumlah course aktif (>=1 modul).
 // Urutan output mengikuti urutan kategori di COURSE.md (parent → sub).
 // Run: node --env-file=.env.local --import tsx scripts/audit-categories.ts

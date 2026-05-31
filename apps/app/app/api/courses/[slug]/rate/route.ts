@@ -111,7 +111,7 @@ export async function POST(
     let xpEarned = 0;
     if (!existingRating) {
       // First time rating -> award XP
-      const xpResult = await awardXP(user.id, 15); // +15 XP for rating
+      await awardXP(user.id, 15); // +15 XP for rating
       xpEarned = 15;
       // Eval badges (RATING_10 trigger setelah 10 ratings)
       await evaluateBadges(user.id);
@@ -123,7 +123,7 @@ export async function POST(
       ratingCount: count,
       xpEarned,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[COURSE_RATE]", error);
     return NextResponse.json(
       { error: "Internal Server Error" },

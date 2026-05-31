@@ -142,7 +142,7 @@ export async function POST(req: Request) {
 
       // 5. Reward the referred user too? (e.g. 3 days trial)
       const referredTrialDays = 3;
-      let referredEndDate = new Date();
+      const referredEndDate = new Date();
       referredEndDate.setDate(referredEndDate.getDate() + referredTrialDays);
 
       await tx.subscription.upsert({
@@ -168,7 +168,7 @@ export async function POST(req: Request) {
       success: true,
       message: `Kode berhasil diklaim! Kamu mendapat ${result.referredTrialDays} hari Premium gratis.`,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[REFERRAL_APPLY]", error);
     return NextResponse.json(
       { error: "Internal Server Error" },

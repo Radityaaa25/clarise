@@ -1,7 +1,6 @@
 "use client";
 
 import { ReactNode } from "react";
-import { Sparkles } from "lucide-react";
 import Image from "next/image";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {

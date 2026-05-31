@@ -1,10 +1,19 @@
 "use client";
-import { CheckCircle2, XCircle, Eye, Trash2, ShieldAlert } from "lucide-react";
+import { CheckCircle2, Eye, Trash2, ShieldAlert } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { deleteCourse, toggleCoursePublish } from "@/app/actions/course";
 
-export function CoursesClient({ initialCourses }: { initialCourses: any[] }) {
+interface CourseItem {
+  id: string;
+  title: string;
+  slug: string;
+  isPublished: boolean;
+  isAiGenerated: boolean;
+  authorName: string | null;
+}
+
+export function CoursesClient({ initialCourses }: { initialCourses: CourseItem[] }) {
   const [filter, setFilter] = useState("ALL");
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const router = useRouter();

@@ -14,6 +14,10 @@ export function DashboardLayoutClient({
 
   return (
     <>
+      <a href="#main-content" className="skip-link">
+        Lewati ke konten utama
+      </a>
+
       <div className="hidden md:block">
         <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
       </div>
@@ -23,7 +27,9 @@ export function DashboardLayoutClient({
         className={`transition-all duration-300 ${collapsed ? "md:pl-[72px]" : "md:pl-[260px]"}`}
       >
         {header}
-        <main className="p-4 md:p-6 lg:p-8">{children}</main>
+        <main id="main-content" className="p-4 md:p-6 lg:p-8">
+          {children}
+        </main>
       </div>
     </>
   );

@@ -1,3 +1,10 @@
+import bundleAnalyzer from "@next/bundle-analyzer";
+
+const withBundleAnalyzer = bundleAnalyzer({
+  // eslint-disable-next-line no-undef
+  enabled: process.env.ANALYZE === "true",
+});
+
 const nextConfig = {
   async headers() {
     return [
@@ -34,8 +41,4 @@ const nextConfig = {
   },
 };
 
-const withBundleAnalyzer = require("@next/bundle-analyzer")({
-  enabled: process.env.ANALYZE === "true",
-});
-
-module.exports = withBundleAnalyzer(nextConfig);
+export default withBundleAnalyzer(nextConfig);

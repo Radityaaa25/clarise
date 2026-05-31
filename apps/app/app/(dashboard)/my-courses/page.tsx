@@ -58,7 +58,7 @@ export default function MyCoursesPage() {
           </div>
         ) : activeCourses.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {activeCourses.map((course: any) => (
+            {activeCourses.map((course: { id: string; slug: string; title: string; categoryName: string; progressPercent: number }) => (
               <Link
                 key={course.id}
                 href={`/course/${course.slug}`}

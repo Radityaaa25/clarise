@@ -30,16 +30,6 @@ export async function GET(
     const isExpired = new Date(voucher.expiresAt) < new Date();
     const isFull = voucher.usedCount >= voucher.maxUses;
 
-    // Check if user already redeemed
-    const alreadyRedeemed = await prisma.voucherRedemption.findUnique({
-      where: {
-        voucherId_userId: {
-          voucherId: voucher.id,
-          userId: userId, // Wait, prisma schema has `userId` referencing User.id, but clerk passes clerkId. We must look up the user.id!
-        },
-      },
-    });
-
     // Need to fix user ID look up before proceeding
     const user = await prisma.user.findUnique({
       where: { clerkId: userId },

@@ -18,6 +18,19 @@
   --color-muted: #64748B;
   --color-muted-soft: #94A3B8;
 
+  /* ── Semantic Colors ── */
+  --color-success: #16A34A;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-surface-soft: #F1F5F9;
+
+  /* ── shadcn/ui Aliases (dipakai komponen ui & header) ── */
+  --color-border: #CBD5E1;
+  --color-ring: #1A7FCC;
+  --color-secondary: #F1F5F9;
+  --color-muted-foreground: #64748B;
+  --color-destructive: #EF4444;
+
   /* ── Font Families ── */
   --font-heading: "Darker Grotesque", sans-serif;
   --font-body: "Jost", sans-serif;
@@ -271,6 +284,36 @@ h1, h2, h3, h4, h5, h6 {
 \n\n/* ── Input base ── */
 input, select, textarea { font-size: 16px; }
 * { -webkit-tap-highlight-color: transparent; }
+
+/* ── A11y: focus-visible ring konsisten untuk semua elemen interaktif ──
+   Banyak komponen pakai `outline-none`; ini mengembalikan indikator fokus
+   keyboard yang jelas tanpa mengganggu klik mouse (WCAG 2.4.7). */
+:where(a, button, input, select, textarea, [role="button"], [tabindex]):focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── A11y: skip-to-content link ── */
+.skip-link {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 100;
+  transform: translateY(-150%);
+  background: var(--color-core-blue);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  font-size: 0.875rem;
+  transition: transform 0.2s ease;
+}
+.skip-link:focus {
+  transform: translateY(0);
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
 
 /* ── Prose long-content overflow handling (mobile safari fix) ── */
 /* Pastikan code block, inline code, iframe, gambar, dan tabel di dalam

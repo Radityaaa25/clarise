@@ -99,26 +99,26 @@ export async function POST(req: Request) {
     await redis.del(`sub:${user.id}`);
 
     return NextResponse.json({ success: true, reward: result });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[VOUCHER_REDEEM]", error);
 
-    // Check known application errors
-    if (error.message === "VOUCHER_NOT_FOUND")
+    const msg = error instanceof Error ? error.message : "";
+    if (msg === "VOUCHER_NOT_FOUND")
       return NextResponse.json(
         { error: "Voucher tidak ditemukan" },
         { status: 404 },
       );
-    if (error.message === "VOUCHER_EXPIRED")
+    if (msg === "VOUCHER_EXPIRED")
       return NextResponse.json(
         { error: "Voucher kedaluwarsa" },
         { status: 400 },
       );
-    if (error.message === "VOUCHER_FULL")
+    if (msg === "VOUCHER_FULL")
       return NextResponse.json(
         { error: "Kuota voucher penuh" },
         { status: 400 },
       );
-    if (error.message === "VOUCHER_ALREADY_REDEEMED")
+    if (msg === "VOUCHER_ALREADY_REDEEMED")
       return NextResponse.json(
         { error: "Anda sudah mengklaim voucher ini" },
         { status: 400 },

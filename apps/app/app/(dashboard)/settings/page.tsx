@@ -6,10 +6,11 @@ import {
   Bell,
   Shield,
   CreditCard,
-  ChevronRight,
-  Tag,
   Loader2,
+  Tag,
+  MessageSquareHeart,
 } from "lucide-react";
+import { AppFeedbackForm } from "@/components/settings/app-feedback-form";
 
 import { toast } from "sonner";
 import useSWR from "swr";
@@ -58,7 +59,7 @@ export default function SettingsPage() {
       });
       mutateUser();
       toast.success("Profil berhasil diperbarui!");
-    } catch (err) {
+    } catch {
       toast.error("Gagal memperbarui profil");
     } finally {
       setIsSavingProfile(false);
@@ -107,7 +108,7 @@ export default function SettingsPage() {
           text: data.error || "Gagal klaim voucher",
         });
       }
-    } catch (err) {
+    } catch {
       setRedeemMessage({ type: "error", text: "Terjadi kesalahan koneksi" });
     } finally {
       setIsRedeeming(false);
@@ -152,6 +153,12 @@ export default function SettingsPage() {
           >
             <CreditCard className="h-4 w-4" /> Langganan
           </button>
+          <button
+            onClick={() => setActiveTab("masukan")}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm whitespace-nowrap text-left transition-colors ${activeTab === "masukan" ? "bg-core-blue/10 text-core-blue dark:bg-core-blue/20 dark:text-sky" : "text-body dark:text-white/70 hover:bg-surface-soft dark:hover:bg-void-elevated hover:text-ink dark:hover:text-white font-medium"}`}
+          >
+            <MessageSquareHeart className="h-4 w-4" /> Masukan
+          </button>
         </div>
 
         {/* Main Content Area */}
@@ -167,6 +174,7 @@ export default function SettingsPage() {
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-8">
                   <div className="h-20 w-20 rounded-full bg-core-blue text-white flex items-center justify-center text-3xl font-black font-heading shrink-0 shadow-sm overflow-hidden">
                     {user?.imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={user.imageUrl}
                         alt="Avatar"
@@ -406,6 +414,8 @@ export default function SettingsPage() {
               </div>
             </div>
           )}
+
+          {activeTab === "masukan" && <AppFeedbackForm />}
         </div>
       </div>
     </div>

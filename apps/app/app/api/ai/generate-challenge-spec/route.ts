@@ -37,15 +37,15 @@ export async function POST(req: Request) {
 
     const { moduleId } = parsed.data;
 
-    const module = await prisma.module.findUnique({
+    const courseModule = await prisma.module.findUnique({
       where: { id: moduleId },
       include: { course: true },
     });
 
-    if (!module)
+    if (!courseModule)
       return NextResponse.json({ error: "Module not found" }, { status: 404 });
 
-    if (!module.course.isPremium) {
+    if (!courseModule.course.isPremium) {
       return NextResponse.json(
         { error: "Tantangan AI hanya tersedia untuk Course Premium" },
         { status: 403 },
@@ -53,18 +53,18 @@ export async function POST(req: Request) {
     }
 
     const isCodingCourse =
-      module.course.categoryId === "web-development" ||
-      module.course.categoryId === "backend-development" ||
-      module.course.categoryId === "pemrograman" ||
-      module.course.categoryId === "database" ||
-      module.course.title.toLowerCase().includes("python") ||
-      module.course.title.toLowerCase().includes("golang") ||
-      module.course.title.toLowerCase().includes("javascript");
+      courseModule.course.categoryId === "web-development" ||
+      courseModule.course.categoryId === "backend-development" ||
+      courseModule.course.categoryId === "pemrograman" ||
+      courseModule.course.categoryId === "database" ||
+      courseModule.course.title.toLowerCase().includes("python") ||
+      courseModule.course.title.toLowerCase().includes("golang") ||
+      courseModule.course.title.toLowerCase().includes("javascript");
 
     const inputType = isCodingCourse ? "code" : "essay";
 
     const prompt = `Kamu adalah pembuat tantangan ahli untuk platform pembelajaran Clarise.
-Buat 1 tantangan praktis (Tantangan AI) untuk menguji pemahaman user tentang modul "${module.title}" pada kursus "${module.course.title}".
+Buat 1 tantangan praktis (Tantangan AI) untuk menguji pemahaman user tentang modul "${courseModule.title}" pada kursus "${courseModule.course.title}".
 
 Pertanyaan harus menantang dan membutuhkan pemahaman logika atau konsep inti modul tersebut.
 

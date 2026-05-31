@@ -1,5 +1,4 @@
 import { OnboardingWizard } from "@/components/onboarding/onboarding-wizard";
-import Image from "next/image";
 
 export default function OnboardingPage() {
   return (

@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { Difficulty } from "@prisma/client";
 
 const GOAL_TO_CATEGORY: Record<string, string> = {
   Pemrograman: "pemrograman",
@@ -13,11 +12,6 @@ const GOAL_TO_CATEGORY: Record<string, string> = {
   "Data Science": "data-science",
 };
 
-const LEVEL_MAP: Record<string, Difficulty> = {
-  Pemula: "BEGINNER",
-  Menengah: "INTERMEDIATE",
-  Lanjutan: "ADVANCED",
-};
 
 const onboardingSchema = z
   .object({

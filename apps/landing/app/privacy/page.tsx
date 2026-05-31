@@ -3,7 +3,6 @@ import {
   ArrowLeft,
   ShieldCheck,
   Lock,
-  Eye,
   Database,
   Server,
   Trash2,

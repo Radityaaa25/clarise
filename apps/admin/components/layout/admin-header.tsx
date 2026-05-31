@@ -71,7 +71,7 @@ export function AdminHeader() {
 
             <div className="space-y-3 max-h-64 overflow-y-auto">
               {notifications.length > 0 ? (
-                notifications.map((notif: any) => (
+                notifications.map((notif: { id: string; title: string; body: string; isRead: boolean; createdAt: string }) => (
                   <div
                     key={notif.id}
                     className={`flex gap-3 p-3 border-2 border-border cursor-pointer neo-shadow-sm ${notif.isRead ? "bg-background" : "bg-accent"}`}

@@ -33,8 +33,8 @@ export async function GET(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     // Determine if it's the season (Dec-Jan)
-    const now = new Date();
-    const currentMonth = now.getMonth(); // 0-indexed (11 = Dec, 0 = Jan)
+
+    // const currentMonth = now.getMonth(); // 0-indexed (11 = Dec, 0 = Jan)
     // if (currentMonth !== 11 && currentMonth !== 0) {
     //   // Note: Uncomment this check in production if you strictly want to limit access.
     //   // return NextResponse.json({ error: "Clarise Wrapped hanya tersedia di bulan Desember - Januari." }, { status: 403 });
@@ -141,7 +141,7 @@ export async function GET(
       success: true,
       data: premiumStats,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[CLARISE_WRAPPED]", error);
     return NextResponse.json(
       { error: "Internal Server Error" },

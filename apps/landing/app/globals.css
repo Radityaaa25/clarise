@@ -17,6 +17,19 @@
   --color-muted: #64748B;
   --color-muted-soft: #94A3B8;
 
+  /* ── Semantic Colors ── */
+  --color-success: #16A34A;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-surface-soft: #F1F5F9;
+
+  /* ── shadcn/ui Aliases ── */
+  --color-border: #CBD5E1;
+  --color-ring: #1A7FCC;
+  --color-secondary: #F1F5F9;
+  --color-muted-foreground: #64748B;
+  --color-destructive: #EF4444;
+
   /* ── Font Families ── */
   --font-heading: "Darker Grotesque", sans-serif;
   --font-body: "Jost", sans-serif;

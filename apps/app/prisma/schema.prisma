@@ -111,6 +111,7 @@ model User {
   voucherRedemption  VoucherRedemption?
   reports            Report[]
   transactions       Transaction[]
+  appFeedback        AppFeedback[]
 
   @@index([clerkId])
   @@index([email])
@@ -434,4 +435,24 @@ model Transaction {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+// Kritik & saran + rating aplikasi dari user.
+// Ditampilkan di landing page (yang isPublished) sebagai social proof.
+model AppFeedback {
+  id          String   @id @default(cuid())
+  userId      String
+  rating      Int // 1-5
+  message     String?  @db.Text
+  authorName  String? // snapshot nama untuk ditampilkan publik
+  authorRole  String? // mis. learningGoal user, opsional
+  isPublished Boolean  @default(true) // admin bisa unpublish bila perlu
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId])
+  @@index([isPublished, rating])
+  @@index([createdAt])
 }

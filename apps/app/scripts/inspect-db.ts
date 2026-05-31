@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 // Script sementara untuk inspeksi DB.
 // Run: pnpm tsx scripts/inspect-db.ts
 // Hapus setelah investigasi selesai.

@@ -110,7 +110,7 @@ export async function GET(req: Request) {
       processed: reminders.length,
       sent: emailsToSend.length,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[CRON_DAILY_REMINDER]", error);
     return NextResponse.json(
       { error: "Internal Server Error" },

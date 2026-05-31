@@ -288,7 +288,16 @@ async function seedBatch5(prisma: PrismaClient) {
   for (const c of batch5Courses) {
     const course = await prisma.course.upsert({
       where: { slug: c.slug },
-      update: {},
+      update: {
+        // Update meta-fields tapi jangan ubah relasi
+        title: c.title,
+        description: c.description,
+        difficulty: c.difficulty,
+        isPremium: c.isPremium,
+        language: c.language,
+        isPublished: c.isPublished,
+        totalModules: c.totalModules,
+      },
       create: {
         title: c.title,
         slug: c.slug,
@@ -304,9 +313,15 @@ async function seedBatch5(prisma: PrismaClient) {
     });
 
     for (const m of c.modules) {
-      await prisma.module.upsert({
+      // Upsert module
+      const moduleRow = await prisma.module.upsert({
         where: { courseId_slug: { courseId: course.id, slug: m.slug } },
-        update: {},
+        update: {
+          title: m.title,
+          order: m.order,
+          xpReward: m.xpReward,
+          content: JSON.stringify(m.contentObject),
+        },
         create: {
           title: m.title,
           slug: m.slug,
@@ -316,11 +331,88 @@ async function seedBatch5(prisma: PrismaClient) {
           content: JSON.stringify(m.contentObject),
         },
       });
+
+      // Bersihin slide lama supaya seed idempotent (kalau di-rerun, gak duplikat).
+      await prisma.slide.deleteMany({ where: { moduleId: moduleRow.id } });
+
+      // Create Slide rows dari array slides — frontend baca dari sini, BUKAN
+      // dari module.content. Mapping:
+      //   data.content (markdown body)  → slide.content.body
+      //   data.type ("casestudy"/"summary") → "lesson" (frontend cuma render
+      //                                       body untuk lesson/example)
+      for (const slide of m.contentObject.slides) {
+        const s = slide as Record<string, unknown>;
+        const rawType = String(s.type || "lesson");
+        // Frontend cuma render body untuk: text|markdown|lesson|example.
+        // Map casestudy & summary ke lesson supaya konten tetap kelihatan.
+        const renderType =
+          rawType === "casestudy" || rawType === "summary"
+            ? "lesson"
+            : rawType;
+
+        const slideContent: Record<string, unknown> = {
+          type: renderType,
+          // Field "content" di data → "body" di slide.content (sesuai
+          // existing schema yang dibaca frontend).
+          body: typeof s.content === "string" ? s.content : "",
+        };
+
+        if (typeof s.keyTakeaway === "string") {
+          slideContent.keyTakeaway = s.keyTakeaway;
+        }
+        if (typeof s.codeExample === "string") {
+          slideContent.codeExample = s.codeExample;
+        }
+        if (typeof s.language === "string") {
+          slideContent.language = s.language;
+        }
+        if (Array.isArray(s.tooltips)) {
+          slideContent.tooltips = s.tooltips;
+        }
+        if (typeof s.explanation === "string") {
+          slideContent.explanation = s.explanation;
+        }
+        if (s.challenge && typeof s.challenge === "object") {
+          slideContent.challenge = s.challenge;
+        }
+        // Quiz slide: simpan quizBank di slide.content juga (selaras dgn
+        // existing data) walau frontend kuis sekarang fetch dari API.
+        if (renderType === "quiz") {
+          slideContent.quizBank = m.contentObject.quizBank;
+        }
+
+        await prisma.slide.create({
+          data: {
+            moduleId: moduleRow.id,
+            title: typeof s.title === "string" ? s.title : "Untitled",
+            order: typeof s.slideNumber === "number" ? s.slideNumber : 0,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            content: slideContent as any,
+            // Lampirkan sumber referensi (video + dokumentasi + artikel) ke
+            // slide konten. Slide quiz tidak diberi sumber (tidak relevan).
+            ...(m.sources && m.sources.length > 0 && renderType !== "quiz"
+              ? {
+                  sources: {
+                    create: m.sources.map((src) => ({
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      type: src.type as any,
+                      title: src.title,
+                      url: src.url,
+                    })),
+                  },
+                }
+              : {}),
+          },
+        });
+      }
     }
   }
 
   console.log(
-    `✅ Batch 5 berhasil ditambahkan (${batch5Courses.length} course).`,
+    `✅ Batch 5 berhasil ditambahkan (${batch5Courses.length} course, ${batch5Courses.reduce(
+      (acc, c) => acc + c.modules.reduce((a, m) => a + m.contentObject.slides.length, 0),
+      0,
+    )} slide).`,
   );
 }
 

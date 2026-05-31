@@ -192,13 +192,13 @@ export async function POST(req: Request) {
         console.error("Failed to track tokens", err);
       }
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[AI_ASK_ERROR]", error);
-    const msg = error.message || "";
+    const msg = (error as Error).message || "";
     if (
       msg.includes("429") ||
       msg.includes("Quota exceeded") ||
-      error.status === 429
+      (error as { status?: number }).status === 429
     ) {
       return NextResponse.json(
         {
@@ -208,7 +208,7 @@ export async function POST(req: Request) {
         { status: 429 },
       );
     }
-    if (msg.includes("503") || error.status === 503) {
+    if (msg.includes("503") || (error as { status?: number }).status === 503) {
       return NextResponse.json(
         {
           error:

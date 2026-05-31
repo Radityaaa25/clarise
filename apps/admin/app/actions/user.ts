@@ -39,7 +39,7 @@ export async function deleteUser(userId: string) {
     if (user.clerkId) {
       try {
         await clerkClient.users.deleteUser(user.clerkId);
-      } catch (clerkErr: any) {
+      } catch (clerkErr: unknown) {
         console.error("Gagal menghapus user dari Clerk:", clerkErr);
         // Kita tidak mereturn error jika Clerk gagal (mungkin user sudah dihapus manual di Clerk)
         // tapi log tetap dicetak.
@@ -48,11 +48,11 @@ export async function deleteUser(userId: string) {
 
     revalidatePath("/users");
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error deleteUser:", error);
     return {
       success: false,
-      error: error.message || "Gagal menghapus pengguna",
+      error: error instanceof Error ? error.message : "Gagal menghapus pengguna",
     };
   }
 }
@@ -148,11 +148,11 @@ export async function updateUserTier(userId: string, tier: "FREE" | "PREMIUM" | 
 
     revalidatePath("/users");
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error updateUserTier:", error);
     return {
       success: false,
-      error: error.message || "Gagal mengubah tier pengguna",
+      error: error instanceof Error ? error.message : "Gagal mengubah tier pengguna",
     };
   }
 }

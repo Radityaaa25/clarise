@@ -24,6 +24,8 @@ export function MobileBottomNav() {
           <Link
             key={item.href}
             href={item.href}
+            aria-current={isActive ? "page" : undefined}
+            aria-label={item.label}
             className="flex-1 flex flex-col items-center justify-center h-full relative"
           >
             {isActive && (

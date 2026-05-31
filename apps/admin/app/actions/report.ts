@@ -41,11 +41,11 @@ export async function updateReportStatus(
 
     revalidatePath("/reports");
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error updateReportStatus:", error);
     return {
       success: false,
-      error: error.message || "Gagal memperbarui status laporan",
+      error: error instanceof Error ? error.message : "Gagal memperbarui status laporan",
     };
   }
 }

@@ -38,7 +38,7 @@ export async function POST(req: Request) {
 
     const { moduleId } = parsed.data;
 
-    const module = await prisma.module.findUnique({
+    const courseModule = await prisma.module.findUnique({
       where: { id: moduleId },
       include: {
         course: {
@@ -49,16 +49,16 @@ export async function POST(req: Request) {
       },
     });
 
-    if (!module)
+    if (!courseModule)
       return NextResponse.json({ error: "Module not found" }, { status: 404 });
 
-    if (!module.course.isPremium) {
+    if (!courseModule.course.isPremium) {
       // Free course: ambil dari static-quizzes.ts (TIDAK panggil AI/Groq).
       // Lookup berlapis: courseSlug → categorySlug → default.
       const staticQuestions = getRandomStaticQuizzes(
         {
-          courseSlug: module.course.slug,
-          categorySlug: module.course.category?.slug,
+          courseSlug: courseModule.course.slug,
+          categorySlug: courseModule.course.category?.slug,
         },
         5,
       );
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
     }
 
     const prompt = `Kamu adalah pembuat soal pilihan ganda ahli untuk platform pembelajaran Clarise.
-Buat 5 pertanyaan pilihan ganda untuk menguji pemahaman user tentang modul "${module.title}" pada kursus "${module.course.title}".
+Buat 5 pertanyaan pilihan ganda untuk menguji pemahaman user tentang modul "${courseModule.title}" pada kursus "${courseModule.course.title}".
 
 Pertanyaan harus spesifik, berbobot, dan menguji pemahaman konsep, bukan hanya hafalan.
 Setiap pertanyaan memiliki 4 pilihan jawaban, dan 1 jawaban yang benar.

@@ -1,8 +1,5 @@
 import {
-  Bot,
-  ShieldAlert,
   CheckCircle2,
-  Search,
   Zap,
   Code,
   MessageSquare,
@@ -22,22 +19,10 @@ export default async function AIMonitorPage() {
     take: 50, // Limit to recent 50 for performance
   });
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  let tokensUsedToday = 0;
-  let totalRequests = chatHistory.length;
-  let flaggedCount = 0;
-
-  const flags: any[] = [];
+  const flags: { id: string; user: string; context: string; snippet: string; status: string; date: string }[] = [];
 
   chatHistory.forEach((chat) => {
-    // Estimasi token kasar: 1 token = 4 karakter json
     const messagesStr = JSON.stringify(chat.messages || []);
-
-    if (chat.updatedAt >= today) {
-      tokensUsedToday += Math.floor(messagesStr.length / 4);
-    }
 
     // Cek flag sederhana (misal kata kasar/bypass)
     const isFlagged =
@@ -45,7 +30,6 @@ export default async function AIMonitorPage() {
       messagesStr.toLowerCase().includes("ignore all previous");
 
     if (isFlagged) {
-      flaggedCount++;
       flags.push({
         id: chat.id,
         user: chat.user?.name || chat.user?.email || "Anon",

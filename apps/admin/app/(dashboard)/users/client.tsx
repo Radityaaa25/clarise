@@ -1,10 +1,19 @@
 "use client";
 import { useState } from "react";
-import { MoreHorizontal, ShieldAlert, ShieldCheck, Trash2, ArrowUpCircle } from "lucide-react";
+import { MoreHorizontal, ShieldAlert, ShieldCheck, Trash2 } from "lucide-react";
 import { deleteUser, updateUserTier } from "@/app/actions/user";
 import { useRouter } from "next/navigation";
 
-export function UsersClient({ initialUsers }: { initialUsers: any[] }) {
+interface UserItem {
+  id: string;
+  name: string | null;
+  email: string;
+  plan: string;
+  status: string;
+  joined: string;
+}
+
+export function UsersClient({ initialUsers }: { initialUsers: UserItem[] }) {
   const [planFilter, setPlanFilter] = useState("All Plans");
   const [statusFilter, setStatusFilter] = useState("All Status");
   const [loadingId, setLoadingId] = useState<string | null>(null);
@@ -190,7 +199,7 @@ export function UsersClient({ initialUsers }: { initialUsers: any[] }) {
                     ) : (
                       <select
                         value={user.plan}
-                        onChange={(e) => handleUpdateTier(user.id, user.name, e.target.value)}
+                        onChange={(e) => handleUpdateTier(user.id, user.name || "User", e.target.value)}
                         disabled={loadingId === user.id + "-tier"}
                         className="neo-btn bg-background text-foreground px-2 py-1 outline-none text-sm cursor-pointer"
                       >
@@ -200,7 +209,7 @@ export function UsersClient({ initialUsers }: { initialUsers: any[] }) {
                       </select>
                     )}
                     <button
-                      onClick={() => handleDelete(user.id, user.name)}
+                      onClick={() => handleDelete(user.id, user.name || "User")}
                       disabled={loadingId === user.id}
                       className="neo-btn bg-destructive text-destructive-foreground p-2 disabled:opacity-50"
                       title="Hapus Pengguna"

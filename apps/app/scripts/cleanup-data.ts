@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 // Cleanup data inconsistency:
 //  1. Hapus modul kosong (0 slide) yang merupakan duplikat title dengan
 //     modul lain di course yang sama → orphan dari proses generate ulang.

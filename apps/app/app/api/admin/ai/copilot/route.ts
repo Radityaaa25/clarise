@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+
 import { prisma } from "@/lib/prisma";
 import { corsResponse } from "@/lib/cors";
 import { getGenAIAdmin } from "@/lib/gemini";
@@ -150,11 +150,11 @@ Balas dengan bahasa Indonesia yang ramah dan profesional. Jika admin bertanya se
       if (!call)
         return corsResponse({ response: result.response.text() }, 200, origin);
 
-      let functionResponse: any = {};
+      let functionResponse: Record<string, unknown> = {};
 
       try {
         if (call.name === "createVoucher") {
-          const { code, type, trialDays, maxUses } = call.args as any;
+          const { code, type, trialDays, maxUses } = call.args as { code: string; type: "TRIAL" | "DISCOUNT"; trialDays?: number; maxUses?: number };
           const voucher = await prisma.voucher.create({
             data: {
               code: code.toUpperCase(),
@@ -174,7 +174,7 @@ Balas dengan bahasa Indonesia yang ramah dan profesional. Jika admin bertanya se
           const voucherCount = await prisma.voucher.count();
           functionResponse = { userCount, courseCount, voucherCount };
         } else if (call.name === "toggleVoucherPopup") {
-          const { enabled } = call.args as any;
+          const { enabled } = call.args as Record<string, unknown>;
           const { redis } = await import("@/lib/ratelimit");
           await redis.set(
             "clarise:feature:voucher_popup",
@@ -185,9 +185,9 @@ Balas dengan bahasa Indonesia yang ramah dan profesional. Jika admin bertanya se
             message: `Popup voucher telah ${enabled ? "diaktifkan" : "dimatikan"}.`,
           };
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         functionResponse = {
-          error: err.message || "Failed to execute function",
+          error: (err as Error).message || "Failed to execute function",
         };
       }
 
@@ -215,13 +215,13 @@ Balas dengan bahasa Indonesia yang ramah dan profesional. Jika admin bertanya se
     }
 
     return corsResponse({ response: responseText }, 200, origin);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[ADMIN_COPILOT]", error);
-    const msg = error.message || "";
+    const msg = (error as Error).message || "";
     if (
       msg.includes("429") ||
       msg.includes("Quota exceeded") ||
-      error.status === 429
+      (error as { status?: number }).status === 429
     ) {
       return corsResponse(
         {
@@ -232,7 +232,7 @@ Balas dengan bahasa Indonesia yang ramah dan profesional. Jika admin bertanya se
         origin,
       );
     }
-    if (msg.includes("503") || error.status === 503) {
+    if (msg.includes("503") || (error as { status?: number }).status === 503) {
       return corsResponse(
         {
           error:

@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -212,14 +211,18 @@ export function Sidebar({
               </svg>
             </a>
             <a
-              href="#"
+              href="https://wa.me/62881011441173"
+              target="_blank"
+              rel="noreferrer"
               className="text-muted hover:text-green-500 dark:hover:text-green-400 transition-colors"
+              aria-label="WhatsApp Clarise"
             >
               <MessageCircle className="h-5 w-5" />
             </a>
             <a
-              href="mailto:support@clarise.com"
+              href="mailto:helloclarise.official@gmail.com"
               className="text-muted hover:text-core-blue dark:hover:text-sky transition-colors"
+              aria-label="Email Clarise"
             >
               <Mail className="h-5 w-5" />
             </a>
@@ -252,14 +255,18 @@ export function Sidebar({
               </svg>
             </a>
             <a
-              href="#"
+              href="https://wa.me/62881011441173"
+              target="_blank"
+              rel="noreferrer"
               className="text-muted hover:text-green-500 dark:hover:text-green-400 transition-colors"
+              aria-label="WhatsApp Clarise"
             >
               <MessageCircle className="h-5 w-5" />
             </a>
             <a
-              href="mailto:support@clarise.com"
+              href="mailto:helloclarise.official@gmail.com"
               className="text-muted hover:text-core-blue dark:hover:text-sky transition-colors"
+              aria-label="Email Clarise"
             >
               <Mail className="h-5 w-5" />
             </a>

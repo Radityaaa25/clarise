@@ -9,6 +9,8 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { AppPreview } from "@/components/sections/app-preview";
+import { UserRatings } from "@/components/sections/user-ratings";
+import { Faq } from "@/components/sections/faq";
 import { ArrowButton } from "@/components/ui/arrow-button";
 import Link from "next/link";
 import Image from "next/image";
@@ -241,6 +243,12 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ── USER RATINGS / TESTIMONIALS ── */}
+      <UserRatings />
+
+      {/* ── FAQ / QnA ── */}
+      <Faq />
 
       {/* ── CTA BANNER (Massive Glow) ── */}
       <section className="fade-in-up relative py-32 px-6 overflow-hidden flex flex-col items-center justify-center text-center z-10 transition-colors">

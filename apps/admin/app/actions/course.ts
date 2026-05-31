@@ -29,9 +29,9 @@ export async function deleteCourse(courseId: string) {
 
     revalidatePath("/courses");
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error deleteCourse:", error);
-    return { success: false, error: error.message || "Gagal menghapus kursus" };
+    return { success: false, error: error instanceof Error ? error.message : "Gagal menghapus kursus" };
   }
 }
 
@@ -55,11 +55,11 @@ export async function toggleCoursePublish(
 
     revalidatePath("/courses");
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error toggleCoursePublish:", error);
     return {
       success: false,
-      error: error.message || "Gagal memperbarui status kursus",
+      error: error instanceof Error ? error.message : "Gagal memperbarui status kursus",
     };
   }
 }

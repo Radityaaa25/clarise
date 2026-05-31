@@ -8,14 +8,12 @@ import {
   Briefcase,
   LineChart,
   Database,
-  Calculator,
   Sparkles,
   BookOpen,
   Clock,
   ChevronRight,
   Check,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 const TOPICS = [
@@ -81,7 +79,6 @@ const HOURS = [
 ];
 
 export function OnboardingWizard() {
-  const router = useRouter();
   const [step, setStep] = useState(1);
   const [goal, setGoal] = useState("");
   const [customGoal, setCustomGoal] = useState("");

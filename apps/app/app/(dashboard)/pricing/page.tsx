@@ -31,8 +31,8 @@ export default function AppPricingPage() {
       setTimeout(() => {
         window.location.href = "/dashboard";
       }, 2000);
-    } catch (err: any) {
-      setMessage({ type: "error", text: err.message });
+    } catch (err: unknown) {
+      setMessage({ type: "error", text: (err as Error).message });
     } finally {
       setIsRedeeming(false);
     }

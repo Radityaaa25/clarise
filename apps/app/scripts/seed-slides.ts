@@ -16,12 +16,12 @@ async function main() {
 
   for (const mod of modules) {
     const hasQuiz = mod.slides.some((s) => {
-      const content = s.content as any;
+      const content = s.content as Record<string, unknown>;
       return content?.type === "quiz";
     });
 
     const hasChallenge = mod.slides.some((s) => {
-      const content = s.content as any;
+      const content = s.content as Record<string, unknown>;
       return content?.type === "challenge";
     });
 

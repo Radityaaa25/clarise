@@ -22,11 +22,11 @@ export async function deleteVoucher(voucherId: string) {
     // but it's good practice anyway if it becomes server component.
     revalidatePath("/vouchers");
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error deleteVoucher:", error);
     return {
       success: false,
-      error: error.message || "Gagal menghapus voucher",
+      error: error instanceof Error ? error.message : "Gagal menghapus voucher",
     };
   }
 }
@@ -49,11 +49,11 @@ export async function deactivateVoucher(voucherId: string) {
 
     revalidatePath("/vouchers");
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error deactivateVoucher:", error);
     return {
       success: false,
-      error: error.message || "Gagal menonaktifkan voucher",
+      error: error instanceof Error ? error.message : "Gagal menonaktifkan voucher",
     };
   }
 }
