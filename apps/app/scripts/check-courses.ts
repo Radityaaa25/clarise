@@ -5,7 +5,7 @@ if (fs.existsSync(".env.local")) {
   const envConfig = fs.readFileSync(".env.local", "utf-8");
   envConfig.split("\n").forEach(line => {
     const match = line.match(/^([^=]+)=(.*)$/);
-    if (match) {
+    if (match && match[1] && match[2]) {
       process.env[match[1].trim()] = match[2].trim().replace(/^['"](.*)['"]$/, '$1');
     }
   });
