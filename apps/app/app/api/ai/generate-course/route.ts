@@ -33,7 +33,7 @@ const inputSchema = z
     language: z.string().max(5).default("id"),
     visibility: z.enum(["PUBLIC", "PRIVATE"]).default("PRIVATE"),
     categoryId: z.string().min(1),
-    moduleCount: z.number().min(1).max(6).default(3),
+    moduleCount: z.number().min(1).max(3).default(1),
   })
   .strict();
 
