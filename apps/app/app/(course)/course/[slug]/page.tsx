@@ -213,6 +213,13 @@ export default function CoursePage({
   const [activeModuleIdx, setActiveModuleIdx] = useState(0);
   const [activeSlideIdx, setActiveSlideIdx] = useState(0);
   const [showChat, setShowChat] = useState(false);
+  const slideContentRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (slideContentRef.current) {
+      slideContentRef.current.scrollTo(0, 0);
+    }
+  }, [activeSlideIdx, activeModuleIdx]);
 
   // State for mocked quiz
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -334,7 +341,7 @@ export default function CoursePage({
   }
 
   return (
-    <div className="min-h-screen bg-canvas dark:bg-void text-body dark:text-white/70 flex overflow-x-hidden">
+    <div className="h-screen bg-canvas dark:bg-void text-body dark:text-white/70 flex overflow-hidden">
       {/* Sidebar — Module List */}
       <aside className="hidden lg:flex w-[300px] shrink-0 border-r border-hairline bg-canvas dark:bg-void flex-col h-screen sticky top-0">
         {/* Course header */}
@@ -396,9 +403,9 @@ export default function CoursePage({
       </aside>
 
       {/* Main Content — Slide Viewer */}
-      <div className="flex-1 flex flex-col min-h-screen min-w-0">
+      <div className="flex-1 flex flex-col h-full min-w-0">
         {/* Top bar */}
-        <div className="sticky top-0 z-20 flex items-center justify-between gap-3 h-14 px-4 md:px-6 border-b border-hairline bg-canvas/80 dark:bg-void/80 backdrop-blur-md">
+        <div className="shrink-0 z-20 flex items-center justify-between gap-3 h-14 px-4 md:px-6 border-b border-hairline bg-canvas/80 dark:bg-void/80 backdrop-blur-md">
           <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
             <Link
               href="/explore"
@@ -957,7 +964,7 @@ export default function CoursePage({
         </div>
 
         {/* Bottom Navigation */}
-        <div className="sticky bottom-0 flex items-center justify-between gap-2 h-16 px-3 sm:px-4 md:px-6 border-t border-hairline bg-canvas/80 dark:bg-void/80 backdrop-blur-md">
+        <div className="shrink-0 flex items-center justify-between gap-2 h-16 px-3 sm:px-4 md:px-6 border-t border-hairline bg-canvas/80 dark:bg-void/80 backdrop-blur-md">
           <button
             onClick={() => {
               setActiveSlideIdx(Math.max(0, activeSlideIdx - 1));

@@ -31,7 +31,7 @@ export const reactDariNolCourse: CourseData = {
   isPremium: true,
   language: "id",
   isPublished: true,
-  totalModules: 1,
+  totalModules: 3,
   modules: [
     {
       title: "Fondasi React — Berpikir dalam Komponen",
@@ -599,6 +599,716 @@ export default function FormDiskusi() {
         ],
         quizBank: [],
       },
+    },{
+      title: "State Management & Hooks Lanjutan",
+      slug: "state-management-hooks-lanjutan",
+      order: 2,
+      xpReward: 150,
+      sources: [
+        { type: "YOUTUBE", title: "React State Management & Hooks Lanjutan", url: "https://www.youtube.com/watch?v=5kHyviqjhCk" },
+        { type: "DOCUMENTATION", title: "React Hooks Documentation", url: "https://react.dev/reference/react" },
+        { type: "DOCUMENTATION", title: "Synchronizing with Effects", url: "https://react.dev/learn/synchronizing-with-effects" }
+      ],
+      contentObject: {
+        slides: [
+          {
+            slideNumber: 1,
+            type: "lesson",
+            title: "Siklus Hidup Komponen (Lifecycle)",
+            content: `Sebelum masuk ke Hooks tingkat lanjut, kita harus memahami bahwa komponen React memiliki "Siklus Hidup" (Lifecycle) layaknya makhluk hidup.
+            
+Siklus ini terdiri dari 3 fase utama:
+1. **Mounting (Lahir)**: Saat komponen pertama kali dimasukkan ke dalam DOM layar. Di fase ini, UI awal digambar.
+2. **Updating (Tumbuh)**: Saat komponen di-*render* ulang karena ada perubahan \`state\` atau \`props\`.
+3. **Unmounting (Mati)**: Saat komponen dihapus dari DOM (misal, pengguna pindah ke halaman lain).
+
+Pada era *Class Component* lawas, developer menggunakan metode seperti \`componentDidMount\` atau \`componentWillUnmount\` untuk merespons fase-fase ini. Namun, di era *Functional Component* modern, kita menangani semua fase tersebut hanya dengan satu senjata pamungkas: **\`useEffect\`**.`,
+            keyTakeaway: "Setiap komponen React lahir (mount), hidup/berubah (update), dan akhirnya mati (unmount). Siklus ini mengendalikan kapan efek samping harus dijalankan."
+          },
+          {
+            slideNumber: 2,
+            type: "lesson",
+            title: "Apa itu Efek Samping (Side Effects)?",
+            content: `Fungsi komponen React sejatinya dirancang untuk menjadi murni (*pure*). Artinya, tugas utamanya HANYA menerima data (props/state) dan mereturn JSX (UI).
+
+Lalu, di mana kita boleh menaruh kode untuk mengambil data dari internet (Fetch API), mengubah \`document.title\`, atau mengatur \`setInterval\`? 
+Semua hal yang "menyentuh" dunia di luar komponen React disebut sebagai **Efek Samping (Side Effects)**.
+
+Jika kamu melakukan *fetch API* langsung di dalam badan utama fungsi komponen, komponenmu akan kacau balau karena *fetch* tersebut akan dipanggil berulang-ulang tanpa henti setiap kali React me-*render* ulang layar.
+
+Oleh karena itu, React menyediakan semacam "ruang isolasi" khusus untuk mengeksekusi kode efek samping ini agar aman dan terkontrol. Ruang isolasi tersebut bernama **\`useEffect\`**.`,
+            keyTakeaway: "Efek samping adalah operasi apa pun yang mempengaruhi dunia di luar komponen yang sedang dirender (seperti HTTP request, manipulasi DOM manual, timer). Gunakan useEffect untuk menanganinya."
+          },
+          {
+            slideNumber: 3,
+            type: "example",
+            title: "Anatomi useEffect & Dependency Array",
+            content: `Mari kita lihat anatomi dasar dari hook \`useEffect\`:
+
+\`\`\`jsx
+import { useEffect } from 'react';
+
+function KomponenKu() {
+  useEffect(() => {
+    // 1. Logika efek samping dieksekusi di sini
+    console.log("Komponen baru saja di-mount!");
+  }, []); // 2. Dependency Array
+}
+\`\`\`
+
+**Rahasia Terbesar useEffect ada pada Parameter Keduanya (Dependency Array):**
+- **Tanpa array sama sekali**: \`useEffect(() => { ... })\` -> Berjalan setiap kali komponen dirender ulang (SANGAT BERBAHAYA, bisa bikin Infinite Loop).
+- **Array kosong**: \`useEffect(() => { ... }, [])\` -> Berjalan **HANYA SEKALI** saat komponen pertama kali di-mount (Lahir). Sangat cocok untuk fetch data awal.
+- **Array berisi variabel**: \`useEffect(() => { ... }, [angka, nama])\` -> Berjalan saat pertama kali di-mount, DAN akan berjalan lagi HANYA JIKA nilai variabel \`angka\` atau \`nama\` berubah.`,
+            keyTakeaway: "Kendalikan kapan efek dijalankan menggunakan Dependency Array (parameter kedua useEffect). Array kosong [] memastikan kode di dalamnya hanya berjalan 1 kali."
+          },
+          {
+            slideNumber: 4,
+            type: "example",
+            title: "Cleanup Function: Menghindari Memory Leak",
+            content: `Bagaimana jika efek yang kita buat bersifat terus-menerus, seperti mengatur \`setInterval\` atau berlangganan (*subscribe*) ke layanan chat? 
+
+Jika pengguna berpindah halaman (komponen di-Unmount) namun timer tersebut tidak pernah dihentikan, timer itu akan terus berjalan selamanya di latar belakang browser, memakan memori, dan memicu *Memory Leak* (kebocoran memori)!
+
+Untuk mencegahnya, \`useEffect\` bisa mereturn sebuah fungsi pembersihan (*Cleanup Function*):
+
+\`\`\`jsx
+useEffect(() => {
+  // 1. Mulai sesuatu (misal: Timer)
+  const timerId = setInterval(() => {
+    console.log("Detak jantung aplikasi...");
+  }, 1000);
+
+  // 2. Fungsi pembersihan (Cleanup)
+  return () => {
+    // Kode ini akan dipanggil otomatis oleh React SEBELUM komponen hancur
+    clearInterval(timerId);
+    console.log("Timer dimatikan!");
+  };
+}, []);
+\`\`\`
+Pola \`return () => {}\` di dalam \`useEffect\` ini setara dengan asuransi keamanan aplikasimu.`,
+            keyTakeaway: "Jika efekmu menciptakan sesuatu yang terus berjalan (timer, event listener), WAJIB kembalikan Cleanup Function untuk membersihkannya saat komponen unmount."
+          },
+          {
+            slideNumber: 5,
+            type: "lesson",
+            title: "Misteri Strict Mode (Kenapa Efek Jalan 2x?)",
+            content: `Saat kamu mencoba menjalankan \`useEffect\` dengan \`console.log\` di mode *development* (saat di komputermu), kamu mungkin akan panik melihat pesan log tercetak **Dua Kali** padahal dependency array-nya kosong \`[]\`.
+
+Apakah ini *bug*? BUKAN!
+Ini adalah fitur sengaja dari **React Strict Mode**. 
+
+Sejak React 18, React sengaja me-*mount*, meng-*unmount*, lalu me-*mount* ulang komponenmu secara instan dalam hitungan milidetik saat *development*. Tujuannya sangat mulia: **React sedang mengetes apakah *Cleanup Function* yang kamu tulis sudah benar**.
+
+Jika kamu tidak menulis *Cleanup Function* untuk efek yang membutuhkan pembersihan, aplikasi akan rusak ganda di lingkungan pengembangan, sehingga kamu bisa menyadarinya lebih awal. 
+
+**Jangan panik!** Perilaku ganda ini HANYA terjadi di *development*. Saat aplikasimu di-build dan di-deploy ke produksi (Production), komponen hanya akan di-mount satu kali secara normal.`,
+            keyTakeaway: "React Strict Mode secara sengaja menjalankan useEffect 2x saat development untuk mendeteksi potensi bug Memory Leak. Ini normal dan aman."
+          },
+          {
+            slideNumber: 6,
+            type: "lesson",
+            title: "Aturan Baku React Hooks",
+            content: `Sebelum kita berlatih, kamu harus menghafal **Dua Hukum Tertinggi Hooks**:
+
+1. **Hanya Panggil Hooks di Tingkat Teratas (Top Level)**
+   Kamu **TIDAK BOLEH** memanggil \`useState\` atau \`useEffect\` di dalam *loops*, *conditions* (\`if\`), atau fungsi bersarang. React sangat bergantung pada URUTAN pemanggilan hooks. Jika kamu menyembunyikannya di balik \`if\`, urutan itu bisa berantakan dan aplikasimu akan seketika *crash*.
+
+   \`\`\`jsx
+   // SALAH (DI DALAM IF)
+   if (isUserLoggedIn) {
+     useEffect(() => { ... }); 
+   }
+
+   // BENAR
+   useEffect(() => {
+     if (isUserLoggedIn) { ... }
+   }, [isUserLoggedIn]);
+   \`\`\`
+
+2. **Hanya Panggil Hooks dari Fungsi React**
+   Jangan memanggil Hooks dari fungsi JavaScript biasa. Panggil mereka hanya dari dalam *Functional Component* React, atau dari dalam *Custom Hooks* buatanmu sendiri.`,
+            keyTakeaway: "Hukum Mutlak: Hooks harus dipanggil di urutan paling atas fungsi komponen. Jangan pernah memasukkannya ke dalam if, loop, atau switch."
+          },
+          {
+            slideNumber: 7,
+            type: "challenge",
+            title: "Challenge: Sinkronisasi Judul Halaman",
+            content: `Mari kita praktikkan kekuatan \`useEffect\`.
+            
+Salah satu penggunaan paling dasar dari efek samping adalah mengubah \`document.title\` (judul tab browser yang terlihat di atas) agar tersinkronisasi dengan state yang ada di komponen.`,
+            challenge: {
+              instruction: "Gunakan useEffect untuk mengubah nilai `document.title` setiap kali tombol diklik (state `count` berubah). Judul tab harus menjadi 'Diklik N kali'.",
+              inputType: "code",
+              inputPlaceholder: "...",
+              starterCode: "import { useState, useEffect } from 'react';\n\nexport default function PageTitle() {\n  const [count, setCount] = useState(0);\n  \n  // Tambahkan useEffect disini\n  // Ganti document.title dengan string literal `Diklik ${count} kali`\n\n  return (\n    <button onClick={() => setCount(c => c + 1)}>\n      Klik: {count}\n    </button>\n  );\n}",
+              expectedConcepts: ["useEffect", "document.title", "[count]"],
+              evaluationCriteria: "Evaluasi apakah useEffect menggunakan dependency array [count] dan mengubah document.title di dalamnya.",
+              hints: [
+                "Pastikan efek tersebut memiliki dependency array: `[count]`",
+                "Di dalam fungsi efek, tulis `document.title = ...`"
+              ],
+              sampleAnswer: "import { useState, useEffect } from 'react';\n\nexport default function PageTitle() {\n  const [count, setCount] = useState(0);\n  \n  useEffect(() => {\n    document.title = `Diklik ${count} kali`;\n  }, [count]);\n\n  return (\n    <button onClick={() => setCount(c => c + 1)}>\n      Klik: {count}\n    </button>\n  );\n}",
+              followUpQuestion: "Apa yang terjadi jika kita mengosongkan dependency array menjadi [] di kode tersebut?"
+            }
+          },
+          {
+            slideNumber: 8,
+            type: "lesson",
+            title: "Mengenal Custom Hooks",
+            content: `Setelah kita memahami \`useState\` dan \`useEffect\`, ada satu kekuatan super lagi yang dimiliki oleh React Hooks: **Custom Hooks**.
+
+Custom Hooks pada dasarnya adalah fungsi JavaScript biasa, tetapi ia memiliki kemampuan spesial: **Bisa memanggil hooks lain di dalamnya**.
+
+Mengapa kita butuh Custom Hooks?
+Bayangkan kamu memiliki tiga komponen berbeda (misalnya: Header, Sidebar, dan Footer) yang semuanya butuh mendeteksi apakah pengguna sedang *online* atau *offline*. Daripada kamu menulis ulang \`useEffect\` untuk mendengarkan *event* \`window.addEventListener('online')\` di ketiga komponen tersebut (yang melanggar prinsip DRY - *Don't Repeat Yourself*), kamu bisa mengekstrak logika tersebut ke dalam satu fungsi Custom Hook bernama \`useOnlineStatus\`.`,
+            keyTakeaway: "Custom Hooks digunakan untuk membagikan (share) logika stateful antar komponen, bukan membagikan statenya. Setiap komponen yang memanggil hook akan mendapatkan state yang terisolasi."
+          },
+          {
+            slideNumber: 9,
+            type: "example",
+            title: "Praktik Membuat: useWindowSize",
+            content: `Mari kita buat Custom Hook paling populer di dunia *frontend*: \`useWindowSize\`. Hook ini berguna jika kamu ingin membuat komponen merespons perubahan ukuran layar (misal merender versi mobile vs desktop) langsung dari *state* JavaScript.
+
+\`\`\`jsx
+import { useState, useEffect } from 'react';
+
+// 1. Deklarasi fungsi dengan awalan "use"
+export function useWindowSize() {
+  const [windowSize, setWindowSize] = useState({
+    width: undefined,
+    height: undefined,
+  });
+
+  useEffect(() => {
+    // Handler saat ukuran window berubah
+    function handleResize() {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    }
+    
+    // Tambahkan event listener
+    window.addEventListener("resize", handleResize);
+    
+    // Panggil sekali saat pertama load
+    handleResize();
+    
+    // Jangan lupa CLEANUP!
+    return () => window.removeEventListener("resize", handleResize);
+  }, []); // Array kosong = hanya mount & unmount
+
+  return windowSize;
+}
+\`\`\`
+
+Cara pakainya di komponen sangat elegan:
+\`\`\`jsx
+function TampilanResponsif() {
+  const size = useWindowSize(); // 💥 Magic!
+  
+  return (
+    <div>
+      Lebar layar saat ini: {size.width}px. 
+      {size.width < 768 ? "Mode Mobile" : "Mode Desktop"}
+    </div>
+  );
+}
+\`\`\``,
+            keyTakeaway: "Custom Hooks menyembunyikan logika kompleks dan mengembalikan (return) nilai yang siap pakai. Komponen yang memakainya menjadi sangat bersih dan rapi."
+          },
+          {
+            slideNumber: 10,
+            type: "lesson",
+            title: "Aturan Wajib Custom Hooks",
+            content: `Meskipun Custom Hooks itu fungsinya bebas, ada satu aturan emas (Golden Rule) yang ditegakkan dengan ketat oleh linter React: **NAMA FUNGSI WAJIB DIAWALI DENGAN KATA \`use\`**.
+
+Contoh yang Benar: \`useFetch\`, \`useAuth\`, \`useMediaQuery\`.
+Contoh yang Salah: \`getFetch\`, \`fetchData\`, \`authStatus\`.
+
+Mengapa ini sangat krusial?
+1. **Validasi Aturan Hooks**: React linter hanya bisa mengecek apakah kamu melanggar aturan hooks (seperti memanggil hook di dalam *if* atau *loop*) JIKA fungsimu berawalan \`use\`. Jika kamu menamainya \`ambilData\`, React akan menganggapnya sebagai fungsi biasa dan membiarkan *bug* siluman lewat.
+2. **Keterbacaan**: Membaca nama \`use...\` langsung memberitahu *developer* lain bahwa fungsi tersebut adalah komponen *stateful* yang memiliki efek samping.`,
+            keyTakeaway: "Selalu, selalu, dan selalu berikan awalan 'use' (huruf kecil) pada Custom Hook buatanmu. Tanpa awalan ini, aplikasi React-mu kehilangan lapisan pengamanan deteksi bug otomatis."
+          },
+          {
+            slideNumber: 11,
+            type: "lesson",
+            title: "Optimalisasi: Mengenal useCallback",
+            content: `Di React tingkat lanjut, ada situasi di mana *re-render* yang berlebihan mulai membuat aplikasimu terasa lemot.
+Setiap kali komponen me-*render* ulang (misal karena ada ketikan di input), **semua fungsi yang ada di dalam komponen itu akan dideklarasikan ulang (diciptakan kembali di memori)**.
+
+Dalam banyak kasus, ini sangat cepat dan tidak masalah. Tetapi jika fungsi itu dioper sebagai *Props* ke komponen *Child* yang berat, komponen *Child* akan mengira fungsinya baru, lalu ia akan ikut me-*render* ulang dirinya sendiri secara sia-sia!
+
+Di sinilah **\`useCallback\`** datang sebagai pahlawan.
+
+\`useCallback\` akan **Mengingat (Memoize)** fungsimu. React tidak akan mendeklarasikan ulang fungsi tersebut selama *dependency array*-nya tidak berubah.
+
+\`\`\`jsx
+import { useCallback, useState } from 'react';
+
+function Parent() {
+  const [teks, setTeks] = useState("");
+  const [data, setData] = useState([]);
+
+  // Fungsi ini tidak akan diciptakan ulang setiap kali 'teks' diketik!
+  const hapusData = useCallback((id) => {
+    setData(prev => prev.filter(item => item.id !== id));
+  }, []); // Dependensi kosong, fungsi ini "abadi"
+
+  return (
+    <>
+      <input onChange={(e) => setTeks(e.target.value)} />
+      {/* ChildComponent yang berat akan aman dari re-render palsu */}
+      <ChildComponent yangBerat={true} onHapus={hapusData} />
+    </>
+  );
+}
+\`\`\``,
+            keyTakeaway: "Gunakan useCallback HANYA ketika kamu perlu mengoper fungsi ke komponen anak (Child) yang teroptimasi, untuk mencegah anak tersebut re-render secara tidak perlu."
+          },
+          {
+            slideNumber: 12,
+            type: "lesson",
+            title: "Optimalisasi: Mengenal useMemo",
+            content: `Jika \`useCallback\` digunakan untuk mengingat FUNGSI, maka **\`useMemo\`** digunakan untuk mengingat **HASIL NILAI (Value) DARI SEBUAH KALKULASI BERAT**.
+
+Kapan kamu harus menggunakannya?
+Bayangkan kamu punya fungsi untuk memfilter atau mengurutkan (sorting) 10.000 data tabel. Jika kamu menaruh fungsi itu langsung di komponen, setiap kali ada perubahan kecil (seperti menekan tombol centang/checkbox yang tidak berhubungan dengan tabel), React akan mengalkulasi ulang 10.000 data tersebut! Aplikasi akan nge-*lag*.
+
+\`\`\`jsx
+import { useMemo, useState } from 'react';
+
+function TabelBanyakData({ daftarBarang }) {
+  const [modeGelap, setModeGelap] = useState(false);
+
+  // ❌ BURUK: Dieksekusi ulang setiap kali toggle modeGelap diklik!
+  // const barangTermahal = daftarBarang.filter(b => b.harga > 1000000).sort(...);
+
+  // ✅ BAIK: Hasil kalkulasi diingat. 
+  // Hanya dihitung ulang JIKA 'daftarBarang' sungguhan berubah mutasinya.
+  const barangTermahal = useMemo(() => {
+    console.log("Kalkulasi berat berjalan...");
+    return daftarBarang
+             .filter(b => b.harga > 1000000)
+             .sort((a,b) => b.harga - a.harga);
+  }, [daftarBarang]);
+
+  return (
+    <div className={modeGelap ? 'dark' : 'light'}>
+      <button onClick={() => setModeGelap(!modeGelap)}>Toggle Theme</button>
+      {/* Render barangTermahal di sini */}
+    </div>
+  );
+}
+\`\`\``,
+            keyTakeaway: "Jangan gunakan useMemo untuk segalanya karena useMemo sendiri memakan sedikit memori. Gunakan hanya pada operasi komputasi yang berat (seperti sorting array besar atau filter data kompleks)."
+          },
+          {
+            slideNumber: 13,
+            type: "challenge",
+            title: "Challenge: Perbaiki Render Berulang",
+            content: "Berikut ini ada kode komponen yang sangat lambat karena melakukan operasi matematika berat di setiap karakter yang pengguna ketik. Perbaiki performanya menggunakan \`useMemo\`!",
+            challenge: {
+              instruction: "Bungkus logika `hitungFaktorial` di dalam `useMemo` agar ia hanya dihitung ulang ketika nilai variabel `angkaTarget` berubah, bukan saat pengguna mengetik di `input teksLain`.",
+              inputType: "code",
+              inputPlaceholder: "...",
+              starterCode: "import { useState, useMemo } from 'react';\n\nfunction hitungBerat(n) {\n  console.log('Menghitung...');\n  for(let i=0; i<1000000000; i++){}\n  return n * 2;\n}\n\nexport default function App() {\n  const [angkaTarget, setAngkaTarget] = useState(10);\n  const [teksLain, setTeksLain] = useState('');\n\n  // PERBAIKI BARIS INI DENGAN USEMEMO:\n  const hasil = hitungBerat(angkaTarget);\n\n  return (\n    <div>\n      <input value={teksLain} onChange={e => setTeksLain(e.target.value)} />\n      <button onClick={() => setAngkaTarget(a => a + 1)}>Tambah Angka</button>\n      <p>Hasil Kalkulasi: {hasil}</p>\n    </div>\n  );\n}",
+              expectedConcepts: ["useMemo", "hitungBerat", "[angkaTarget]"],
+              evaluationCriteria: "Pastikan pengguna menggunakan sintaks `useMemo(() => hitungBerat(angkaTarget), [angkaTarget])`",
+              hints: ["Pola useMemo: `const hasil = useMemo(() => panggilFungsi(), [dependensi]);`", "Dependensinya harus array `[angkaTarget]` agar hanya re-render saat angka di-klik."],
+              sampleAnswer: "import { useState, useMemo } from 'react';\n\nfunction hitungBerat(n) {\n  console.log('Menghitung...');\n  for(let i=0; i<1000000000; i++){}\n  return n * 2;\n}\n\nexport default function App() {\n  const [angkaTarget, setAngkaTarget] = useState(10);\n  const [teksLain, setTeksLain] = useState('');\n\n  const hasil = useMemo(() => hitungBerat(angkaTarget), [angkaTarget]);\n\n  return (\n    <div>\n      <input value={teksLain} onChange={e => setTeksLain(e.target.value)} />\n      <button onClick={() => setAngkaTarget(a => a + 1)}>Tambah Angka</button>\n      <p>Hasil Kalkulasi: {hasil}</p>\n    </div>\n  );\n}",
+              followUpQuestion: "Kenapa teks input terasa nge-lag sebelum di-fix dengan useMemo?"
+            }
+          },
+          {
+            slideNumber: 14,
+            type: "lesson",
+            title: "Rangkuman Modul 2",
+            content: `Luar biasa! Kamu baru saja mempelajari senjata-senjata andalan developer React level *Senior*.
+            
+Mari kita rangkum materi Modul 2 ini:
+1. **useEffect**: Ruang khusus untuk *Side Effects* (seperti fetch API, timer, event listener). Jangan lupa fungsi *Cleanup* di parameter balikan.
+2. **Dependency Array**: Rem tangan dari *useEffect*. Array kosong = jalan sekali di awal. Array berisi state = jalan saat state itu berubah.
+3. **Custom Hooks**: Cara terbaik me-*refactor* logika *stateful* menjadi fungsi modular yang berawalan \`use\`.
+4. **useCallback**: Mengunci / menghafal **Fungsi** agar tidak dibuat ulang di memori setiap kali komponen render.
+5. **useMemo**: Mengunci / menghafal **Nilai (Hasil)** dari operasi komputasi berat agar tidak memakan CPU sia-sia.
+
+Dengan menguasai *Hooks* ini, kodemu tidak hanya akan berfungsi dengan benar, tetapi juga melesat dengan sangat cepat (*performant*).`,
+            keyTakeaway: "Kuasai Dependency Array dan Aturan Top-Level Hooks, maka 90% bug misterius di React akan terhindari. Gunakan useCallback dan useMemo dengan bijak untuk optimasi."
+          },
+          {
+            slideNumber: 15,
+            type: "quiz",
+            title: "Ujian Validasi Modul 2",
+            content: "Uji insting React-mu! Buktikan bahwa kamu memahami siklus hidup, side effect, dan aturan baku Hooks. Harus tembus skor 80!",
+            quiz: { questions: [], passingScore: 80, totalQuestions: 5, timeLimit: 300 }
+          }
+        ],
+        quizBank: []
+      }
     },
-  ],
+    {
+      title: "Routing & Data Fetching",
+      slug: "routing-data-fetching-react",
+      order: 3,
+      xpReward: 200,
+      sources: [
+        { type: "YOUTUBE", title: "React Router Dasar & Fetch API", url: "https://www.youtube.com/watch?v=5kHyviqjhCk" },
+        { type: "DOCUMENTATION", title: "React Router", url: "https://reactrouter.com/" },
+        { type: "DOCUMENTATION", title: "Fetching Data", url: "https://react.dev/reference/react/useEffect#fetching-data-with-effects" }
+      ],
+      contentObject: {
+        slides: [
+          {
+            slideNumber: 1,
+            type: "lesson",
+            title: "Fetching Data di Dunia React",
+            content: `Aplikasi modern nyaris tidak berguna tanpa data dinamis dari server (API). 
+
+Di React SPA (Single Page Application) tradisional, pengambilan data dilakukan di *client-side* (di browser pengguna) menggunakan kombinasi **\`useEffect\`** dan **\`useState\`**. 
+
+Alurnya selalu seperti ini:
+1. Komponen di-mount (tampil di layar).
+2. Tampilkan UI Kosong atau UI *Loading*.
+3. \`useEffect\` berjalan dan memicu HTTP Request (misal fungsi \`fetch()\`).
+4. Data dari server tiba (sebagai Promise).
+5. Data tersebut dimasukkan ke dalam fungsi *Setter State* (seperti \`setData(hasil)\`).
+6. Perubahan *State* memaksa komponen untuk di-render ulang.
+7. Komponen kini me-render UI asli dengan data yang lengkap!`,
+            keyTakeaway: "Di React tradisional, render UI selalu mendahului fetching data. UI akan ter-update secara otomatis saat data telah selesai di-fetch dan masuk ke dalam State."
+          },
+          {
+            slideNumber: 2,
+            type: "example",
+            title: "Implementasi Dasar Fetch",
+            content: `Mari kita lihat kode nyatanya. Kita akan menggunakan API publik dari \`JSONPlaceholder\`.
+
+\`\`\`jsx
+import { useState, useEffect } from 'react';
+
+function DaftarUser() {
+  const [users, setUsers] = useState([]); // State untuk wadah data
+
+  useEffect(() => {
+    // Ingat, fetch adalah proses asinkron (Promise)
+    fetch('https://jsonplaceholder.typicode.com/users')
+      .then(response => response.json()) // Ubah ke JSON
+      .then(data => {
+        setUsers(data); // Simpan hasil ke State
+      });
+  }, []); // Array kosong = ambil data cuma sekali pas komponen muncul
+
+  return (
+    <ul>
+      {users.map(user => (
+        <li key={user.id}>{user.name}</li>
+      ))}
+    </ul>
+  );
+}
+\`\`\`
+Sederhana, bukan? \`useEffect\` memanggil jaringan, lalu hasilnya "ditanam" ke dalam \`useState\`.`,
+            keyTakeaway: "Selalu gunakan dependency array kosong [] saat melakukan initial data fetch agar permintaan ke API tidak dipanggil berulang-ulang tanpa henti (infinite loop)."
+          },
+          {
+            slideNumber: 3,
+            type: "lesson",
+            title: "Tiga Serangkai State: Data, Loading, Error",
+            content: `Kode di slide sebelumnya berfungsi, tapi di dunia nyata, itu adalah praktik yang **buruk**. Mengapa? Karena koneksi internet pengguna bisa lambat atau bahkan gagal.
+
+Aplikasi yang solid harus memiliki **Tiga Serangkai State**:
+1. \`State Data\`: Untuk menampung isi konten.
+2. \`State Loading\`: Boolean (\`true\` / \`false\`) untuk menampilkan spinner pemuatan.
+3. \`State Error\`: String untuk menampilkan pesan kesalahan jika server *down*.
+
+Dengan tiga state ini, UX (Pengalaman Pengguna) aplikasimu akan naik level. Pengguna tahu bahwa aplikasi sedang bekerja, bukan sekadar layar kosong atau *hang*.`,
+            keyTakeaway: "Developer profesional selalu memikirkan skenario terburuk (jaringan lambat atau server mati) dengan menyiapkan Loading State dan Error State."
+          },
+          {
+            slideNumber: 4,
+            type: "example",
+            title: "Menulis Kode Tiga Serangkai State",
+            content: `Beginilah wujud komponen fetching yang standar industri:
+
+\`\`\`jsx
+function PostLengkap() {
+  const [posts, setPosts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    setIsLoading(true); // Mulai loading
+    
+    fetch('https://jsonplaceholder.typicode.com/posts')
+      .then(res => {
+        if (!res.ok) throw new Error("Gagal mengambil data");
+        return res.json();
+      })
+      .then(data => {
+        setPosts(data);
+        setIsLoading(false); // Matikan loading jika sukses
+      })
+      .catch(err => {
+        setError(err.message); // Tangkap error
+        setIsLoading(false); // Tetap matikan loading meski error
+      });
+  }, []);
+
+  // UI Cabang (Conditional Rendering)
+  if (isLoading) return <p>Sedang memuat data dari server...</p>;
+  if (error) return <p style={{color: 'red'}}>Waduh: {error}</p>;
+
+  return <ul>{posts.map(p => <li key={p.id}>{p.title}</li>)}</ul>;
+}
+\`\`\`
+Pola di atas disebut *Conditional Rendering*. Komponen akan menghentikan proses render utama (List HTML) dan me-return elemen *Loading* atau *Error* terlebih dahulu sesuai kondisinya.`,
+            keyTakeaway: "Gunakan Conditional Rendering (if-return di tengah komponen) untuk memblokir render komponen utama selama data masih dimuat atau terjadi error."
+          },
+          {
+            slideNumber: 5,
+            type: "challenge",
+            title: "Challenge: Mengambil Data Kucing",
+            content: "Terapkan ilmu Tiga Serangkai State untuk mengambil fakta unik tentang Kucing dari API publik.",
+            challenge: {
+              instruction: "Lengkapi kode di dalam `useEffect`. Matikan status loading HANYA JIKA proses fetch sukses (di blok `.then()`). Abaikan blok `.catch()` untuk latihan ini.",
+              inputType: "code",
+              inputPlaceholder: "...",
+              starterCode: "import { useState, useEffect } from 'react';\n\nexport default function CatFact() {\n  const [fact, setFact] = useState('');\n  const [isLoading, setIsLoading] = useState(true);\n  \n  useEffect(() => {\n    // Lengkapi fetch di bawah ini:\n    fetch('https://catfact.ninja/fact')\n      .then(r => r.json())\n      .then(data => {\n        // 1. Simpan data.fact ke state fact\n        // 2. Ubah state isLoading menjadi false\n        \n      });\n  }, []);\n\n  if (isLoading) return <h2>Memuat fakta kucing...</h2>;\n  return <h2>Tahukah kamu? {fact}</h2>;\n}",
+              expectedConcepts: ["setFact", "setIsLoading(false)"],
+              evaluationCriteria: "Evaluasi pengisian setFact(data.fact) dan pemanggilan setIsLoading(false) di dalam blok then data",
+              hints: [
+                "Gunakan fungsi setFact() dan masukkan data.fact ke dalamnya.",
+                "Panggil setIsLoading(false) segera setelahnya."
+              ],
+              sampleAnswer: "import { useState, useEffect } from 'react';\n\nexport default function CatFact() {\n  const [fact, setFact] = useState('');\n  const [isLoading, setIsLoading] = useState(true);\n  \n  useEffect(() => {\n    fetch('https://catfact.ninja/fact')\n      .then(r => r.json())\n      .then(data => {\n        setFact(data.fact);\n        setIsLoading(false);\n      });\n  }, []);\n\n  if (isLoading) return <h2>Memuat fakta kucing...</h2>;\n  return <h2>Tahukah kamu? {fact}</h2>;\n}",
+              followUpQuestion: "Kenapa kita menaruh `setIsLoading(false)` di dalam `.then` dan tidak di luarnya?"
+            }
+          },
+          {
+            slideNumber: 6,
+            type: "lesson",
+            title: "Konsep SPA & React Router",
+            content: `Sampai di titik ini, kita sudah bisa menampilkan komponen dan memompa data ke dalamnya. Namun, bagaimana jika pengguna ingin berpindah dari halaman "Beranda" ke halaman "Profil"?
+
+Dalam arsitektur website tradisional (*Multi Page Application*), menekan tautan \`<a href="/profil">\` akan membuat browser membuang seluruh layar, memuat file HTML baru, mengeksekusi ulang seluruh CSS & JS dari nol, memicu layar berkedip sesaat (*white screen flash*). Ini SANGAT lambat.
+
+Aplikasi React modern menganut **Single Page Application (SPA)**.
+Artinya, kita secara fisik hanya memiliki SATU file \`index.html\`. Saat pengguna berpindah halaman, kita hanya mencegah *browser* melakukan proses *refresh*, lalu kita secara ajaib "menghapus" komponen Beranda dari layar dan "menggambar" komponen Profil sebagai gantinya. Semuanya ditangani oleh JavaScript, instan tanpa layar berkedip!
+
+Untuk mengatur pergantian komponen rumit ini berdasarkan rute URL (\`/beranda\` vs \`/profil\`), kita menggunakan pustaka tambahan yang sangat populer bernama **React Router** (atau *App Router* jika kamu menggunakan *framework* tingkat lanjut seperti Next.js).`,
+            keyTakeaway: "Di aplikasi React, perpindahan layar adalah ilusi JavaScript. Browser sebenarnya tidak pernah me-refresh dokumen HTML, itulah yang membuat SPA terasa secepat kilat seperti aplikasi asli (Native App)."
+          },
+          {
+            slideNumber: 7,
+            type: "example",
+            title: "Navigasi ala React Router",
+            content: `Satu aturan krusial yang HARUS kamu ingat di dunia SPA: **Jangan pernah menggunakan tag \`<a>\` HTML standar untuk navigasi internal aplikasi!**
+
+Jika kamu memakai \`<a href="/profil">\`, browser tetap akan memaksa melakukan perilaku bawaan *refresh* layar putih. Seluruh State aplikasi akan mati dan hangus!
+
+Sebagai gantinya, pustaka *Router* akan selalu menyediakan komponen khusus (biasanya bernama \`<Link>\`) yang akan membajak klik tersebut secara elegan.
+
+\`\`\`jsx
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+
+function App() {
+  return (
+    <BrowserRouter>
+      {/* Menu Navigasi yang aman (TIDAK BOLEH PAKAI <a href>) */}
+      <nav>
+        <Link to="/">Beranda</Link>
+        <Link to="/profil">Profil</Link>
+      </nav>
+
+      {/* Mesin yang mengatur Komponen apa yang muncul */}
+      <Routes>
+        <Route path="/" element={<HalamanBeranda />} />
+        <Route path="/profil" element={<HalamanProfil />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+\`\`\`
+Mulai saat ini, hindari kebiasaan menekan *Reload Browser*!`,
+            keyTakeaway: "Tinggalkan tag <a> konvensional. Gunakan komponen <Link> untuk navigasi mulus tanpa kehilangan memori State aplikasi."
+          },
+          {
+            slideNumber: 8,
+            type: "lesson",
+            title: "Tantangan Asynchronous: Loading & Error",
+            content: `Mengambil data dari internet tidak terjadi secara instan. Bisa memakan waktu 100 milidetik, bisa 5 detik, atau bahkan gagal sama sekali karena koneksi internet terputus.
+
+Sebagai developer yang baik, kita tidak boleh membiarkan pengguna melihat layar kosong saat data sedang dalam perjalanan, apalagi membiarkan aplikasi nge-*crash* (hang) jika server sedang bermasalah.
+
+Dalam React tradisional, kita menangani ini dengan menambah 2 buah *State* tambahan di samping State data utama:
+1. **Loading State**: Bertipe boolean (\`true\`/\`false\`) untuk menandai apakah kita sedang menunggu data.
+2. **Error State**: Bertipe string atau objek untuk menyimpan pesan kesalahan jika request gagal.
+
+Pola ini sangat sering ditemui di industri sehingga disebut sebagai **Pola Fetching 3-State** (Data, Loading, Error).`,
+            keyTakeaway: "Data dari API bersifat Asynchronous. Selalu antisipasi delay jaringan dan potensi kegagalan dengan memikirkan status 'Loading' dan status 'Error'."
+          },
+          {
+            slideNumber: 9,
+            type: "example",
+            title: "Praktik Pola 3-State",
+            content: `Berikut adalah cetak biru standar pengambilan data yang profesional di React murni:
+
+\`\`\`jsx
+import { useState, useEffect } from 'react';
+
+function ProfilPengguna() {
+  const [data, setData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true); // Loading awal = true
+  const [errorMsg, setErrorMsg] = useState("");
+
+  useEffect(() => {
+    // Jalankan operasi ambil data saat komponen tampil
+    fetch('https://api.github.com/users/octocat')
+      .then(res => {
+        if (!res.ok) throw new Error("Gagal mengambil data dari server");
+        return res.json();
+      })
+      .then(hasilData => {
+        setData(hasilData);
+        setIsLoading(false); // Matikan loading setelah sukses
+      })
+      .catch(err => {
+        setErrorMsg(err.message);
+        setIsLoading(false); // Matikan loading juga saat error
+      });
+  }, []);
+
+  // Early Return Pattern! (Sangat elegan)
+  if (isLoading) return <h2>⏳ Sedang Memuat Data...</h2>;
+  if (errorMsg) return <h2 style={{color: 'red'}}>❌ Error: {errorMsg}</h2>;
+
+  // Jika kode sampai sini, dijamin 'data' sudah tersedia
+  return (
+    <div>
+      <h1>{data.name}</h1>
+      <p>{data.bio}</p>
+    </div>
+  );
+}
+\`\`\``,
+            keyTakeaway: "Gunakan pola 'Early Return' dalam komponenmu. Tulis pengecekan if(loading) dan if(error) di atas, sehingga kode JSX utama di bawahnya bebas dari kondisi yang berantakan."
+          },
+          {
+            slideNumber: 10,
+            type: "challenge",
+            title: "Challenge: Perbaiki UI Data Kosong",
+            content: "Ada satu celah dalam Pola 3-State kita. Bagaimana jika request ke API berhasil, tapi API mereturn array kosong `[]` (Misal, tidak ada data produk)? Kita tidak boleh membiarkan layar menjadi putih kosong tanpa informasi bagi pengguna.",
+            challenge: {
+              instruction: "Lengkapi komponen di bawah ini dengan pola Early Return. Tambahkan pengkondisian untuk mengecek apakah state `produk` kosong (panjang array 0). Jika kosong, return teks `Tidak ada produk yang ditemukan`.",
+              inputType: "code",
+              inputPlaceholder: "...",
+              starterCode: "function DaftarProduk({ isLoading, errorMsg, produk }) {\n  if (isLoading) return <h2>Loading...</h2>;\n  if (errorMsg) return <h2>Error: {errorMsg}</h2>;\n\n  // TULIS EARLY RETURN UNTUK PRODUK KOSONG DI SINI:\n\n\n  return (\n    <ul>\n      {produk.map(p => <li key={p.id}>{p.nama}</li>)}\n    </ul>\n  );\n}",
+              expectedConcepts: ["if(produk.length === 0)", "return <JSX>"],
+              evaluationCriteria: "Pastikan pengguna memeriksa `produk.length === 0` dan mereturn teks yang diminta. Penggunaan operator `!produk.length` juga diperbolehkan.",
+              hints: ["Gunakan properti `.length` pada array. Jika sama dengan 0, return sebuah tag header atau p."],
+              sampleAnswer: "function DaftarProduk({ isLoading, errorMsg, produk }) {\n  if (isLoading) return <h2>Loading...</h2>;\n  if (errorMsg) return <h2>Error: {errorMsg}</h2>;\n\n  if (produk.length === 0) return <h2>Tidak ada produk yang ditemukan</h2>;\n\n  return (\n    <ul>\n      {produk.map(p => <li key={p.id}>{p.nama}</li>)}\n    </ul>\n  );\n}",
+              followUpQuestion: "Kenapa mengecek length sangat penting daripada langsung merender `.map`?"
+            }
+          },
+          {
+            slideNumber: 11,
+            type: "lesson",
+            title: "Dynamic Routing (Rute Dinamis)",
+            content: `Setelah data didapatkan, tantangan berikutnya di dunia SPA adalah Navigasi Lanjutan: **Rute Dinamis**.
+
+Bayangkan Tokopedia memiliki jutaan produk. Mustahil developer mereka mendaftarkan rute (Route) satu per satu secara manual seperti ini:
+- \`<Route path="/produk/sepatu-adidas" />\`
+- \`<Route path="/produk/laptop-asus" />\`
+
+Solusinya adalah menggunakan Rute Dinamis berparameter. Di React Router, kita menandai parameter dinamis menggunakan titik dua ( \`:\` ).
+Contohnya: \`<Route path="/produk/:idProduk" />\`.
+
+Apapun yang diketik pengguna setelah \`/produk/\` (seperti \`/produk/123\` atau \`/produk/abc\`) akan dianggap sebagai halaman detail, dan nilai \`123\` tersebut akan disimpan ke dalam variabel \`idProduk\` yang bisa dibaca oleh komponenmu.`,
+            keyTakeaway: "Tanda titik dua ( : ) pada deklarasi Route menandakan bahwa bagian path tersebut bersifat dinamis dan nilainya bisa ditangkap oleh komponen sebagai variabel."
+          },
+          {
+            slideNumber: 12,
+            type: "example",
+            title: "Menangkap URL Params",
+            content: `Untuk membaca parameter dinamis yang ada di *address bar* (URL) browser pengguna, React Router menyediakan Custom Hook bernama **\`useParams\`**.
+
+Mari kita rangkai konsep Routing Dinamis ini bersama dengan Data Fetching yang baru saja kita pelajari:
+
+\`\`\`jsx
+import { useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+
+// Komponen Halaman Detail
+function HalamanDetailProduk() {
+  // Tangkap parameter 'idProduk' dari URL browser (misal: /produk/88)
+  const params = useParams(); 
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    // Kita gunakan ID dari URL untuk fetch spesifik 1 produk!
+    fetch(\`https://api.toko.com/products/\${params.idProduk}\`)
+      .then(res => res.json())
+      .then(data => setData(data));
+  }, [params.idProduk]); // ← Dependensi ini PENTING!
+
+  if (!data) return <p>Loading detail...</p>;
+  
+  return (
+    <div>
+      <h1>{data.namaBarang}</h1>
+      <p>Harga: Rp {data.harga}</p>
+    </div>
+  );
+}
+\`\`\`
+
+Perhatikan bagaimana kita menaruh \`params.idProduk\` di dalam **Dependency Array** \`useEffect\`. Ini memastikan bahwa jika pengguna melompat dari URL produk A ke produk B, komponen akan mengambil ulang data produk B tanpa harus merefresh halaman!`,
+            keyTakeaway: "Kombinasi `useParams()` dari React Router dan `useEffect` adalah resep standar untuk membangun halaman Detail di aplikasi Single Page Application."
+          },
+          {
+            slideNumber: 13,
+            type: "lesson",
+            title: "Masa Depan React: Mengapa Next.js?",
+            content: `Sampai di sini, kamu telah menamatkan seluruh kurikulum utama pengembangan Web Frontend SPA menggunakan React murni (sering disebut *Client Side Rendering* / CSR). 
+Namun, SPA Murni memiliki kelemahan telak:
+1. **SEO yang Buruk**: Karena HTML awal yang dikirim dari server hanya sebuah \`<div>\` kosong, robot Google (Crawler) kesulitan membaca isi konten aplikasimu.
+2. **Initial Load yang Lambat**: Pengguna dengan *smartphone* lambat harus menunggu ukuran file Javascript (bundle) React selesai di-download baru halaman bisa muncul.
+
+Untuk mengatasi ini, pencipta React (Facebook) sangat menyarankan agar proyek baru skala besar beralih ke ranah **SSR (Server Side Rendering)** menggunakan kerangka kerja (Framework) berbasis React.
+
+Sang Raja Framework tersebut saat ini adalah **Next.js**.
+Di Next.js, kamu tetap menulis komponen menggunakan fungsi-fungsi React (useState, JSX, Component). Namun Next.js melakukan "sihir" dengan me-render komponenmu di Server *Backend* (Node.js) terlebih dahulu, sehingga pengguna langsung disuguhi halaman HTML utuh secepat kilat.`,
+            keyTakeaway: "React Murni adalah Pustaka (Library). Next.js adalah Kerangka Kerja (Framework). Pelajari React murni untuk fondasi berpikir, gunakan Next.js di dunia profesional."
+          },
+          {
+            slideNumber: 14,
+            type: "lesson",
+            title: "Tamat! React Foundation Clear",
+            content: `Selamat! Kamu telah menyelesaikan Kurikulum React Premium Clarise.
+
+Mari kita *flashback* ilmu yang telah tertanam di otakmu:
+1. **Komponen & JSX**: Kita berpikir dalam arsitektur balok mandiri Lego, dan menuliskannya dalam format perpaduan HTML-Javascript yang elegan.
+2. **Props & State**: Kita mengirim data mengalir turun dari *Parent* ke *Child* (Props), dan kita memberikan ingatan memori yang bisa dimutasi secara interaktif (State).
+3. **Immutability**: Kita mematuhi aturan ketat untuk tidak merusak variabel sumber secara langsung, menggunakan \`setState\` dengan teknik *Spread Operator* pada *Array/Object*.
+4. **Side Effects (useEffect)**: Kita menaklukkan operasi asinkron dunia nyata, menghubungkan React dengan API luar angkasa dengan aman berbekal *Cleanup* dan *Dependency Array*.
+5. **SPA Concept**: Kita memahami bahwa *reload* browser adalah musuh, dan navigasi harus dijalankan secara dinamis dengan \`<Link>\` dan \`useParams\`.
+
+Pemahaman solid mengenai konsep reaktif ini akan membantumu menaklukkan ekosistem modern apa pun.`,
+            keyTakeaway: "Framework datang dan pergi, namun filosofi State-UI React telah mengubah dunia Front-End selamanya. Selamat berkarya sebagai React Developer!"
+          },
+          {
+            slideNumber: 15,
+            type: "quiz",
+            title: "Grand Final Quiz: React Expert",
+            content: "Ini adalah ujian tersulit di kurikulum dasar. Data Fetching, Router, Lifecycle, dan Hooks tingkat lanjut digabungkan menjadi satu. Buktikan kamu layak menyandang gelar React Developer!",
+            quiz: { questions: [], passingScore: 80, totalQuestions: 5, timeLimit: 300 }
+          }
+        ],
+        quizBank: []
+      }
+    }
+  ]
 };

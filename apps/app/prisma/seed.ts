@@ -1,6 +1,11 @@
+import { config } from "dotenv";
+config({ path: ".env.local" });
 import { PrismaClient, Difficulty } from "@prisma/client";
 import { batch5Courses } from "./data/batch5-pemrograman";
 import { reactDariNolCourse } from "./data/batch6-react";
+import { tailwindCourse } from "./data/batch7-tailwind";
+import { flutterCourse } from "./data/batch8-flutter";
+import { akuntansiCourses } from "./data/batch9-akuntansi";
 
 const prisma = new PrismaClient();
 
@@ -101,6 +106,15 @@ async function main() {
 
   // Call Batch 6
   await seedBatch6(prisma);
+
+  // Call Batch 7
+  await seedBatch7(prisma);
+
+  // Call Batch 8
+  await seedBatch8(prisma);
+
+  // Call Batch 9
+  await seedBatch9(prisma);
 
   console.log("✅ Seed completed successfully");
 }
@@ -530,9 +544,319 @@ async function seedBatch6(prisma: PrismaClient) {
   console.log("✅ Batch 6 berhasil ditambahkan.");
 }
 
+async function seedBatch7(prisma: PrismaClient) {
+  console.log("Sedang melakukan seeding Batch 7: Web Development (Tailwind CSS)...");
+
+  const catWebDev = await prisma.category.upsert({
+    where: { slug: "web-development" },
+    update: {},
+    create: { name: "Web Development", slug: "web-development", icon: "🌐", description: "Pengembangan website frontend dan backend", order: 7 },
+  });
+
+  const c = tailwindCourse;
+  const course = await prisma.course.upsert({
+    where: { slug: c.slug },
+    update: {
+      title: c.title,
+      description: c.description,
+      difficulty: c.difficulty,
+      isPremium: c.isPremium,
+      language: c.language,
+      isPublished: c.isPublished,
+      totalModules: c.totalModules,
+    },
+    create: {
+      title: c.title,
+      slug: c.slug,
+      description: c.description,
+      categoryId: catWebDev.id,
+      difficulty: c.difficulty,
+      isPremium: c.isPremium,
+      language: c.language,
+      isPublished: c.isPublished,
+      totalModules: c.totalModules,
+      visibility: "PUBLIC",
+    },
+  });
+
+  for (const m of c.modules) {
+    const moduleRow = await prisma.module.upsert({
+      where: { courseId_slug: { courseId: course.id, slug: m.slug } },
+      update: {
+        title: m.title,
+        order: m.order,
+        xpReward: m.xpReward,
+        content: JSON.stringify(m.contentObject),
+      },
+      create: {
+        courseId: course.id,
+        title: m.title,
+        slug: m.slug,
+        order: m.order,
+        xpReward: m.xpReward,
+        content: JSON.stringify(m.contentObject),
+      },
+    });
+
+    await prisma.slide.deleteMany({ where: { moduleId: moduleRow.id } });
+
+    for (const s of m.contentObject.slides) {
+      const renderType = s.type as string;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const slideContent: any = {
+        type: renderType,
+        body: s.content,
+        keyTakeaway: s.keyTakeaway,
+      };
+
+      if (renderType === "quiz" && s.quiz) {
+        slideContent.quiz = s.quiz;
+      }
+      if (renderType === "challenge" && s.challenge) {
+        slideContent.challenge = s.challenge;
+      }
+      if (renderType === "quiz") {
+        slideContent.quizBank = m.contentObject.quizBank;
+      }
+
+      await prisma.slide.create({
+        data: {
+          moduleId: moduleRow.id,
+          title: typeof s.title === "string" ? s.title : "Untitled",
+          order: typeof s.slideNumber === "number" ? s.slideNumber : 0,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          content: slideContent as any,
+          ...(m.sources && m.sources.length > 0 && renderType !== "quiz"
+            ? {
+                sources: {
+                  create: m.sources.map((src) => ({
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    type: src.type as any,
+                    title: src.title,
+                    url: src.url,
+                  })),
+                },
+              }
+            : {}),
+        },
+      });
+    }
+  }
+
+  console.log("✅ Batch 7 berhasil ditambahkan.");
+}
+
+async function seedBatch8(prisma: PrismaClient) {
+  console.log("Sedang melakukan seeding Batch 8: Mobile Development (Flutter)...");
+
+  const catMobileDev = await prisma.category.upsert({
+    where: { slug: "mobile-development" },
+    update: {},
+    create: { name: "Mobile Development", slug: "mobile-development", icon: "📱", description: "Pengembangan aplikasi Android dan iOS", order: 8 },
+  });
+
+  const c = flutterCourse;
+  const course = await prisma.course.upsert({
+    where: { slug: c.slug },
+    update: {
+      title: c.title,
+      description: c.description,
+      difficulty: c.difficulty,
+      isPremium: c.isPremium,
+      language: c.language,
+      isPublished: c.isPublished,
+      totalModules: c.totalModules,
+    },
+    create: {
+      title: c.title,
+      slug: c.slug,
+      description: c.description,
+      categoryId: catMobileDev.id,
+      difficulty: c.difficulty,
+      isPremium: c.isPremium,
+      language: c.language,
+      isPublished: c.isPublished,
+      totalModules: c.totalModules,
+      visibility: "PUBLIC",
+    },
+  });
+
+  for (const m of c.modules) {
+    const moduleRow = await prisma.module.upsert({
+      where: { courseId_slug: { courseId: course.id, slug: m.slug } },
+      update: {
+        title: m.title,
+        order: m.order,
+        xpReward: m.xpReward,
+        content: JSON.stringify(m.contentObject),
+      },
+      create: {
+        courseId: course.id,
+        title: m.title,
+        slug: m.slug,
+        order: m.order,
+        xpReward: m.xpReward,
+        content: JSON.stringify(m.contentObject),
+      },
+    });
+
+    await prisma.slide.deleteMany({ where: { moduleId: moduleRow.id } });
+
+    for (const s of m.contentObject.slides) {
+      const renderType = s.type as string;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const slideContent: any = {
+        type: renderType,
+        body: s.content,
+        keyTakeaway: s.keyTakeaway,
+      };
+
+      if (renderType === "quiz" && s.quiz) {
+        slideContent.quiz = s.quiz;
+      }
+      if (renderType === "challenge" && s.challenge) {
+        slideContent.challenge = s.challenge;
+      }
+      if (renderType === "quiz") {
+        slideContent.quizBank = m.contentObject.quizBank;
+      }
+
+      await prisma.slide.create({
+        data: {
+          moduleId: moduleRow.id,
+          title: typeof s.title === "string" ? s.title : "Untitled",
+          order: typeof s.slideNumber === "number" ? s.slideNumber : 0,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          content: slideContent as any,
+          ...(m.sources && m.sources.length > 0 && renderType !== "quiz"
+            ? {
+                sources: {
+                  create: m.sources.map((src) => ({
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    type: src.type as any,
+                    title: src.title,
+                    url: src.url,
+                  })),
+                },
+              }
+            : {}),
+        },
+      });
+    }
+  }
+
+  console.log("✅ Batch 8 berhasil ditambahkan.");
+}
+
 main()
   .catch((e) => {
     console.error(e);
     process.exit(1);
   })
   .finally(() => prisma.$disconnect());
+
+async function seedBatch9(prisma: PrismaClient) {
+  console.log("Sedang melakukan seeding Batch 9: Akuntansi...");
+
+  const catAkuntansi = await prisma.category.findUnique({
+    where: { slug: "keuangan-akuntansi" },
+  });
+  
+  if (!catAkuntansi) {
+    console.warn("⚠️  Kategori 'keuangan-akuntansi' tidak ditemukan, skip Batch 9.");
+    return;
+  }
+
+  for (const c of akuntansiCourses) {
+    const course = await prisma.course.upsert({
+      where: { slug: c.slug },
+      update: {
+        title: c.title,
+        description: c.description,
+        difficulty: c.difficulty as Difficulty,
+        isPremium: c.isPremium,
+        language: c.language,
+        isPublished: true, // assume published
+        totalModules: c.modules.length,
+      },
+      create: {
+        title: c.title,
+        slug: c.slug,
+        description: c.description,
+        categoryId: catAkuntansi.id,
+        difficulty: c.difficulty as Difficulty,
+        isPremium: c.isPremium,
+        language: c.language,
+        isPublished: true,
+        totalModules: c.modules.length,
+        visibility: "PUBLIC",
+      },
+    });
+
+    for (const m of c.modules) {
+      const moduleRow = await prisma.module.upsert({
+        where: { courseId_slug: { courseId: course.id, slug: m.slug } },
+        update: {
+          title: m.title,
+          order: m.order,
+          xpReward: m.xpReward,
+          content: JSON.stringify(m.contentObject),
+        },
+        create: {
+          title: m.title,
+          slug: m.slug,
+          courseId: course.id,
+          order: m.order,
+          xpReward: m.xpReward,
+          content: JSON.stringify(m.contentObject),
+        },
+      });
+
+      await prisma.slide.deleteMany({ where: { moduleId: moduleRow.id } });
+
+      for (const slide of m.contentObject.slides) {
+        const s = slide as Record<string, any>;
+        const rawType = String(s.type || "lesson");
+        const renderType =
+          rawType === "casestudy" || rawType === "summary"
+            ? "lesson"
+            : rawType;
+
+        const slideContent: Record<string, any> = {
+          type: renderType,
+          body: typeof s.content === "string" ? s.content : "",
+        };
+
+        if (typeof s.keyTakeaway === "string") slideContent.keyTakeaway = s.keyTakeaway;
+        if (typeof s.codeExample === "string") slideContent.codeExample = s.codeExample;
+        if (typeof s.language === "string") slideContent.language = s.language;
+        if (Array.isArray(s.tooltips)) slideContent.tooltips = s.tooltips;
+        if (typeof s.explanation === "string") slideContent.explanation = s.explanation;
+        if (s.challenge && typeof s.challenge === "object") slideContent.challenge = s.challenge;
+        if (renderType === "quiz") slideContent.quizBank = m.contentObject.quizBank;
+
+        await prisma.slide.create({
+          data: {
+            moduleId: moduleRow.id,
+            title: typeof s.title === "string" ? s.title : "Untitled",
+            order: typeof s.slideNumber === "number" ? s.slideNumber : 0,
+            content: slideContent as any,
+            ...(m.sources && m.sources.length > 0 && renderType !== "quiz"
+              ? {
+                  sources: {
+                    create: m.sources.map((src: any) => ({
+                      type: src.type,
+                      title: src.title,
+                      url: src.url,
+                    })),
+                  },
+                }
+              : {}),
+          },
+        });
+      }
+    }
+  }
+
+  console.log("✅ Batch 9 (Akuntansi) berhasil ditambahkan.");
+}
