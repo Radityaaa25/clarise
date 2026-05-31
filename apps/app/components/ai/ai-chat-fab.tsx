@@ -18,7 +18,7 @@ export function AIChatFAB() {
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const { messages, input, setInput, isLoading, sendMessage } = useAiChat();
+  const { messages, input, setInput, isLoading, isInitializing, sendMessage } = useAiChat();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto scroll to bottom
@@ -101,47 +101,56 @@ export function AIChatFAB() {
           </div>
         </div>
 
-        {/* Messages */}
-        {messages
-          .filter((m) => m.role !== "system")
-          .map((msg, i) => (
-            <div
-              key={i}
-              className={cn(
-                "flex gap-3",
-                msg.role === "user" ? "flex-row-reverse" : "flex-row",
-              )}
-            >
-              <div
-                className={cn(
-                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg mt-1",
-                  msg.role === "user"
-                    ? "bg-core-blue text-white"
-                    : "bg-sky text-white",
-                )}
-              >
-                {msg.role === "user" ? (
-                  <User className="h-4 w-4" />
-                ) : (
-                  <Sparkles className="h-4 w-4" />
-                )}
-              </div>
-              <div
-                className={cn(
-                  "rounded-2xl p-3 text-sm",
-                  msg.role === "user"
-                    ? "rounded-tr-sm bg-core-blue text-white"
-                    : "rounded-tl-sm bg-surface-soft dark:bg-white/5 text-ink dark:text-white prose prose-sm dark:prose-invert max-w-full",
-                )}
-              >
-                {msg.role === "user" ? (
-                  msg.content
-                ) : (
-                  <ReactMarkdown>{msg.content}</ReactMarkdown>
-                )}
-              </div>
-            </div>
-          ))}
+        {/* Messages or Loading */}
+        {isInitializing ? (
+          <div className="flex justify-center items-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-sky" />
+          </div>
+        ) : (
+          <>
+            {/* Messages */}
+            {messages
+              .filter((m) => m.role !== "system")
+              .map((msg, i) => (
+                <div
+                  key={i}
+                  className={cn(
+                    "flex gap-3",
+                    msg.role === "user" ? "flex-row-reverse" : "flex-row",
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg mt-1",
+                      msg.role === "user"
+                        ? "bg-core-blue text-white"
+                        : "bg-sky text-white",
+                    )}
+                  >
+                    {msg.role === "user" ? (
+                      <User className="h-4 w-4" />
+                    ) : (
+                      <Sparkles className="h-4 w-4" />
+                    )}
+                  </div>
+                  <div
+                    className={cn(
+                      "rounded-2xl p-3 text-sm",
+                      msg.role === "user"
+                        ? "rounded-tr-sm bg-core-blue text-white"
+                        : "rounded-tl-sm bg-surface-soft dark:bg-white/5 text-ink dark:text-white prose prose-sm dark:prose-invert max-w-full",
+                    )}
+                  >
+                    {msg.role === "user" ? (
+                      msg.content
+                    ) : (
+                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                    )}
+                  </div>
+                </div>
+              ))}
+          </>
+        )}
 
         {/* Loading Indicator */}
         {isLoading && (

@@ -1,10 +1,40 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AiChatMessage } from "../types";
 
 export function useAiChat(courseId?: string, moduleId?: string) {
   const [messages, setMessages] = useState<AiChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
+
+  useEffect(() => {
+    async function fetchHistory() {
+      try {
+        const url = new URL("/api/ai/history", window.location.origin);
+        if (courseId) url.searchParams.append("courseId", courseId);
+        if (moduleId) url.searchParams.append("moduleId", moduleId);
+
+        const res = await fetch(url.toString());
+        if (res.ok) {
+          const data = await res.json();
+          if (data.messages && Array.isArray(data.messages)) {
+            // Extract the messages, formatting them to fit AiChatMessage
+            const formattedMessages = data.messages.map((m: any) => ({
+              role: m.role,
+              content: m.content,
+            }));
+            setMessages(formattedMessages);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load chat history:", error);
+      } finally {
+        setIsInitializing(false);
+      }
+    }
+
+    fetchHistory();
+  }, [courseId, moduleId]);
 
   const sendMessage = async (content: string) => {
     if (!content.trim()) return;
@@ -49,6 +79,7 @@ export function useAiChat(courseId?: string, moduleId?: string) {
     input,
     setInput,
     isLoading,
+    isInitializing,
     sendMessage,
   };
 }

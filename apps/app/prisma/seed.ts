@@ -1,5 +1,6 @@
 import { PrismaClient, Difficulty } from "@prisma/client";
 import { batch5Courses } from "./data/batch5-pemrograman";
+import { reactDariNolCourse } from "./data/batch6-react";
 
 const prisma = new PrismaClient();
 
@@ -97,6 +98,9 @@ async function main() {
 
   // Call Batch 5
   await seedBatch5(prisma);
+
+  // Call Batch 6
+  await seedBatch6(prisma);
 
   console.log("✅ Seed completed successfully");
 }
@@ -414,6 +418,116 @@ async function seedBatch5(prisma: PrismaClient) {
       0,
     )} slide).`,
   );
+}
+
+async function seedBatch6(prisma: PrismaClient) {
+  console.log("Sedang melakukan seeding Batch 6: Web Development (React dari Nol)...");
+
+  const catWebDev = await prisma.category.upsert({
+    where: { slug: "web-development" },
+    update: {},
+    create: { name: "Web Development", slug: "web-development", icon: "🌐", description: "Pengembangan website frontend dan backend", order: 7 },
+  });
+
+  const courses = [reactDariNolCourse];
+
+  for (const c of courses) {
+    const course = await prisma.course.upsert({
+      where: { slug: c.slug },
+      update: {
+        title: c.title,
+        description: c.description,
+        difficulty: c.difficulty,
+        isPremium: c.isPremium,
+        language: c.language,
+        isPublished: c.isPublished,
+        totalModules: c.totalModules,
+      },
+      create: {
+        title: c.title,
+        slug: c.slug,
+        description: c.description,
+        categoryId: catWebDev.id,
+        difficulty: c.difficulty,
+        isPremium: c.isPremium,
+        language: c.language,
+        isPublished: c.isPublished,
+        totalModules: c.totalModules,
+        visibility: "PUBLIC",
+      },
+    });
+
+    for (const m of c.modules) {
+      const moduleRow = await prisma.module.upsert({
+        where: { courseId_slug: { courseId: course.id, slug: m.slug } },
+        update: {
+          title: m.title,
+          order: m.order,
+          xpReward: m.xpReward,
+          content: JSON.stringify(m.contentObject),
+        },
+        create: {
+          title: m.title,
+          slug: m.slug,
+          courseId: course.id,
+          order: m.order,
+          xpReward: m.xpReward,
+          content: JSON.stringify(m.contentObject),
+        },
+      });
+
+      await prisma.slide.deleteMany({ where: { moduleId: moduleRow.id } });
+
+      for (const slide of m.contentObject.slides) {
+        const s = slide as Record<string, unknown>;
+        const rawType = String(s.type || "lesson");
+        const renderType =
+          rawType === "casestudy" || rawType === "summary"
+            ? "lesson"
+            : rawType;
+
+        const slideContent: Record<string, unknown> = {
+          type: renderType,
+          body: typeof s.content === "string" ? s.content : "",
+        };
+
+        if (typeof s.keyTakeaway === "string") slideContent.keyTakeaway = s.keyTakeaway;
+        if (typeof s.codeExample === "string") slideContent.codeExample = s.codeExample;
+        if (typeof s.language === "string") slideContent.language = s.language;
+        if (Array.isArray(s.tooltips)) slideContent.tooltips = s.tooltips;
+        if (typeof s.explanation === "string") slideContent.explanation = s.explanation;
+        if (s.challenge && typeof s.challenge === "object") slideContent.challenge = s.challenge;
+        
+        if (renderType === "quiz") {
+          slideContent.quizBank = m.contentObject.quizBank;
+        }
+
+        await prisma.slide.create({
+          data: {
+            moduleId: moduleRow.id,
+            title: typeof s.title === "string" ? s.title : "Untitled",
+            order: typeof s.slideNumber === "number" ? s.slideNumber : 0,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            content: slideContent as any,
+            ...(m.sources && m.sources.length > 0 && renderType !== "quiz"
+              ? {
+                  sources: {
+                    create: m.sources.map((src) => ({
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      type: src.type as any,
+                      title: src.title,
+                      url: src.url,
+                    })),
+                  },
+                }
+              : {}),
+          },
+        });
+      }
+    }
+  }
+
+  console.log("✅ Batch 6 berhasil ditambahkan.");
 }
 
 main()
