@@ -26,10 +26,19 @@ const getGroqQuizKeys = () => {
   return keys.length > 0 ? keys : getGroqKeys();
 };
 
+const getGroqChatKeys = () => {
+  const keys = parseKeys(process.env.GROQ_API_KEY_CHAT_USER);
+  return keys.length > 0 ? keys : getGroqKeys();
+};
+
 export const getGroqApiKey = () => {
   return getRandomKey(getGroqKeys());
 };
 
 export const getGroqQuizApiKey = () => {
   return getRandomKey(getGroqQuizKeys());
+};
+
+export const getGroqChatApiKey = () => {
+  return getRandomKey(getGroqChatKeys());
 };

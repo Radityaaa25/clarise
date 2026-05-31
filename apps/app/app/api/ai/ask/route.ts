@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { Ratelimit } from "@upstash/ratelimit";
 import { redis } from "@/lib/ratelimit";
 import { getGeminiModel } from "@/lib/gemini";
+import { getGroqChatApiKey } from "@/lib/groq";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { stripHtml, detectPromptInjection } from "@/lib/sanitize";
@@ -150,75 +151,101 @@ export async function POST(req: Request) {
     parts: [{ text: m.content }],
   }));
 
-  const chat = getGeminiModel().startChat({
-    history: [
-      {
-        role: "user",
-        parts: [
-          { text: SYSTEM_PROMPT + (courseContext ? `\n${courseContext}` : "") },
-        ],
-      },
-      {
-        role: "model",
-        parts: [
-          {
-            text: "Mengerti. Saya Clarise AI dan hanya membantu topik pembelajaran.",
-          },
-        ],
-      },
-      ...chatHistory,
-    ],
-    generationConfig: { maxOutputTokens: 800, temperature: 0.3 },
-  });
-
   let responseText = "";
+  let totalTokens = 0;
+
   try {
+    // 1. Try Gemini First
+    const chat = getGeminiModel().startChat({
+      history: [
+        {
+          role: "user",
+          parts: [
+            { text: SYSTEM_PROMPT + (courseContext ? `\n${courseContext}` : "") },
+          ],
+        },
+        {
+          role: "model",
+          parts: [
+            {
+              text: "Mengerti. Saya Clarise AI dan hanya membantu topik pembelajaran.",
+            },
+          ],
+        },
+        ...chatHistory,
+      ],
+      generationConfig: { maxOutputTokens: 800, temperature: 0.3 },
+    });
+
     const result = await chat.sendMessage(message);
     responseText = result.response.text();
-
-    // Output validation
-    if (SUSPICIOUS_OUTPUT_RE.some((re) => re.test(responseText))) {
-      console.error("[AI] Suspicious output detected for user:", user.id);
-      responseText =
-        "Maaf, saya tidak bisa menjawab pertanyaan tersebut. Silakan tanyakan hal lain seputar pembelajaran.";
-    }
-
-    // Token tracking
-    const totalTokens = result.response.usageMetadata?.totalTokenCount || 0;
-    if (totalTokens > 0) {
-      try {
-        await redis.incrby("clarise:token:chat", totalTokens);
-      } catch (err) {
-        console.error("Failed to track tokens", err);
-      }
-    }
+    totalTokens = result.response.usageMetadata?.totalTokenCount || 0;
   } catch (error: unknown) {
-    console.error("[AI_ASK_ERROR]", error);
-    const msg = (error as Error).message || "";
-    if (
-      msg.includes("429") ||
-      msg.includes("Quota exceeded") ||
-      (error as { status?: number }).status === 429
-    ) {
-      return NextResponse.json(
+    console.error("[AI_ASK_GEMINI_ERROR] Falling back to Groq", error);
+    
+    // 2. Fallback to Groq if Gemini fails
+    try {
+      const groqMessages = [
+        { role: "system", content: SYSTEM_PROMPT + (courseContext ? `\n${courseContext}` : "") },
+        ...recentMessages.map(m => ({
+           role: m.role === "user" ? "user" : "assistant",
+           content: m.content
+        })),
+        { role: "user", content: message }
+      ];
+
+      const groqResponse = await fetch(
+        "https://api.groq.com/openai/v1/chat/completions",
         {
-          error:
-            "Limit API AI telah tercapai. Harap tunggu beberapa saat lalu coba lagi.",
-        },
-        { status: 429 },
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${getGroqChatApiKey()}`,
+          },
+          body: JSON.stringify({
+            model: "llama-3.3-70b-versatile",
+            messages: groqMessages,
+            temperature: 0.3,
+            max_tokens: 800,
+          }),
+        }
       );
-    }
-    if (msg.includes("503") || (error as { status?: number }).status === 503) {
+
+      if (!groqResponse.ok) {
+        throw new Error(`Groq Fallback Failed: ${groqResponse.status}`);
+      }
+
+      const groqData = await groqResponse.json();
+      responseText = groqData.choices?.[0]?.message?.content || "";
+      totalTokens = groqData.usage?.total_tokens || 0;
+      
+      console.log("[AI_POOL] Successfully used Groq as Fallback!");
+    } catch (fallbackError: unknown) {
+      console.error("[AI_ASK_GROQ_ERROR]", fallbackError);
       return NextResponse.json(
         {
           error:
-            "Server AI saat ini sedang sibuk (High Demand). Harap tunggu beberapa detik dan coba lagi.",
+            "Saat ini AI sedang mengalami gangguan atau terlalu sibuk. Harap tunggu beberapa saat lalu coba lagi.",
         },
         { status: 503 },
       );
     }
+  }
+
+  // Output validation
+  if (SUSPICIOUS_OUTPUT_RE.some((re) => re.test(responseText))) {
+    console.error("[AI] Suspicious output detected for user:", user.id);
     responseText =
-      "Maaf, saat ini AI sedang mengalami gangguan atau terlalu sibuk. Silakan coba lagi nanti.";
+      "Maaf, saya tidak bisa menjawab pertanyaan tersebut. Silakan tanyakan hal lain seputar pembelajaran.";
+  }
+
+  // Token tracking
+  if (totalTokens > 0) {
+    try {
+      await redis.incrby("clarise:token:chat", totalTokens);
+    } catch (err) {
+      console.error("Failed to track tokens", err);
+    }
   }
 
   // Save to history

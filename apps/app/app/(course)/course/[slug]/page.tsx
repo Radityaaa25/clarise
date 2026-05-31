@@ -1599,7 +1599,7 @@ export default function CoursePage({
       )}
 
       {/* Hide Chat FAB if modal is open */}
-      {!showQuizModal && <AIChatFAB />}
+      {!showQuizModal && <AIChatFAB courseId={courseData?.id} moduleId={activeModule?.id} />}
     </div>
   );
 }

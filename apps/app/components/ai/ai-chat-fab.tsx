@@ -16,11 +16,11 @@ import ReactMarkdown from "react-markdown";
 
 import { motion } from "framer-motion";
 
-export function AIChatFAB() {
+export function AIChatFAB({ courseId, moduleId }: { courseId?: string; moduleId?: string } = {}) {
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const { messages, input, setInput, isLoading, isInitializing, sendMessage } = useAiChat();
+  const { messages, input, setInput, isLoading, isInitializing, sendMessage } = useAiChat(courseId, moduleId);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto scroll to bottom
