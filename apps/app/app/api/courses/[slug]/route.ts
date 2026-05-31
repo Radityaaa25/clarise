@@ -79,27 +79,29 @@ export async function GET(
   // Wave 2: parallel — premium check (cached di Redis) dan progress fetch.
   const needsPremiumCheck =
     course.isPremium || course.difficulty !== "BEGINNER";
-  const [hasPremium, userProgress] = await Promise.all([
+  const [hasPremium, allUserProgress] = await Promise.all([
     needsPremiumCheck ? isSubscriptionActive(user.id) : Promise.resolve(true),
     prisma.userProgress.findMany({
       where: {
         userId: user.id,
         courseId: course.id,
-        completedAt: { not: null },
       },
       select: { moduleId: true, completedAt: true },
     }),
   ]);
 
-  const canAccess = needsPremiumCheck ? hasPremium : true;
+  const isEnrolled = allUserProgress.length > 0;
+  const canAccess = isEnrolled || (needsPremiumCheck ? hasPremium : true);
+
+  const completedProgress = allUserProgress.filter((p) => p.completedAt !== null);
 
   return NextResponse.json({
     ...course,
     canAccess,
-    userProgress: userProgress.map((p) => p.moduleId),
+    userProgress: completedProgress.map((p) => p.moduleId),
     progressPercent:
       course.totalModules > 0
-        ? Math.round((userProgress.length / course.totalModules) * 100)
+        ? Math.round((completedProgress.length / course.totalModules) * 100)
         : 0,
   });
 }

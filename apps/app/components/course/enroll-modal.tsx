@@ -10,6 +10,7 @@ interface EnrollModalProps {
   courseName: string;
   isFreeUser: boolean;
   hasReachedLimit: boolean;
+  hasReachedPremiumLimit: boolean;
   isPremiumCourse: boolean;
   isLoading?: boolean;
 }
@@ -21,6 +22,7 @@ export function EnrollModal({
   courseName,
   isFreeUser,
   hasReachedLimit,
+  hasReachedPremiumLimit,
   isPremiumCourse,
   isLoading = false,
 }: EnrollModalProps) {
@@ -39,7 +41,7 @@ export function EnrollModal({
         className="relative bg-white dark:bg-void-elevated rounded-2xl p-8 max-w-md w-full shadow-[0_24px_60px_rgba(12,31,61,0.2)] animate-in zoom-in-95 fade-in duration-250 ease-out"
         role="dialog"
       >
-        {isFreeUser && isPremiumCourse ? (
+        {isFreeUser && isPremiumCourse && hasReachedPremiumLimit ? (
           /* Condition 3: Premium Course Block */
           <div className="flex flex-col items-center text-center">
             <div className="w-12 h-12 bg-spark/10 text-spark rounded-full flex items-center justify-center mb-4">

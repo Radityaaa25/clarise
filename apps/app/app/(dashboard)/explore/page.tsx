@@ -108,6 +108,7 @@ export default function ExplorePage() {
   const { user } = useUser();
   const isFreeUser = user?.subscription?.plan === "FREE" || !user?.subscription;
   const hasReachedLimit = activeCourses.length >= 2; // Free tier: max 2 kursus (1 free + 1 premium, atau 2 free)
+  const hasReachedPremiumLimit = activeCourses.filter((c: any) => c.isPremium).length >= 1;
 
   const handleCourseClick = (e: React.MouseEvent, course: { slug: string; title: string; isPremium: boolean }) => {
     e.preventDefault();
@@ -322,6 +323,7 @@ export default function ExplorePage() {
         courseName={selectedCourse?.title || ""}
         isFreeUser={isFreeUser}
         hasReachedLimit={hasReachedLimit}
+        hasReachedPremiumLimit={hasReachedPremiumLimit}
         isPremiumCourse={selectedCourse?.isPremium || false}
         isLoading={isLoading}
       />

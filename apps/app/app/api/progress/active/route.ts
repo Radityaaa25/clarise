@@ -35,6 +35,7 @@ export async function GET() {
       slug: true,
       category: { select: { name: true } },
       totalModules: true,
+      isPremium: true,
       progress: {
         where: { userId: user.id, completedAt: { not: null } },
         select: { id: true },
@@ -47,6 +48,7 @@ export async function GET() {
     title: course.title,
     slug: course.slug,
     categoryName: course.category.name,
+    isPremium: course.isPremium,
     progressPercent:
       course.totalModules > 0
         ? Math.round((course.progress.length / course.totalModules) * 100)
