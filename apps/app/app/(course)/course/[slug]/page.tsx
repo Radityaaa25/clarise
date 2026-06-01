@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any, react/no-unescaped-entities, no-empty */
 "use client";
 
-import React, { useState, use } from "react";
+import React, { useState, use, useTransition } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -13,6 +13,7 @@ import {
   Trophy,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { AIChatFAB } from "@/components/ai/ai-chat-fab";
@@ -273,6 +274,18 @@ export default function CoursePage({
   const [isMarking, setIsMarking] = useState(false);
   const [isRequestingPublic, setIsRequestingPublic] = useState(false);
 
+  // Tombol Kembali: pakai transition + prefetch agar navigasi terasa cepat,
+  // dan disable saat proses agar tidak ke-klik berkali-kali.
+  const router = useRouter();
+  const [isLeaving, startLeaving] = useTransition();
+  React.useEffect(() => {
+    router.prefetch("/explore");
+  }, [router]);
+  const handleBack = () => {
+    if (isLeaving) return;
+    startLeaving(() => router.push("/explore"));
+  };
+
   const handleRequestPublic = async () => {
     if (isRequestingPublic) return;
     setIsRequestingPublic(true);
@@ -391,13 +404,19 @@ export default function CoursePage({
       <aside className="hidden lg:flex w-[300px] shrink-0 border-r border-hairline bg-canvas dark:bg-void flex-col h-screen sticky top-0">
         {/* Course header */}
         <div className="p-5 border-b border-hairline">
-          <Link
-            href="/explore"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-muted hover:text-ink dark:hover:text-white transition-colors mb-4 px-2 py-1 -ml-2 rounded-md hover:bg-black/5 dark:hover:bg-white/10"
+          <button
+            onClick={handleBack}
+            disabled={isLeaving}
+            aria-label="Kembali ke Explore"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-muted hover:text-ink dark:hover:text-white transition-colors mb-4 px-2 py-1 -ml-2 rounded-md hover:bg-black/5 dark:hover:bg-white/10 active:scale-95 disabled:opacity-60 disabled:cursor-wait"
           >
-            <ChevronLeft className="w-4 h-4" />
-            Kembali
-          </Link>
+            {isLeaving ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <ChevronLeft className="w-4 h-4" />
+            )}
+            {isLeaving ? "Keluar..." : "Kembali"}
+          </button>
           <h2 className="text-lg font-bold font-heading text-ink dark:text-white leading-tight">
             {courseData.title}
           </h2>
@@ -474,13 +493,21 @@ export default function CoursePage({
         {/* Top bar */}
         <div className="shrink-0 z-20 flex items-center justify-between gap-3 h-14 px-4 md:px-6 border-b border-hairline bg-canvas/80 dark:bg-void/80 backdrop-blur-md">
           <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
-            <Link
-              href="/explore"
-              className="lg:hidden flex items-center gap-1.5 px-3 h-8 rounded-full bg-surface-soft hover:bg-black/5 dark:bg-void-elevated dark:hover:bg-white/10 transition-colors shrink-0 border border-hairline shadow-sm"
+            <button
+              onClick={handleBack}
+              disabled={isLeaving}
+              aria-label="Kembali ke Explore"
+              className="lg:hidden flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 h-9 rounded-full bg-surface-soft hover:bg-black/5 dark:bg-void-elevated dark:hover:bg-white/10 transition-all shrink-0 border border-hairline shadow-sm active:scale-95 disabled:opacity-60 disabled:cursor-wait"
             >
-              <ChevronLeft className="h-4 w-4 text-ink dark:text-white" />
-              <span className="text-xs font-bold text-ink dark:text-white pr-1">Kembali</span>
-            </Link>
+              {isLeaving ? (
+                <Loader2 className="h-4 w-4 animate-spin text-ink dark:text-white" />
+              ) : (
+                <ChevronLeft className="h-4 w-4 text-ink dark:text-white" />
+              )}
+              <span className="text-xs font-bold text-ink dark:text-white pr-0.5">
+                {isLeaving ? "Keluar" : "Kembali"}
+              </span>
+            </button>
             <div className="text-sm font-medium text-ink dark:text-white truncate min-w-0">
               {activeModule?.title}
             </div>
