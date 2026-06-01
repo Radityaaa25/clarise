@@ -120,6 +120,8 @@ export interface AiGeneratedModule {
   order: number;
   slides: SlideContent[];
   quizBank: QuizQuestion[];
+  /** Sumber referensi level-modul (dipasang ke tiap slide konten saat disimpan) */
+  sources?: { type: string; title: string; url: string }[];
 }
 
 /** Struktur course mentah dari output AI generate */

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Sparkles,
   Lock,
@@ -10,16 +10,76 @@ import {
   Loader2,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { useUser } from "@/hooks/use-user";
 
 export default function GenerateCoursePage() {
   const { user } = useUser();
+  const router = useRouter();
   const isPremium =
     user?.subscription?.plan && user.subscription.plan !== "FREE";
 
   const [topic, setTopic] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>(
+    [],
+  );
+  const [categoryId, setCategoryId] = useState("");
+  const [difficulty, setDifficulty] = useState<
+    "BEGINNER" | "INTERMEDIATE" | "ADVANCED"
+  >("BEGINNER");
+
+  useEffect(() => {
+    fetch("/api/categories")
+      .then((r) => r.json())
+      .then((d) => {
+        if (Array.isArray(d.categories) && d.categories.length > 0) {
+          setCategories(d.categories);
+          setCategoryId(d.categories[0].id);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleGenerate = async () => {
+    if (isGenerating) return;
+    if (topic.trim().length < 10) {
+      toast.error("Tulis topik minimal 10 karakter agar hasilnya berkualitas.");
+      return;
+    }
+    if (!categoryId) {
+      toast.error("Pilih kategori dulu.");
+      return;
+    }
+    setIsGenerating(true);
+    try {
+      const res = await fetch("/api/ai/generate-course", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          topic: topic.trim(),
+          categoryId,
+          difficulty,
+          moduleCount: 1,
+          visibility: "PRIVATE",
+          language: "id",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data?.error || "Gagal membuat kursus. Coba lagi.");
+        setIsGenerating(false);
+        return;
+      }
+      toast.success(data.message || "Kursus berhasil dibuat!");
+      router.push(`/course/${data.courseSlug}`);
+    } catch {
+      toast.error("Terjadi kesalahan. Coba lagi.");
+      setIsGenerating(false);
+    }
+  };
 
   if (!isPremium) {
     return (
@@ -98,23 +158,50 @@ export default function GenerateCoursePage() {
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
-                if (topic && !isGenerating) setIsGenerating(true);
+                handleGenerate();
               }
             }}
           />
-          <div className="flex items-center justify-between p-2">
-            <div className="text-xs text-muted-soft dark:text-white/50 px-2 flex items-center gap-1">
-              <Lock className="w-3 h-3" /> Pribadi
+          <div className="flex flex-wrap items-center justify-between gap-2 p-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <select
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
+                className="rounded-lg border border-hairline bg-canvas dark:bg-void-elevated px-3 py-2 text-sm text-ink dark:text-white outline-none focus:border-spark"
+              >
+                {categories.length === 0 && <option value="">Kategori…</option>}
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={difficulty}
+                onChange={(e) =>
+                  setDifficulty(
+                    e.target.value as
+                      | "BEGINNER"
+                      | "INTERMEDIATE"
+                      | "ADVANCED",
+                  )
+                }
+                className="rounded-lg border border-hairline bg-canvas dark:bg-void-elevated px-3 py-2 text-sm text-ink dark:text-white outline-none focus:border-spark"
+              >
+                <option value="BEGINNER">Pemula</option>
+                <option value="INTERMEDIATE">Menengah</option>
+                <option value="ADVANCED">Lanjutan</option>
+              </select>
             </div>
             <button
               disabled={!topic || isGenerating}
-              onClick={() => setIsGenerating(true)}
+              onClick={handleGenerate}
               className="flex items-center gap-2 rounded-xl bg-spark px-6 py-2.5 text-sm font-bold text-white hover:bg-spark/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-spark/20"
             >
               {isGenerating ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Menganalisis...
+                  Meracik kursus…
                 </>
               ) : (
                 <>

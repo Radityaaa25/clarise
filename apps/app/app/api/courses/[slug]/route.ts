@@ -26,6 +26,7 @@ export async function GET(
         totalModules: true,
         isPremium: true,
         visibility: true,
+        publishStatus: true,
         authorId: true,
         rating: true,
         ratingCount: true,
@@ -98,6 +99,7 @@ export async function GET(
   return NextResponse.json({
     ...course,
     canAccess,
+    isAuthor: course.authorId === user.id,
     userProgress: completedProgress.map((p) => p.moduleId),
     progressPercent:
       course.totalModules > 0

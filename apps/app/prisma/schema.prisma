@@ -45,6 +45,13 @@ enum CourseVisibility {
   PRIVATE
 }
 
+enum PublishStatus {
+  NONE
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum UserActivityType {
   COURSE_VIEW
   MODULE_COMPLETE
@@ -143,6 +150,7 @@ model Course {
   isUserGenerated Boolean          @default(false)
   isPrivate       Boolean          @default(false)
   visibility      CourseVisibility  @default(PUBLIC)
+  publishStatus   PublishStatus    @default(NONE)
   language        String           @default("id")
   isPublished     Boolean          @default(false)
   isPremium       Boolean          @default(false)

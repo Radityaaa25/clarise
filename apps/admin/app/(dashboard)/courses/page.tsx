@@ -10,6 +10,7 @@ export default async function CoursesPage() {
       slug: true,
       isAiGenerated: true,
       isPublished: true,
+      publishStatus: true,
       author: {
         select: { name: true },
       },
@@ -22,6 +23,7 @@ export default async function CoursesPage() {
     slug: course.slug,
     isAiGenerated: course.isAiGenerated,
     isPublished: course.isPublished,
+    publishStatus: course.publishStatus,
     authorName: course.author?.name ?? null,
   }));
 

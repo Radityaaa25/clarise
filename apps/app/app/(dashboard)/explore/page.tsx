@@ -242,7 +242,7 @@ export default function ExplorePage() {
               <button
                 key={course.slug}
                 onClick={(e) => handleCourseClick(e, course)}
-                className="group rounded-xl border border-hairline shadow-sm bg-canvas dark:bg-void-elevated p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative text-left flex flex-col w-full h-full"
+                className="group rounded-xl border border-hairline shadow-sm bg-canvas dark:bg-void-elevated p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative text-left flex flex-col w-full h-full overflow-hidden"
               >
                 {course.isPremium && !isEnrolled && (
                   <div className="absolute top-4 right-4">
@@ -252,10 +252,8 @@ export default function ExplorePage() {
                   </div>
                 )}
                 {isEnrolled && (
-                  <div className="absolute top-4 right-4">
-                    <span className="inline-flex items-center rounded-full bg-core-blue/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-core-blue">
-                      Telah Diambil
-                    </span>
+                  <div className="absolute right-[-34px] top-[14px] z-10 rotate-45 bg-core-blue px-10 py-1 text-center text-[10px] font-bold uppercase tracking-wider text-white shadow-md">
+                    Diambil
                   </div>
                 )}
                 <div className="flex items-center gap-2 mb-4">

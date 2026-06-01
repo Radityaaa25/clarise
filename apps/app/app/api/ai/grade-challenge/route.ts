@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { Ratelimit } from "@upstash/ratelimit";
 import { redis } from "@/lib/ratelimit";
-import { getGeminiGraderModel } from "@/lib/gemini";
+import { getGroqQuizApiKey } from "@/lib/groq";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { stripHtml } from "@/lib/sanitize";
@@ -115,26 +115,37 @@ ${instruction}
 [JAWABAN USER]:
 ${answer}`;
 
-    // Minta AI menghasilkan output
-    const chat = getGeminiGraderModel().startChat({
-      history: [
-        { role: "user", parts: [{ text: systemInstruction }] },
-        {
-          role: "model",
-          parts: [
-            {
-              text: "Mengerti. Saya akan mengevaluasi jawaban user dan merespons HANYA dengan format JSON yang diminta, tanpa tambahan backticks atau teks lain.",
-            },
-          ],
+    // Evaluasi via Groq (key khusus quiz/challenge).
+    const groqResponse = await fetch(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${getGroqQuizApiKey()}`,
+          "Content-Type": "application/json",
         },
-      ],
-      generationConfig: {
-        temperature: 0.1,
+        body: JSON.stringify({
+          model: "llama-3.3-70b-versatile",
+          messages: [
+            { role: "system", content: systemInstruction },
+            { role: "user", content: userMessage },
+          ],
+          response_format: { type: "json_object" },
+          temperature: 0.1,
+        }),
       },
-    });
+    );
 
-    const result = await chat.sendMessage(userMessage);
-    let responseText = result.response.text();
+    if (!groqResponse.ok) {
+      console.error("[GRADER_ERROR] Groq Error:", await groqResponse.text());
+      return NextResponse.json(
+        { error: "Gagal mengevaluasi jawaban" },
+        { status: 502 },
+      );
+    }
+
+    const groqData = await groqResponse.json();
+    let responseText = groqData.choices?.[0]?.message?.content || "";
 
     try {
       // Hilangkan backticks markdown jika AI mengembalikannya

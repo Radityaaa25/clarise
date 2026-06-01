@@ -9,13 +9,17 @@ import { z } from "zod";
 import { stripHtml, detectPromptInjection } from "@/lib/sanitize";
 import { checkFeatureAccess } from "@/lib/subscription";
 import {
-  buildCourseSystemPrompt,
-  augmentUserCourseInput,
   COURSE_QUALITY_STANDARDS,
 } from "@/lib/course-template";
+import { generateCourseTwoPhase } from "@/lib/course-generator";
 import { validateCourseQuality } from "@/lib/course-quality-gate";
 import { enhanceCourseContent } from "@/lib/course-enhancer";
 import type { AiGeneratedCourse } from "@/types";
+
+// Pipeline two-phase memanggil banyak API (outline + ~20 slide paralel +
+// enhancer) sehingga butuh waktu lebih lama dari default. Naikkan batas durasi
+// fungsi agar tidak timeout di production (Vercel: maks sesuai plan).
+export const maxDuration = 60;
 
 // Rate limiter: max 3 course generations per day per user
 const generateRatelimit = new Ratelimit({
@@ -45,49 +49,6 @@ function slugify(text: string): string {
     .replace(/-+/g, "-")
     .trim()
     .substring(0, 80);
-}
-
-// ──────────────────────────────────────────────
-// Call Groq API dengan system prompt dari template
-// ──────────────────────────────────────────────
-
-async function callGroqGenerate(
-  apiKey: string,
-  systemPrompt: string,
-  userPrompt: string,
-): Promise<{ responseText: string; totalTokens: number }> {
-  const groqResponse = await fetch(
-    "https://api.groq.com/openai/v1/chat/completions",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        response_format: { type: "json_object" },
-        temperature: 0.7,
-        max_tokens: 8000,
-      }),
-    },
-  );
-
-  if (!groqResponse.ok) {
-    const errText = await groqResponse.text();
-    console.error("[AI_GENERATE] Groq Error:", errText);
-    throw new Error(`Groq API error: ${groqResponse.status}`);
-  }
-
-  const groqData = await groqResponse.json();
-  const responseText = groqData.choices?.[0]?.message?.content || "";
-  const totalTokens = groqData.usage?.total_tokens || 0;
-
-  return { responseText, totalTokens };
 }
 
 // ──────────────────────────────────────────────
@@ -203,22 +164,19 @@ export async function POST(req: Request) {
       );
     }
 
-    // ─── STEP 5: Augment input ───
-    const systemPrompt = buildCourseSystemPrompt();
-    const userPrompt = augmentUserCourseInput(
-      {
-        topic: sanitizedTopic,
-        difficulty,
-        targetModules: moduleCount,
-        language,
-      },
-      {
-        learningGoal: user.learningGoal ?? undefined,
-        currentLevel: user.currentLevel ?? undefined,
-      },
-    );
+    // ─── STEP 5: Siapkan input generator ───
+    const genInput = {
+      topic: sanitizedTopic,
+      difficulty,
+      targetModules: moduleCount,
+      language,
+    };
+    const genProfile = {
+      learningGoal: user.learningGoal ?? undefined,
+      currentLevel: user.currentLevel ?? undefined,
+    };
 
-    // ─── STEP 6 + 7: Generate dengan retry ───
+    // ─── STEP 6 + 7: Generate dengan retry (two-phase: outline → per-slide paralel) ───
     const maxRetries = COURSE_QUALITY_STANDARDS.maxRetryGenerate;
     let courseData: AiGeneratedCourse | null = null;
     let totalTokensUsed = 0;
@@ -226,24 +184,14 @@ export async function POST(req: Request) {
 
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
-        const apiKey = getGroqApiKey();
-        const retryInstruction =
-          attempt > 0
-            ? "\n\nPERHATIAN: Percobaan sebelumnya gagal. Pastikan output HANYA berupa JSON valid tanpa teks apapun di luar JSON. Pastikan setiap modul memiliki minimal 10 slide, termasuk slide challenge dan quiz. quizBank minimal 10 soal per modul."
-            : "";
-
-        const { responseText, totalTokens } = await callGroqGenerate(
-          apiKey,
-          systemPrompt,
-          userPrompt + retryInstruction,
-        );
-
+        const { course: generated, totalTokens } =
+          await generateCourseTwoPhase(genInput, genProfile);
         totalTokensUsed += totalTokens;
 
-        // ─── STEP 7: Parse JSON ───
-        courseData = parseAiResponse(responseText);
+        // ─── STEP 7: Normalisasi (slug, order, default array) ───
+        courseData = parseAiResponse(JSON.stringify(generated));
 
-        // ─── STEP 8: Enhance ───
+        // ─── STEP 8: Enhance (jaring pengaman untuk slide yang gagal) ───
         const enhanceApiKey = getGroqApiKey();
         const { enhanced, enhancements } =
           await enhanceCourseContent(courseData, enhanceApiKey);
@@ -333,13 +281,15 @@ export async function POST(req: Request) {
             });
 
             // Slides
+            const createdContentSlideIds: string[] = [];
             if (Array.isArray(mod.slides)) {
-              for (const slide of mod.slides) {
-                await tx.slide.create({
+              for (let si = 0; si < mod.slides.length; si++) {
+                const slide = mod.slides[si]!;
+                const createdSlide = await tx.slide.create({
                   data: {
                     title: slide.title,
                     moduleId: newModule.id,
-                    order: slide.slideNumber || slide.slideNumber,
+                    order: slide.slideNumber || si + 1,
                     content: {
                       type: slide.type || "lesson",
                       body: slide.content || "",
@@ -373,10 +323,45 @@ export async function POST(req: Request) {
                           }
                         : {}),
                       ...(slide.quiz ? { quiz: slide.quiz } : {}),
+                      ...(slide.type === "quiz" &&
+                      Array.isArray(mod.quizBank) &&
+                      mod.quizBank.length > 0
+                        ? { quizBank: mod.quizBank }
+                        : {}),
                     } as unknown as Prisma.InputJsonValue,
                   },
                 });
+                if (slide.type !== "quiz" && slide.type !== "challenge") {
+                  createdContentSlideIds.push(createdSlide.id);
+                }
               }
+            }
+
+            // Sumber referensi: pasang sumber level-modul ke tiap slide konten
+            const modSources = Array.isArray(mod.sources) ? mod.sources : [];
+            if (modSources.length > 0 && createdContentSlideIds.length > 0) {
+              const validTypes = new Set([
+                "DOCUMENTATION",
+                "ARTICLE",
+                "YOUTUBE",
+                "BOOK",
+                "OTHER",
+              ]);
+              await tx.source.createMany({
+                data: createdContentSlideIds.flatMap((sid) =>
+                  modSources
+                    .slice(0, 6)
+                    .filter((src) => src?.url && src?.title)
+                    .map((src) => ({
+                      slideId: sid,
+                      type: (validTypes.has(src.type)
+                        ? src.type
+                        : "OTHER") as Prisma.SourceCreateManyInput["type"],
+                      title: String(src.title),
+                      url: String(src.url),
+                    })),
+                ) as Prisma.SourceCreateManyInput[],
+              });
             }
 
             // QuizBank sebagai slide terakhir (jika ada)

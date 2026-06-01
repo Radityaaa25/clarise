@@ -26,14 +26,14 @@ Ini adalah ringkasan arsitektur Clarise yang sudah diimplementasikan. Kamu WAJIB
 ### 2. Pemisahan Logika Free vs Premium
 
 **Kursus Free (isPremium: false):**
-- **TIDAK ADA AI CHALLENGE**. Fitur AI Challenge disembunyikan total di UI. Jangan buat slide bertipe `challenge` untuk kursus gratis.
-- Kuis menggunakan soal **statis** yang akan dimasukkan ke `apps/app/lib/static-quizzes.ts`. 
-- **WAJIB** buat lebih dari 5 soal (minimal 6-10 soal) di `quizBank` untuk kursus gratis agar sistem bisa mengacak 5 soal.
+- **TIDAK ADA slide `challenge`.** Fitur AI Challenge disembunyikan total di UI untuk kursus gratis — jangan buat slide bertipe `challenge`.
+- **Kuis WAJIB STATIS & EMBEDDED.** Slide kuis (slide terakhir tiap modul) HARUS memuat `quizBank` berisi **tepat ≥10 soal lengkap** langsung di dalam slide tersebut. Frontend membaca `quizBank` itu dan menampilkannya **tanpa memanggil API AI sama sekali**.
+- ⛔ **DILARANG KERAS** mengandalkan AI untuk kuis kursus gratis. Jika `quizBank` kosong / `[]` / tidak ada, frontend akan jatuh ke endpoint kuis dan kualitas tidak terkontrol — **ini bug yang dilaporkan & harus dihindari**. Kalau kamu belum punya soal, BUAT 10 soal manual; JANGAN dikosongkan dan JANGAN berharap AI mengisinya.
 
 **Kursus Premium (isPremium: true):**
-- **WAJIB ADA AI CHALLENGE**. Konten `challenge` di setiap modul harus lengkap.
-- Kuis **digenerate secara dinamis** oleh AI menggunakan API `GROQ_API_KEY_GENERATOR_QUIZCHALLENGE` yang sudah disiapkan sistem.
-- Artinya, bagian `quizBank` di `seed.ts` untuk kursus premium **BISA DIKOSONGKAN `[]`** karena soal akan dibuat on-the-fly oleh AI.
+- **WAJIB ADA slide `challenge`** di SETIAP modul, dengan semua field terisi lengkap (lihat spesifikasi).
+- **Kuis digenerate dinamis oleh AI** (`GROQ_API_KEY_GENERATOR_QUIZCHALLENGE`). Maka slide kuis premium **JANGAN menyetel field `quizBank` sama sekali** (hilangkan field-nya).
+  > ⚠️ `quizBank: []` (array kosong) BERBEDA dari "tidak ada field". Array kosong bisa membuat frontend menampilkan 0 soal. Untuk premium: **OMIT** field `quizBank` sepenuhnya.
 
 ### 3. Infrastruktur Backend yang Sudah Ada
 - **Redis Token Monitor:** Penggunaan token dipantau real-time via Upstash Redis dengan 4 kunci terpisah:
@@ -47,6 +47,12 @@ Ini adalah ringkasan arsitektur Clarise yang sudah diimplementasikan. Kamu WAJIB
 - `evaluationCriteria` harus detail — ini jadi system prompt evaluator, bukan sekadar catatan
 - Untuk kursus free: pastikan `quizBank` berkualitas tinggi karena ini satu-satunya kuis yang user lihat
 - Untuk kursus premium: pastikan `challenge` lengkap semua field-nya karena diproses AI secara dinamis
+
+### 4. KONTRAK DATA NYATA (WAJIB — sumber utama ketidakkonsistenan antar-agent)
+
+Data model SEBENARNYA di DB (cek `schema.prisma`): `Course → Module → Slide` di mana **setiap slide adalah record `Slide` terpisah** dengan field `content` (JSON), dan **setiap sumber referensi adalah record `Source` terpisah** yang terhubung ke slide. **JANGAN** menaruh seluruh slide sebagai JSON string di `module.content` (itu format lama yang TIDAK dirender frontend).
+
+Agar SEMUA agent menghasilkan struktur identik & berkualitas sama, **WAJIB pakai helper `createCourse` di `apps/app/scripts/_seed-helpers.ts`** (lihat bagian "Format Output & Cara Seeding"). Helper ini otomatis: membuat record Slide per slide, menanam `quizBank` ke dalam slide quiz, membuat record Source, mengeset `order`/`isPublished:true`/`visibility:PUBLIC`/`totalModules`, dan idempotent (slug sama akan di-replace).
 
 ---
 
@@ -138,10 +144,9 @@ Dari hasil Query 2, identifikasi kursus di kategori target yang **jumlah modulny
 
 ---
 
-### LANGKAH 5 — Buat Konten
+### LANGKAH 5 — Buat Konten & Seed
 
-Buat konten lengkap untuk 2 kursus yang dipilih sesuai standar kualitas di bawah.
-Outputkan konten tersebut ke dalam `apps/app/prisma/seed.ts` (jika kamu memiliki akses write ke file tersebut) tanpa mengubah kode yang sudah ada selain menambahkan data baru (append).
+Buat konten lengkap untuk 2 kursus (1 Free + 1 Premium) sesuai standar kualitas & format **CANONICAL** di bawah. Gunakan helper `createCourse` (`apps/app/scripts/_seed-helpers.ts`): buat file `apps/app/scripts/seed-<kategori>-<free|premium>.ts`, lalu jalankan `npx tsx scripts/seed-...ts` dari folder `apps/app`. Setelah itu **VERIFIKASI di DB** (hitung slide tiap modul & pastikan quizBank free ≥10) sebelum lanjut ke LANGKAH 6.
 
 ---
 
@@ -171,11 +176,12 @@ Setiap kursus harus terasa seperti kursus premium senilai Rp 500.000+ yang dibel
 - Kursus Premium:         minimal 3 modul, maksimal 6 modul
 ```
 
-### Per Modul:
+### Per Modul (MINIMUM MUTLAK — tidak boleh kurang):
 ```
-- Kursus Free:    minimal 10 slide
-- Kursus Premium: minimal 15 slide
+- Kursus Free:    minimal 10 slide PER MODUL (slide ke-10 = quiz)
+- Kursus Premium: minimal 15 slide PER MODUL (termasuk 1 challenge + 1 quiz)
 ```
+> ⚠️ **WAJIB HITUNG ULANG** jumlah slide tiap modul sebelum melapor. Free < 10 atau Premium < 15 = **GAGAL** → tambahkan slide berkualitas (bukan filler) sampai memenuhi. Jangan pernah mengurangi jumlah slide demi cepat selesai.
 
 ### Urutan Slide dalam Setiap Modul:
 
@@ -302,49 +308,108 @@ Slide terakhir: KUIS (Sistem AI dinamis, quizBank boleh [])
 
 ---
 
-## 📚 ATURAN SUMBER REFERENSI (Sources)
-Saat memasukkan `sources` dalam data course, pastikan:
-1. **Jangan hanya video YouTube!** Jika ada sumber lain seperti artikel, e-book, atau dokumentasi resmi, sertakan juga.
-2. **Video YouTube Wajib Konteks Indonesia**: Gunakan referensi video yang menggunakan bahasa Indonesia dengan penjelasan mendalam, sama seperti course yang sudah ada.
-3. **Cek Kualitas & Ketersediaan**: Kualitas referensi sangat dijaga, pastikan sumber-sumber tersebut benar-benar membahas topik secara mendetail.
-4. **Validasi Embed Video**: Kamu harus mengecek dan memastikan video YouTube tersebut *playable* dan mengizinkan *embedding*. Jangan sampai link video rusak saat dimasukkan ke platform.
+## 📚 ATURAN SUMBER REFERENSI (Sources) — WAJIB
+1. **4-6 sumber per modul**, dipasang pada slide konten (menjadi record `Source`).
+2. **Minimal 2 tipe berbeda** — jangan hanya YouTube. Wajib ada minimal 1 `DOCUMENTATION`/`ARTICLE` + 1 `YOUTUBE`. Tipe valid: `DOCUMENTATION | ARTICLE | YOUTUBE | BOOK | OTHER`.
+3. **URL harus NYATA & relevan — JANGAN mengarang.** Pakai domain stabil/resmi (mis. `id.wikipedia.org`, situs dokumentasi resmi, `dicoding.com`, `petanikode.com`).
+4. **YouTube: konteks Indonesia & AMAN di-embed.** Jika kamu tidak 100% yakin sebuah video spesifik masih ada & mengizinkan embed, gunakan **link CHANNEL** kreator Indonesia tepercaya (mis. `https://www.youtube.com/@channel`). Link channel stabil dan tidak menghasilkan embed rusak. JANGAN menempel ID video yang kamu ragukan keberadaannya.
+5. **Lebih baik sedikit tapi pasti** daripada banyak tapi mengarang. Jika ragu, kurangi jumlah — jangan pernah membuat URL fiktif.
 
 ---
 
-## Format Output Lengkap
+## Format Output & Cara Seeding (CANONICAL — JANGAN PAKAI CARA LAIN)
+
+Buat file baru `apps/app/scripts/seed-<kategori>-<free|premium>.ts`, import `createCourse` dari `./_seed-helpers`, lalu jalankan dari folder `apps/app`:
+```bash
+npx tsx scripts/seed-matematika-free.ts
+```
+
+Bentuk data yang diberikan ke `createCourse` (TypeScript valid & idempotent):
 
 ```typescript
-const courseData = {
-  title: "Judul Kursus",
-  slug: "judul-kursus",
-  description: "Deskripsi yang menarik dan informatif (2-3 kalimat)",
-  categorySlug: "pemrograman",
-  difficulty: "Pemula | Menengah | Lanjutan",
-  isPremium: false,
-  language: "id",
-  estimatedHours: 5,
-  thumbnail: null,
-  
-  modules: [
-    {
-      title: "Judul Modul",
-      slug: "judul-modul",
-      order: 1,
-      estimatedMinutes: 45,
-      xpReward: 50,
-      
-      content: JSON.stringify({
+import { createCourse, prisma } from "./_seed-helpers";
+
+async function main() {
+  await createCourse({
+    title: "Judul Kursus",
+    slug: "judul-kursus",
+    description: "2-3 kalimat menarik & informatif",
+    categorySlug: "matematika",        // slug kategori dari DB — CEK dulu lewat query!
+    difficulty: "BEGINNER",            // "BEGINNER" | "INTERMEDIATE" | "ADVANCED"
+    isPremium: false,                  // false = Free, true = Premium
+    modules: [
+      {
+        title: "Judul Modul",
+        slug: "judul-modul",
+        xpReward: 50,
         slides: [
-          // Semua slide sesuai spesifikasi
+          // type konten: "lesson" | "example" | "casestudy" | "summary"
+          {
+            type: "lesson",
+            title: "Judul Slide",
+            body: "Isi slide dalam Markdown, MINIMAL 200 kata, dengan analogi + contoh nyata.",
+            keyTakeaway: "Satu kalimat inti slide.",
+            sources: [
+              { type: "DOCUMENTATION", title: "...", url: "https://..." },
+              { type: "YOUTUBE", title: "...", url: "https://www.youtube.com/@channel" },
+            ],
+          },
+          // ...slide konten lain sampai memenuhi minimum...
+
+          // === PREMIUM SAJA: slide challenge (WAJIB di tiap modul premium) ===
+          {
+            type: "challenge",
+            title: "Challenge: ...",
+            body: "Skenario/konteks challenge (markdown).",
+            challenge: {
+              instruction: "Instruksi jelas apa yang harus dikerjakan user.",
+              inputType: "math",               // "code" | "text" | "math" | "essay"
+              inputPlaceholder: "Contoh format jawaban",
+              starterCode: "",
+              expectedConcepts: ["konsep 1", "konsep 2", "konsep 3"], // min 3
+              evaluationCriteria: "Sangat detail: apa yang dicek, kriteria benar/parsial/salah. Dipakai langsung sebagai system prompt AI evaluator.",
+              hints: ["hint samar", "hint lebih jelas", "hint hampir jawaban"], // 3
+              sampleAnswer: "Jawaban ideal (tidak ditampilkan ke user).",
+              followUpQuestion: "Pertanyaan lanjutan jika user benar.",
+            },
+          },
+
+          // === SLIDE TERAKHIR = quiz ===
+          // FREE → WAJIB sertakan quizBank ≥10 soal (render statis, tanpa AI):
+          {
+            type: "quiz",
+            title: "Kuis: Uji Pemahamanmu",
+            body: "Sebelum lanjut, pastikan kamu paham materi modul ini.",
+            quizBank: [
+              {
+                id: "q1",
+                question: "Pertanyaan menguji pemahaman (bukan hafalan)",
+                options: [
+                  { id: "a", text: "Opsi A" }, { id: "b", text: "Opsi B" },
+                  { id: "c", text: "Opsi C" }, { id: "d", text: "Opsi D" },
+                ],
+                correctAnswer: "b",
+                explanation: "Kenapa benar & kenapa opsi lain salah (edukatif).",
+                difficulty: "easy", // "easy" | "medium" | "hard"
+              },
+              // ...total MINIMAL 10 soal (2 easy, 2 medium, 1 hard, dst)...
+            ],
+          },
+          // PREMIUM → quiz TANPA field quizBank (AI generate dinamis):
+          // { type: "quiz", title: "Kuis: Uji Pemahamanmu", body: "..." },
         ],
-        quizBank: [
-          // WAJIB minimal 10 soal — dipakai sistem randomisasi
-        ]
-      })
-    }
-  ]
+      },
+    ],
+  });
 }
+
+main().catch((e) => { console.error(e); process.exit(1); }).finally(() => prisma.$disconnect());
 ```
+
+Catatan WAJIB:
+- Isi slide ada di `body` (markdown). JANGAN taruh di `module.content`.
+- `sources` ditaruh PER SLIDE (jadi record `Source`). Pasang 4-6 sumber pada slide konten.
+- Setelah seeding, **verifikasi di DB** (hitung slide & cek quizBank) sebelum melapor.
 
 ---
 
@@ -352,7 +417,7 @@ const courseData = {
 
 **Pemrograman:** Kode wajib ada syntax highlighting + komentar. Gunakan nama variabel konteks Indonesia. Challenge harus bisa dijalankan secara logis.
 
-**Matematika:** Penjelasan langkah demi langkah. Gunakan LaTeX untuk rumus. Contoh dari konteks nyata (cicilan, luas tanah, dll).
+**Matematika:** Penjelasan langkah demi langkah. **JANGAN pakai LaTeX (`$...$`)** — platform memakai Markdown biasa tanpa KaTeX, jadi rumus LaTeX TIDAK akan dirender. Tulis rumus dalam notasi teks yang mudah dibaca (`2x + 3 = 7`, `3/4`, `x^2`, `√16 = 4`) atau dalam code block. Contoh dari konteks nyata (cicilan, luas tanah, diskon, dll). Challenge `inputType: "math"`.
 
 **Bahasa:** Konten bilingual di slide yang relevan. Contoh kalimat dalam konteks nyata. Challenge: user membuat kalimat/paragraf sendiri.
 
@@ -370,10 +435,12 @@ const courseData = {
 □ Kategori target sudah ditentukan (kategori pertama yang < 5 kursus aktif di DB)?
 □ 2 kursus yang dipilih berasal dari kategori target yang sama?
 □ Kursus yang dipilih memiliki 0 modul berdasarkan Query 2?
-□ Setiap modul minimal 10 slide (free) atau 15 slide (premium)?
-□ Untuk Kursus Premium: ADA slide CHALLENGE di setiap modul?
-□ Untuk Kursus Free: TIDAK ADA slide CHALLENGE, tetapi ADA `quizBank` statis > 5 soal?
-□ Referensi (`sources`): Tidak hanya YouTube, konteks Indonesia, dan video YouTube playable (allow embed)?
+□ Sudah HITUNG ULANG slide tiap modul di DB → Free ≥10, Premium ≥15? (tidak boleh kurang)
+□ Untuk Kursus Premium: ADA slide CHALLENGE lengkap di SETIAP modul?
+□ Untuk Kursus Premium: slide quiz TANPA field `quizBank` (bukan `[]`)?
+□ Untuk Kursus Free: TIDAK ADA slide CHALLENGE, dan slide quiz memuat `quizBank` EMBEDDED ≥10 soal (tanpa AI)?
+□ Referensi (`sources`): 4-6/modul, ≥2 tipe, URL NYATA (tidak mengarang), YouTube embed aman / link channel?
+□ Seeding via `createCourse` + dijalankan `npx tsx`, lalu diverifikasi di DB?
 □ Konten dibuat MANUAL tanpa menggunakan call API Groq/Gemini secara langsung olehmu?
 □ Konten setiap slide cukup panjang dan mendalam (minimal 200 kata per slide)?
 □ Ada contoh nyata atau analogi di setiap konsep baru?
@@ -443,17 +510,18 @@ Kirim prompt yang sama untuk melanjutkan ke batch berikutnya.
 
 ## 🚨 LARANGAN KERAS — WAJIB DIPATUHI
 
-### 1. JANGAN UBAH FRONTEND ATAU KODE APLIKASI UTAMA LAINNYA
+### 1. JANGAN UBAH FRONTEND ATAU LOGIKA APLIKASI
 
-Tugasmu **hanya** membuat konten kursus dalam format JSON/TypeScript untuk `seed.ts`.
+Tugasmu **hanya** membuat konten kursus dan men-seed-nya ke DB lewat helper.
 
-- ❌ Jangan modifikasi file apapun di `components/`, `pages/`, `app/`, `styles/`, atau file UI lainnya
-- ❌ Jangan ubah CSS, Tailwind class, layout, atau tampilan apapun
-- ❌ Jangan "memperbaiki" kode frontend meski kamu melihat sesuatu yang menurutmu bisa diimprove
-- ❌ Jangan modifikasi `static-quizzes.ts`, `groq.ts`, atau file library lainnya
-- ✅ Satu-satunya file yang boleh kamu tulis/modifikasi adalah `apps/app/prisma/seed.ts` (atau outputkan saja kode tersebut)
+- ❌ Jangan modifikasi file di `components/`, `app/`, `pages/`, `styles/`, atau komponen UI apa pun
+- ❌ Jangan ubah CSS, Tailwind class, layout, atau tampilan apa pun
+- ❌ Jangan modifikasi `groq.ts`, route API, `_seed-helpers.ts`, atau file library lain
+- ❌ Jangan "memperbaiki" kode meski kamu pikir bisa diimprove (catat di "Temuan", jangan diubah)
+- ✅ Kamu HANYA boleh **MEMBUAT file data baru** di `apps/app/scripts/` (mis. `seed-matematika-free.ts`) yang memakai `createCourse`
+- ✅ Karena `quizBank` kursus free di-embed langsung di slide quiz, kamu **TIDAK perlu** menyentuh `static-quizzes.ts`
 
-Jika menemukan bug atau potensi improvement, **catat di bagian "Temuan frontend" laporan akhir batch** — jangan langsung diubah.
+Jika menemukan bug atau potensi improvement, **catat di bagian "Temuan" laporan akhir batch** — jangan langsung diubah.
 
 ### 2. BUAT KONTEN SECARA MANUAL — JANGAN PAKAI API EKSTERNAL
 

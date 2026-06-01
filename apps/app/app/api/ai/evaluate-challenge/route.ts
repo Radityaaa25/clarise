@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { Ratelimit } from "@upstash/ratelimit";
 import { redis } from "@/lib/ratelimit";
-import { getGroqApiKey } from "@/lib/groq";
+import { getGroqQuizApiKey } from "@/lib/groq";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { stripHtml, detectPromptInjection } from "@/lib/sanitize";
@@ -168,7 +168,7 @@ export async function POST(req: Request) {
       inputType: challenge.inputType || inputType,
     });
 
-    const apiKey = getGroqApiKey();
+    const apiKey = getGroqQuizApiKey();
     const groqResponse = await fetch(
       "https://api.groq.com/openai/v1/chat/completions",
       {

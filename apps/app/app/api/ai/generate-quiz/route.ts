@@ -13,9 +13,7 @@ const ratelimit = new Ratelimit({
   prefix: "clarise:ai:quiz",
 });
 
-const inputSchema = z.object({
-  moduleId: z.string(),
-});
+const inputSchema = z.object({ moduleId: z.string() }).strict();
 
 export async function POST(req: Request) {
   try {
@@ -63,6 +61,20 @@ export async function POST(req: Request) {
         5,
       );
       return NextResponse.json({ questions: staticQuestions });
+    }
+
+    // Premium course → AI generation (berbiaya). Pastikan pemanggil benar-benar
+    // terdaftar di course ini agar user random tidak bisa memicu generate AI
+    // pada moduleId premium milik orang lain (cost abuse / IDOR).
+    const enrolled = await prisma.userProgress.findFirst({
+      where: { courseId: courseModule.courseId, user: { clerkId } },
+      select: { id: true },
+    });
+    if (!enrolled) {
+      return NextResponse.json(
+        { error: "Kamu belum terdaftar di kursus ini" },
+        { status: 403 },
+      );
     }
 
     const prompt = `Kamu adalah pembuat soal pilihan ganda ahli untuk platform pembelajaran Clarise.

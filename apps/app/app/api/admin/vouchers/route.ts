@@ -3,14 +3,16 @@ import { corsResponse } from "@/lib/cors";
 import { z } from "zod";
 import { checkApiAdmin } from "@/lib/admin-auth";
 
-const createVoucherSchema = z.object({
-  code: z.string().min(3).max(30).trim().toUpperCase(),
-  type: z.enum(["TRIAL", "DISCOUNT"]),
-  trialDays: z.number().min(0).default(0),
-  discountPct: z.number().min(0).max(100).default(0),
-  maxUses: z.number().min(1),
-  expiresAt: z.string().datetime(),
-});
+const createVoucherSchema = z
+  .object({
+    code: z.string().min(3).max(30).trim().toUpperCase(),
+    type: z.enum(["TRIAL", "DISCOUNT"]),
+    trialDays: z.number().min(0).default(0),
+    discountPct: z.number().min(0).max(100).default(0),
+    maxUses: z.number().min(1),
+    expiresAt: z.string().datetime(),
+  })
+  .strict();
 
 export async function GET(req: Request) {
   const origin = req.headers.get("origin");

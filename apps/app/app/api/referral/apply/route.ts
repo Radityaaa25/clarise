@@ -140,10 +140,32 @@ export async function POST(req: Request) {
         });
       }
 
-      // 5. Reward the referred user too? (e.g. 3 days trial)
+      // 5. Reward user yang direferral (3 hari trial) — TANPA menurunkan atau
+      // memperpendek langganan berbayar yang mungkin sudah dimilikinya.
       const referredTrialDays = 3;
-      const referredEndDate = new Date();
+      const existingReferredSub = await tx.subscription.findUnique({
+        where: { userId: currentUser.id },
+      });
+
+      let referredEndDate = new Date();
       referredEndDate.setDate(referredEndDate.getDate() + referredTrialDays);
+
+      // Kalau sudah punya langganan aktif yang berakhir lebih lama, perpanjang
+      // dari tanggal itu — bukan menimpanya jadi 3 hari dari sekarang.
+      if (
+        existingReferredSub?.status === "ACTIVE" &&
+        existingReferredSub.endDate &&
+        new Date(existingReferredSub.endDate) > new Date()
+      ) {
+        referredEndDate = new Date(existingReferredSub.endDate);
+        referredEndDate.setDate(referredEndDate.getDate() + referredTrialDays);
+      }
+
+      // Jangan turunkan plan berbayar ke PREMIUM_TRIAL — hanya upgrade dari FREE.
+      const referredPlan =
+        existingReferredSub && existingReferredSub.plan !== "FREE"
+          ? existingReferredSub.plan
+          : "PREMIUM_TRIAL";
 
       await tx.subscription.upsert({
         where: { userId: currentUser.id },
@@ -156,7 +178,7 @@ export async function POST(req: Request) {
         },
         update: {
           status: "ACTIVE",
-          plan: "PREMIUM_TRIAL", // Override free plan
+          plan: referredPlan,
           endDate: referredEndDate,
         },
       });

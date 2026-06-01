@@ -265,12 +265,34 @@ export default function CoursePage({
   const [isCourseRatingSubmitted, setIsCourseRatingSubmitted] =
     useState<boolean>(false);
 
-  const { data: courseData, isLoading: isCourseLoading } = useSWR(
+  const { data: courseData, isLoading: isCourseLoading, mutate: mutateCourse } = useSWR(
     `/api/courses/${slug}`,
     fetcher,
   );
   const { markComplete, progress } = useUserProgress(courseData?.id || "");
   const [isMarking, setIsMarking] = useState(false);
+  const [isRequestingPublic, setIsRequestingPublic] = useState(false);
+
+  const handleRequestPublic = async () => {
+    if (isRequestingPublic) return;
+    setIsRequestingPublic(true);
+    try {
+      const res = await fetch(`/api/courses/${slug}/request-public`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data?.error || "Gagal mengajukan kursus.");
+      } else {
+        toast.success(data.message || "Kursus berhasil diajukan.");
+        mutateCourse();
+      }
+    } catch {
+      toast.error("Terjadi kesalahan. Coba lagi.");
+    } finally {
+      setIsRequestingPublic(false);
+    }
+  };
 
   // Derive completed modules from progress data directly if available, otherwise from courseData (initial state)
   const completedModules =
@@ -285,6 +307,21 @@ export default function CoursePage({
   const activeSlide = slides[activeSlideIdx];
   const totalSlides = slides.length;
 
+  React.useEffect(() => {
+    if (activeSlide?.content?.challenge) {
+      setChallengeData({ challenge: activeSlide.content.challenge });
+      if (activeSlide.content.challenge.starterCode) {
+        setChallengeAnswer(activeSlide.content.challenge.starterCode);
+      }
+    } else {
+      setChallengeData(null);
+      setChallengeAnswer("");
+      setChallengeFeedback(null);
+      setChallengeAttempts(0);
+      setShowChallengeHint(0);
+    }
+  }, [activeSlide]);
+
   // Helper: load (or reload) quiz untuk modul aktif.
   // Dipakai dari beberapa entry-point (tombol "Mulai Kuis" di slide,
   // tombol "Buka Kuis" di navigasi bawah, dan "Coba Lagi" setelah hasil)
@@ -295,6 +332,14 @@ export default function CoursePage({
     setQuizData([]);
     setQuizAnswers([]);
     setShowQuizResult(false);
+    
+    // Gunakan quizBank langsung jika sudah tersedia di DB
+    if (activeSlide?.content?.quizBank && Array.isArray(activeSlide.content.quizBank)) {
+      setQuizData(activeSlide.content.quizBank);
+      setIsGeneratingQuiz(false);
+      return;
+    }
+
     try {
       const res = await fetch("/api/ai/generate-quiz", {
         method: "POST",
@@ -348,9 +393,10 @@ export default function CoursePage({
         <div className="p-5 border-b border-hairline">
           <Link
             href="/explore"
-            className="text-sm text-muted hover:text-core-blue transition-colors mb-3 block"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-muted hover:text-ink dark:hover:text-white transition-colors mb-4 px-2 py-1 -ml-2 rounded-md hover:bg-black/5 dark:hover:bg-white/10"
           >
-            ← Kembali
+            <ChevronLeft className="w-4 h-4" />
+            Kembali
           </Link>
           <h2 className="text-lg font-bold font-heading text-ink dark:text-white leading-tight">
             {courseData.title}
@@ -364,6 +410,27 @@ export default function CoursePage({
               ({courseData.ratingCount} rating)
             </span>
           </div>
+          {courseData.isAuthor && courseData.visibility === "PRIVATE" && (
+            <div className="mt-4">
+              {courseData.publishStatus === "PENDING" ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-spark/10 px-3 py-1.5 text-xs font-bold text-spark">
+                  Menunggu review admin
+                </span>
+              ) : (
+                <button
+                  onClick={handleRequestPublic}
+                  disabled={isRequestingPublic}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-core-blue px-3 py-1.5 text-xs font-bold text-white hover:bg-core-blue/90 transition-colors disabled:opacity-50"
+                >
+                  {isRequestingPublic
+                    ? "Memproses..."
+                    : courseData.publishStatus === "REJECTED"
+                      ? "Ajukan ulang jadi Publik"
+                      : "Ajukan jadi Publik"}
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Module list */}
@@ -409,9 +476,10 @@ export default function CoursePage({
           <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
             <Link
               href="/explore"
-              className="lg:hidden flex items-center justify-center h-8 w-8 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors shrink-0"
+              className="lg:hidden flex items-center gap-1.5 px-3 h-8 rounded-full bg-surface-soft hover:bg-black/5 dark:bg-void-elevated dark:hover:bg-white/10 transition-colors shrink-0 border border-hairline shadow-sm"
             >
-              <ChevronLeft className="h-5 w-5 text-muted hover:text-ink dark:hover:text-white transition-colors" />
+              <ChevronLeft className="h-4 w-4 text-ink dark:text-white" />
+              <span className="text-xs font-bold text-ink dark:text-white pr-1">Kembali</span>
             </Link>
             <div className="text-sm font-medium text-ink dark:text-white truncate min-w-0">
               {activeModule?.title}
@@ -440,10 +508,8 @@ export default function CoursePage({
                 </h1>
 
                 {/* Slide Body */}
-                {(activeSlide.content.type === "text" ||
-                  activeSlide.content.type === "markdown" ||
-                  activeSlide.content.type === "lesson" ||
-                  activeSlide.content.type === "example") &&
+                {activeSlide.content.type !== "quiz" &&
+                  activeSlide.content.type !== "code" &&
                   activeSlide.content.body && (
                     <div className="prose prose-lg dark:prose-invert max-w-none break-words prose-headings:font-heading prose-headings:font-bold prose-a:text-core-blue hover:prose-a:text-core-blue/80 prose-img:rounded-xl prose-pre:overflow-x-auto prose-pre:max-w-full">
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -662,28 +728,54 @@ export default function CoursePage({
                                     setIsGradingChallenge(true);
                                     setChallengeFeedback(null);
                                     try {
+                                      // Challenge tersimpan di DB → pakai
+                                      // evaluate-challenge (ambil kriteria dari
+                                      // DB + cek enrollment, tidak percaya
+                                      // input client). Fallback ke grade-
+                                      // challenge hanya untuk challenge dinamis
+                                      // lama yang belum tersimpan di DB.
+                                      const fromDb =
+                                        !!activeSlide?.content?.challenge;
+                                      const dbSlideIndex =
+                                        activeModule.slides.findIndex(
+                                          (s: any) => s.id === activeSlide?.id,
+                                        );
+                                      const useDb = fromDb && dbSlideIndex >= 0;
                                       const res = await fetch(
-                                        "/api/ai/grade-challenge",
+                                        useDb
+                                          ? "/api/ai/evaluate-challenge"
+                                          : "/api/ai/grade-challenge",
                                         {
                                           method: "POST",
                                           headers: {
                                             "Content-Type": "application/json",
                                           },
-                                          body: JSON.stringify({
-                                            courseName: courseData.title,
-                                            instruction:
-                                              challengeData.challenge
-                                                ?.instruction || "",
-                                            expectedConcepts:
-                                              challengeData.challenge
-                                                .expectedConcepts || [],
-                                            evaluationCriteria:
-                                              challengeData.challenge
-                                                .evaluationCriteria || "",
-                                            answer: challengeAnswer,
-                                            courseId: courseData.id,
-                                            moduleId: activeModule.id,
-                                          }),
+                                          body: JSON.stringify(
+                                            useDb
+                                              ? {
+                                                  moduleId: activeModule.id,
+                                                  slideIndex: dbSlideIndex,
+                                                  userAnswer: challengeAnswer,
+                                                  inputType:
+                                                    challengeData.challenge
+                                                      .inputType || "text",
+                                                }
+                                              : {
+                                                  courseName: courseData.title,
+                                                  instruction:
+                                                    challengeData.challenge
+                                                      ?.instruction || "",
+                                                  expectedConcepts:
+                                                    challengeData.challenge
+                                                      .expectedConcepts || [],
+                                                  evaluationCriteria:
+                                                    challengeData.challenge
+                                                      .evaluationCriteria || "",
+                                                  answer: challengeAnswer,
+                                                  courseId: courseData.id,
+                                                  moduleId: activeModule.id,
+                                                },
+                                          ),
                                         },
                                       );
                                       const data = await res.json();

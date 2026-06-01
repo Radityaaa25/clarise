@@ -12,9 +12,7 @@ const ratelimit = new Ratelimit({
   prefix: "clarise:ai:challenge",
 });
 
-const inputSchema = z.object({
-  moduleId: z.string(),
-});
+const inputSchema = z.object({ moduleId: z.string() }).strict();
 
 export async function POST(req: Request) {
   try {
@@ -48,6 +46,20 @@ export async function POST(req: Request) {
     if (!courseModule.course.isPremium) {
       return NextResponse.json(
         { error: "Tantangan AI hanya tersedia untuk Course Premium" },
+        { status: 403 },
+      );
+    }
+
+    // Premium course → AI generation (berbiaya). Pastikan pemanggil terdaftar
+    // di course ini agar tidak ada yang memicu generate AI pada moduleId
+    // premium sembarangan (cost abuse / IDOR).
+    const enrolled = await prisma.userProgress.findFirst({
+      where: { courseId: courseModule.courseId, user: { clerkId } },
+      select: { id: true },
+    });
+    if (!enrolled) {
+      return NextResponse.json(
+        { error: "Kamu belum terdaftar di kursus ini" },
         { status: 403 },
       );
     }

@@ -1,8 +1,13 @@
 "use client";
-import { CheckCircle2, Eye, Trash2, ShieldAlert } from "lucide-react";
+import { CheckCircle2, Eye, Trash2, ShieldAlert, Globe, XCircle } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { deleteCourse, toggleCoursePublish } from "@/app/actions/course";
+import {
+  deleteCourse,
+  toggleCoursePublish,
+  approveCoursePublic,
+  rejectCoursePublic,
+} from "@/app/actions/course";
 
 interface CourseItem {
   id: string;
@@ -10,6 +15,7 @@ interface CourseItem {
   slug: string;
   isPublished: boolean;
   isAiGenerated: boolean;
+  publishStatus: string;
   authorName: string | null;
 }
 
@@ -38,13 +44,33 @@ export function CoursesClient({ initialCourses }: { initialCourses: CourseItem[]
     else router.refresh();
   };
 
+  const handleApprovePublic = async (id: string) => {
+    setLoadingId(id);
+    const res = await approveCoursePublic(id);
+    setLoadingId(null);
+    if (!res.success) alert(res.error);
+    else router.refresh();
+  };
+
+  const handleRejectPublic = async (id: string) => {
+    setLoadingId(id);
+    const res = await rejectCoursePublic(id);
+    setLoadingId(null);
+    if (!res.success) alert(res.error);
+    else router.refresh();
+  };
+
   const courses = initialCourses.filter((course) => {
     if (filter === "ALL") return true;
     if (filter === "NEEDS_REVIEW") return !course.isPublished;
+    if (filter === "PUBLIC_REQUESTS") return course.publishStatus === "PENDING";
     return true;
   });
 
   const needsReviewCount = initialCourses.filter((c) => !c.isPublished).length;
+  const publicRequestCount = initialCourses.filter(
+    (c) => c.publishStatus === "PENDING",
+  ).length;
 
   return (
     <div className="space-y-6">
@@ -72,6 +98,15 @@ export function CoursesClient({ initialCourses }: { initialCourses: CourseItem[]
             Needs Review
             <span className="bg-accent text-accent-foreground border-2 border-border neo-shadow-sm text-[10px] px-1.5 py-0.5 font-black">
               {needsReviewCount}
+            </span>
+          </button>
+          <button
+            onClick={() => setFilter("PUBLIC_REQUESTS")}
+            className={`neo-btn px-4 py-2 text-sm font-bold flex items-center gap-2 ${filter === "PUBLIC_REQUESTS" ? "bg-primary text-primary-foreground" : "bg-card text-foreground"}`}
+          >
+            Public Requests
+            <span className="bg-accent text-accent-foreground border-2 border-border neo-shadow-sm text-[10px] px-1.5 py-0.5 font-black">
+              {publicRequestCount}
             </span>
           </button>
         </div>
@@ -134,6 +169,11 @@ export function CoursesClient({ initialCourses }: { initialCourses: CourseItem[]
                   >
                     {course.isPublished ? "PUBLISHED" : "PENDING REVIEW"}
                   </span>
+                  {course.publishStatus === "PENDING" && (
+                    <span className="ml-2 px-2 py-1 text-[10px] font-black uppercase border-2 border-border neo-shadow-sm bg-accent text-accent-foreground">
+                      MINTA PUBLIK
+                    </span>
+                  )}
                 </td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex justify-end gap-3">
@@ -157,6 +197,26 @@ export function CoursesClient({ initialCourses }: { initialCourses: CourseItem[]
                           <CheckCircle2 className="w-4 h-4" />
                         </button>
                         {/* We could use XCircle for reject, but delete handles it for now */}
+                      </>
+                    )}
+                    {course.publishStatus === "PENDING" && (
+                      <>
+                        <button
+                          onClick={() => handleApprovePublic(course.id)}
+                          disabled={loadingId === course.id}
+                          className="neo-btn bg-primary text-primary-foreground p-2 hover:opacity-90 disabled:opacity-50"
+                          title="Setujui jadi Publik"
+                        >
+                          <Globe className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleRejectPublic(course.id)}
+                          disabled={loadingId === course.id}
+                          className="neo-btn bg-card text-foreground p-2 hover:bg-muted disabled:opacity-50"
+                          title="Tolak Pengajuan Publik"
+                        >
+                          <XCircle className="w-4 h-4" />
+                        </button>
                       </>
                     )}
                     <button

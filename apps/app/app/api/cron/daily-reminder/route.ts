@@ -8,11 +8,13 @@ const resend = new Resend(process.env.RESEND_API_KEY || "dummy_key");
 
 export async function GET(req: Request) {
   try {
-    // Basic authorization for cron job (optional but recommended)
-    // E.g., checking Authorization header against a CRON_SECRET
+    // Authorization for cron job — FAIL CLOSED.
+    // Endpoint ini memicu pengiriman email massal lewat Resend, jadi kalau
+    // CRON_SECRET tidak di-set kita tetap TOLAK (bukan buka akses) untuk
+    // mencegah email bombing & penyalahgunaan biaya oleh pihak luar.
     const authHeader = req.headers.get("Authorization");
     if (
-      process.env.CRON_SECRET &&
+      !process.env.CRON_SECRET ||
       authHeader !== `Bearer ${process.env.CRON_SECRET}`
     ) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

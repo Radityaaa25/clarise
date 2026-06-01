@@ -326,3 +326,133 @@ CARA MENILAI:
 JANGAN pernah memberikan sampleAnswer atau jawaban lengkap dalam feedback atau hint.
 Hint harus MENGARAHKAN, bukan MEMBERITAHU jawaban.`;
 }
+
+
+
+// ──────────────────────────────────────────────
+// 1E. Two-Phase Generation Prompts
+// Fase 1 = blueprint (struktur + fokus tiap slide), Fase 2 = isi per-slide.
+// Memecah generasi jadi banyak call kecil → tiap slide dapat anggaran token
+// penuh = konten jauh lebih dalam, dan bisa diparalelkan lewat pool API key.
+// ──────────────────────────────────────────────
+
+const PEDAGOGY_RULES = `PRINSIP 4C: Connect (kaitkan dgn pengalaman user) → Concept (jelaskan paling intuitif) → Concrete (implementasi nyata) → Conclude (refleksi).
+ANTI-FILLER (WAJIB): hapus kalimat yang bisa ditebak dari judul. DILARANG: "X adalah hal penting...", "digunakan banyak orang...", motivasi kosong, definisi Wikipedia.
+SETIAP SLIDE WAJIB: 1 insight tak-obvious; 1 analogi konkret khas Indonesia (warung, ojol, tokopedia, sekolah); 1 contoh yang bisa langsung dipraktikkan; 1 pertanyaan retoris aktif; diakhiri "jembatan" rasa penasaran ke slide berikutnya. Mulai dari MASALAH/PERTANYAAN, bukan definisi.`;
+
+export function buildOutlineSystemPrompt(): string {
+  return `IDENTITAS: Kamu Dr. Arif, lead instructional designer Clarise (15 thn, eks-Coursera/edX). Standarmu = kursus senilai Rp 2.000.000, bukan konten gratis.
+
+${PEDAGOGY_RULES}
+
+TUGASMU: rancang BLUEPRINT kursus (belum isi penuh tiap slide). Susun alur slide yang mengalir logis dari nol sampai mahir; tiap slide punya SATU fokus jelas dan tidak tumpang tindih dengan slide lain.
+
+OUTPUT: HANYA JSON valid (tanpa teks lain) dengan struktur:
+{
+ "title": "string",
+ "slug": "string",
+ "description": "2 kalimat: masalah yang diselesaikan + kemampuan user setelah selesai",
+ "difficulty": "BEGINNER|INTERMEDIATE|ADVANCED",
+ "estimatedHours": number,
+ "modules": [{
+   "title": "string",
+   "slug": "string",
+   "order": number,
+   "estimatedMinutes": number,
+   "learningObjectives": ["3 kemampuan konkret"],
+   "slides": [
+     {"slideNumber": number, "type": "lesson|example|casestudy|summary", "title": "judul spesifik", "focus": "1-2 kalimat: apa PERSIS yang diajarkan + 3-5 poin kunci yang WAJIB dibahas di slide ini"}
+   ],
+   "challenge": {"title": "string", "content": "narasi skenario realistis Indonesia, min 120 kata", "instruction": "string", "inputType": "code|text|math|essay", "inputPlaceholder": "string", "starterCode": "string atau ''", "expectedConcepts": ["min 3"], "evaluationCriteria": "sangat spesifik: poin yang dicek + jawaban parsial yang masih diterima", "hints": ["3 hint dari samar ke spesifik"], "sampleAnswer": "string", "followUpQuestion": "string"},
+   "quizBank": [{"id": "q1", "question": "berbasis skenario, bukan definisi", "options": [{"id": "a", "text": ""}, {"id": "b", "text": ""}, {"id": "c", "text": ""}, {"id": "d", "text": ""}], "correctAnswer": "a", "explanation": "kenapa benar DAN kenapa opsi lain salah, min 50 kata", "difficulty": "easy|medium|hard"}],
+   "sources": [{"type": "DOCUMENTATION|ARTICLE|YOUTUBE|BOOK", "title": "judul sumber yang deskriptif", "url": "URL stabil & NYATA yang relevan dengan modul"}]
+ }]
+}
+
+ATURAN: quizBank tepat ${COURSE_QUALITY_STANDARDS.minQuizQuestions} soal berkualitas. "challenge", "quizBank", dan "sources" ditaruh di level modul (JANGAN dimasukkan ke array "slides"). Jangan tulis body slide penuh di sini — cukup "focus" yang padat. Jika topik terlalu vague, output {"error": "TOPIC_TOO_VAGUE", "suggestion": "..."}.
+
+ATURAN SUMBER REFERENSI (sources): 4-6 sumber per modul yang NYATA, RELEVAN, dan stabil — bukan URL karangan. Gunakan URL resmi/root domain yang hampir pasti ada (hindari deep-link rapuh). Wajibkan campuran: minimal 1 DOCUMENTATION resmi, 1 YOUTUBE (channel/playlist relevan), dan 1 ARTICLE/BOOK.`;
+}
+
+export function buildOutlineUserPrompt(
+  input: {
+    topic: string;
+    difficulty: string;
+    targetModules: number;
+    language: string;
+  },
+  userProfile: { learningGoal?: string; currentLevel?: string },
+): string {
+  const difficultyLabel =
+    input.difficulty === "BEGINNER"
+      ? "Pemula"
+      : input.difficulty === "INTERMEDIATE"
+        ? "Menengah"
+        : "Lanjutan";
+  const languageLabel =
+    input.language === "id" ? "Bahasa Indonesia" : "Bahasa Inggris";
+
+  // Fokus kedalaman: makin sedikit modul, makin banyak slide per modul.
+  let minSlides = 12;
+  if (input.targetModules === 1) minSlides = 18;
+  else if (input.targetModules === 2) minSlides = 14;
+
+  const audience = userProfile.learningGoal
+    ? `\n- Target belajar user: ${userProfile.learningGoal}`
+    : "";
+  const level = userProfile.currentLevel
+    ? `\n- Level user saat ini: ${userProfile.currentLevel}`
+    : "";
+
+  return `TUGAS: Rancang blueprint kursus tentang "${input.topic}".
+
+PARAMETER:
+- Tingkat: ${difficultyLabel}
+- Jumlah modul: tepat ${input.targetModules}
+- Bahasa: ${languageLabel}
+- Slide konten per modul (type lesson/example/casestudy/summary): ${minSlides}-${minSlides + 4} slide yang mengalir logis
+- WAJIB per modul: minimal 2 slide "example", minimal 1 "casestudy", dan 1 "summary" di akhir
+- Tiap modul punya 1 "challenge" + quizBank tepat ${COURSE_QUALITY_STANDARDS.minQuizQuestions} soal (di field terpisah, bukan di array slides)
+- Tiap modul punya 4-6 "sources" referensi yang NYATA & relevan${audience}${level}
+
+PRIORITAS SUMBER REFERENSI (pakai domain yang stabil & nyata):
+- Dokumentasi resmi: developer.mozilla.org, react.dev, nodejs.org, dan situs resmi teknologi terkait
+- Indonesia: dicoding.com, petanikode.com, codepolitan.com
+- YouTube (channel relevan): "Web Programming UNPAS", "Programmer Zaman Now", "Kelas Terbuka"
+- Internasional: freecodecamp.org, w3schools.com
+Pilih hanya yang relevan dengan topik modul. Jangan mengarang URL yang tidak yakin ada.
+
+Ikuti PERSIS format JSON dari system prompt. Tanpa teks apapun di luar JSON.`;
+}
+
+export function buildSlideContentSystemPrompt(): string {
+  return `Kamu Dr. Arif, instructional designer Clarise. Tulis ISI satu slide kursus berkualitas Rp 2.000.000.
+
+${PEDAGOGY_RULES}
+
+OUTPUT: HANYA JSON valid:
+{"content": "Markdown MINIMAL 220 kata, padat dan substantif (bukan padding). Boleh pakai heading, list, dan bold seperlunya.", "codeExample": "kode jika relevan dgn nama variabel Bahasa Indonesia (produk, harga, pengguna); '' jika tidak relevan", "keyTakeaway": "1 kalimat inti slide"}
+
+Tulis dalam bahasa yang diminta. Jangan mengulang isi slide lain.`;
+}
+
+export function buildSlideContentUserPrompt(ctx: {
+  courseTitle: string;
+  moduleTitle: string;
+  difficulty: string;
+  language: string;
+  slideType: string;
+  slideTitle: string;
+  focus: string;
+  prevTitle?: string;
+  nextTitle?: string;
+}): string {
+  const lang = ctx.language === "id" ? "Bahasa Indonesia" : "Bahasa Inggris";
+  return `Kursus: "${ctx.courseTitle}" | Modul: "${ctx.moduleTitle}" | Tingkat: ${ctx.difficulty} | Bahasa: ${lang}
+Tipe slide: ${ctx.slideType}
+Judul slide: "${ctx.slideTitle}"
+Fokus & poin kunci yang WAJIB dibahas: ${ctx.focus}
+Slide sebelumnya: ${ctx.prevTitle || "(awal modul)"} | Slide berikutnya: ${ctx.nextTitle || "(akhir modul)"}
+
+Tulis isi slide ini sesuai fokus, mulai dari masalah/pertanyaan (bukan definisi), dan akhiri dengan jembatan menuju slide berikutnya.`;
+}
