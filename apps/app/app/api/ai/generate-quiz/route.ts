@@ -21,14 +21,6 @@ export async function POST(req: Request) {
     if (!clerkId)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { success } = await ratelimit.limit(clerkId);
-    if (!success) {
-      return NextResponse.json(
-        { error: "Rate limit exceeded" },
-        { status: 429 },
-      );
-    }
-
     const body = await req.json();
     const parsed = inputSchema.safeParse(body);
     if (!parsed.success)
@@ -50,9 +42,9 @@ export async function POST(req: Request) {
     if (!courseModule)
       return NextResponse.json({ error: "Module not found" }, { status: 404 });
 
+    // ── FREE course → langsung ambil dari static quiz pool ──────────
+    // TIDAK panggil AI/Groq, TIDAK butuh API key, TIDAK butuh rate limit.
     if (!courseModule.course.isPremium) {
-      // Free course: ambil dari static-quizzes.ts (TIDAK panggil AI/Groq).
-      // Lookup berlapis: courseSlug → categorySlug → default.
       const staticQuestions = getRandomStaticQuizzes(
         {
           courseSlug: courseModule.course.slug,
@@ -63,9 +55,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ questions: staticQuestions });
     }
 
-    // Premium course → AI generation (berbiaya). Pastikan pemanggil benar-benar
-    // terdaftar di course ini agar user random tidak bisa memicu generate AI
-    // pada moduleId premium milik orang lain (cost abuse / IDOR).
+    // ── PREMIUM course → rate limit dulu, lalu generate via Groq AI ──
+    try {
+      const { success } = await ratelimit.limit(clerkId);
+      if (!success) {
+        return NextResponse.json(
+          { error: "Rate limit exceeded" },
+          { status: 429 },
+        );
+      }
+    } catch (rlErr) {
+      // Rate limiter gagal (Redis down) → tetap lanjut, jangan block user
+      console.error("[GENERATE_QUIZ] Rate limiter error:", rlErr);
+    }
+
+    // Pastikan pemanggil benar-benar terdaftar di course ini
     const enrolled = await prisma.userProgress.findFirst({
       where: { courseId: courseModule.courseId, user: { clerkId } },
       select: { id: true },

@@ -345,14 +345,67 @@ export default function CoursePage({
     setQuizData([]);
     setQuizAnswers([]);
     setShowQuizResult(false);
-    
-    // Gunakan quizBank langsung jika sudah tersedia di DB
-    if (activeSlide?.content?.quizBank && Array.isArray(activeSlide.content.quizBank)) {
-      setQuizData(activeSlide.content.quizBank);
+
+    // ── Helper: normalize quizBank yang formatnya beragam ────────────
+    // Seed data menyimpan quizBank dalam format:
+    //   { options: [{ id: "a", text: "..." }], correctAnswer: "b" }
+    // Tapi renderer dan scoring mengharapkan:
+    //   { options: ["string", ...], correctAnswer: number (index) }
+    // Fungsi ini mengkonversi format lama ke format yang renderer butuhkan.
+    const normalizeQuizBank = (bank: any[]): any[] => {
+      return bank.map((q: any) => {
+        // Sudah format benar (options = string[], correctAnswer = number)
+        if (
+          Array.isArray(q.options) &&
+          q.options.length > 0 &&
+          typeof q.options[0] === "string" &&
+          typeof q.correctAnswer === "number"
+        ) {
+          return q;
+        }
+
+        // Format seed: options = [{id, text}], correctAnswer = string id
+        if (
+          Array.isArray(q.options) &&
+          q.options.length > 0 &&
+          typeof q.options[0] === "object" &&
+          q.options[0].text
+        ) {
+          const flatOptions = q.options.map((o: any) => o.text);
+          let correctIdx = 0;
+          if (typeof q.correctAnswer === "string") {
+            correctIdx = q.options.findIndex(
+              (o: any) => o.id === q.correctAnswer,
+            );
+            if (correctIdx === -1) correctIdx = 0;
+          } else if (typeof q.correctAnswer === "number") {
+            correctIdx = q.correctAnswer;
+          }
+          return { question: q.question, options: flatOptions, correctAnswer: correctIdx };
+        }
+
+        // Fallback: kembalikan apa adanya
+        return q;
+      });
+    };
+
+    // ── Course FREE → selalu panggil API (menggunakan static quiz pool,
+    //    TANPA API key / Groq). Ini menjamin format data konsisten.  ──
+    // ── Course PREMIUM → coba pakai quizBank dari slide terlebih dulu,
+    //    kalau tidak ada baru panggil API (Groq AI generation).        ──
+    const hasLocalQuizBank =
+      activeSlide?.content?.quizBank &&
+      Array.isArray(activeSlide.content.quizBank) &&
+      activeSlide.content.quizBank.length > 0;
+
+    if (hasLocalQuizBank && courseData?.isPremium) {
+      // Premium course + quizBank tersedia → normalize & gunakan langsung
+      setQuizData(normalizeQuizBank(activeSlide.content.quizBank));
       setIsGeneratingQuiz(false);
       return;
     }
 
+    // Panggil API: free → static pool, premium → Groq AI
     try {
       const res = await fetch("/api/ai/generate-quiz", {
         method: "POST",
@@ -1625,8 +1678,9 @@ export default function CoursePage({
                         </h3>
                       </div>
                       <div className="space-y-3">
-                        {q.options.map((opt: string, oIdx: number) => {
+                        {q.options.map((opt: any, oIdx: number) => {
                           const isSelected = quizAnswers[qIdx] === oIdx;
+                          const optText = typeof opt === "string" ? opt : opt.text;
                           return (
                             <label
                               key={oIdx}
@@ -1646,7 +1700,7 @@ export default function CoursePage({
                                 />
                               </div>
                               <span className="text-body dark:text-white/80 font-medium leading-relaxed">
-                                {opt}
+                                {optText}
                               </span>
                             </label>
                           );

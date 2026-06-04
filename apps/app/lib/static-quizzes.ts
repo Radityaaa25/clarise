@@ -762,6 +762,100 @@ export const STATIC_QUIZ_POOL: Record<string, StaticQuizQuestion[]> = {
     },
   ],
 
+  // ───── CATEGORY SLUG: devops-tools ─────
+  "devops-tools": [
+    {
+      question: "Apa tujuan utama dari DevOps?",
+      options: [
+        "Membangun hardware server",
+        "Menyatukan pengembangan (Dev) dan operasi (Ops) untuk siklus rilis yang lebih cepat dan andal",
+        "Hanya untuk mengotomatiskan testing UI",
+        "Membuat desain grafis aplikasi"
+      ],
+      correctAnswer: 1,
+    },
+    {
+      question: "Apa fungsi dari Docker?",
+      options: [
+        "Mengganti sistem operasi utama komputer",
+        "Sebagai antivirus cloud",
+        "Mengemas aplikasi dan dependensinya ke dalam kontainer yang terisolasi",
+        "Untuk desain antarmuka pengguna"
+      ],
+      correctAnswer: 2,
+    },
+    {
+      question: "Manakah yang merupakan penyedia layanan Cloud Computing?",
+      options: ["Adobe", "AWS (Amazon Web Services)", "Figma", "WordPress"],
+      correctAnswer: 1,
+    },
+    {
+      question: "Apa yang dimaksud dengan CI/CD?",
+      options: [
+        "Continuous Integration / Continuous Deployment",
+        "Cloud Infrastructure / Cloud Data",
+        "Centralized Information / Computer Design",
+        "Code Inspection / Code Debugging"
+      ],
+      correctAnswer: 0,
+    },
+    {
+      question: "Apa itu IP Address dalam konteks jaringan dasar?",
+      options: [
+        "Identitas numerik untuk setiap perangkat yang terhubung ke jaringan",
+        "Password untuk masuk ke server",
+        "Nama domain dari sebuah website",
+        "Jenis kabel fiber optik"
+      ],
+      correctAnswer: 0,
+    },
+    {
+      question: "Mengapa Cloud Computing dianggap lebih hemat biaya bagi startup?",
+      options: [
+        "Karena tidak perlu membayar listrik",
+        "Karena bisa membayar sesuai penggunaan (pay-as-you-go) tanpa investasi server fisik yang besar",
+        "Karena selalu gratis tanpa batas",
+        "Karena menggunakan internet satelit"
+      ],
+      correctAnswer: 1,
+    },
+    {
+      question: "Apa peran dari DNS (Domain Name System)?",
+      options: [
+        "Menerjemahkan nama domain (seperti google.com) menjadi IP address",
+        "Menyembunyikan IP address pengguna (seperti VPN)",
+        "Memblokir virus dari jaringan",
+        "Mempercepat koneksi internet"
+      ],
+      correctAnswer: 0,
+    },
+    {
+      question: "Manakah dari berikut yang merupakan layanan PaaS (Platform as a Service)?",
+      options: ["Google Compute Engine", "AWS EC2", "Heroku", "Microsoft Word"],
+      correctAnswer: 2,
+    },
+    {
+      question: "Apa fungsi utama dari Load Balancer?",
+      options: [
+        "Mendistribusikan trafik jaringan secara merata ke beberapa server",
+        "Menghapus data yang tidak terpakai dari database",
+        "Mengenkripsi password pengguna",
+        "Meningkatkan resolusi video streaming"
+      ],
+      correctAnswer: 0,
+    },
+    {
+      question: "Apa keuntungan utama menggunakan arsitektur Microservices?",
+      options: [
+        "Satu bahasa pemrograman untuk semua fitur",
+        "Aplikasi menjadi satu kesatuan besar (monolith)",
+        "Memisahkan aplikasi menjadi layanan kecil yang independen dan mudah diskalakan",
+        "Tidak membutuhkan koneksi internet"
+      ],
+      correctAnswer: 2,
+    }
+  ],
+
   // ───── CATEGORY SLUG: bahasa-inggris ─────
   "bahasa-inggris": [
     {
@@ -1470,6 +1564,186 @@ export const STATIC_QUIZ_POOL: Record<string, StaticQuizQuestion[]> = {
         "Gunakan nama yang deskriptif dan konsisten (contoh: userCount)",
         "Jangan pernah menggunakan variabel",
         "Campurkan semua bahasa",
+      ],
+      correctAnswer: 1,
+    },
+  ],
+  "devops-tools": [
+    {
+      question: "Apa fungsi utama dari load balancer dalam cloud computing?",
+      options: [
+        "Meningkatkan kapasitas penyimpanan",
+        "Mendistribusikan lalu lintas ke berbagai server",
+        "Melindungi jaringan dari serangan virus",
+        "Membuat cadangan database",
+      ],
+      correctAnswer: 1,
+    },
+    {
+      question: "Manakah yang BUKAN merupakan jenis layanan cloud computing?",
+      options: ["IaaS", "PaaS", "SaaS", "LaaS"],
+      correctAnswer: 3,
+    },
+    {
+      question: "Apa tujuan utama dari Auto Scaling?",
+      options: [
+        "Otomatis membackup data",
+        "Menambah atau mengurangi jumlah instans komputasi berdasarkan permintaan",
+        "Memperbarui sistem operasi otomatis",
+        "Mengenkripsi lalu lintas data",
+      ],
+      correctAnswer: 1,
+    },
+    {
+      question: "Layanan apa di AWS yang berfungsi sebagai Content Delivery Network (CDN)?",
+      options: ["Amazon S3", "Amazon EC2", "Amazon CloudFront", "Amazon RDS"],
+      correctAnswer: 2,
+    },
+    {
+      question: "Apa yang dimaksud dengan VPC (Virtual Private Cloud)?",
+      options: [
+        "Penyimpanan data cloud khusus",
+        "Jaringan virtual yang terisolasi untuk layanan cloud",
+        "Layanan email cloud",
+        "Alat analitik untuk cloud",
+      ],
+      correctAnswer: 1,
+    },
+  ],
+
+  // ───── COURSE SLUG: pengantar-cloud-computing (Free) ─────
+  "pengantar-cloud-computing": [
+    {
+      question: "Apa model layanan cloud yang menyediakan infrastruktur virtual seperti server dan storage?",
+      options: ["SaaS", "PaaS", "IaaS", "FaaS"],
+      correctAnswer: 2,
+    },
+    {
+      question: "Contoh SaaS (Software as a Service) yang paling tepat adalah:",
+      options: [
+        "Amazon EC2",
+        "Google Drive dan Gmail",
+        "AWS Lambda",
+        "Docker Container",
+      ],
+      correctAnswer: 1,
+    },
+    {
+      question: "Apa keuntungan utama model Pay-as-you-go di cloud computing?",
+      options: [
+        "Membayar di muka untuk 5 tahun",
+        "Hanya membayar sesuai pemakaian, tanpa investasi awal besar",
+        "Gratis selamanya",
+        "Harga tetap setiap bulan",
+      ],
+      correctAnswer: 1,
+    },
+    {
+      question: "Apa yang dimaksud dengan 'Shared Responsibility Model' di cloud?",
+      options: [
+        "Semua tanggung jawab ada di cloud provider",
+        "Keamanan dibagi antara cloud provider (infrastruktur) dan pengguna (data & konfigurasi)",
+        "Pengguna bertanggung jawab atas segalanya",
+        "Model berbagi biaya antar pengguna",
+      ],
+      correctAnswer: 1,
+    },
+    {
+      question: "Apa risiko 'Vendor Lock-in' dalam cloud computing?",
+      options: [
+        "Server fisik dikunci di data center",
+        "Sulit pindah ke provider lain setelah membangun di satu provider",
+        "Akun cloud terkunci karena lupa password",
+        "Internet terputus saat migrasi",
+      ],
+      correctAnswer: 1,
+    },
+    {
+      question: "Deployment model cloud mana yang paling cocok untuk instansi pemerintah yang membutuhkan kontrol penuh?",
+      options: ["Public Cloud", "Private Cloud", "Hybrid Cloud", "Community Cloud"],
+      correctAnswer: 1,
+    },
+    {
+      question: "Perusahaan mana yang menggunakan cloud untuk menangani lonjakan traffic 10x lipat saat event belanja besar?",
+      options: ["Netflix", "Tokopedia", "Spotify", "WhatsApp"],
+      correctAnswer: 1,
+    },
+  ],
+
+  // ───── COURSE SLUG: networking-untuk-cloud (Free) ─────
+  "networking-untuk-cloud": [
+    {
+      question: "Apa fungsi Internet Gateway (IGW) di AWS VPC?",
+      options: [
+        "Menyimpan data di cloud",
+        "Menghubungkan VPC ke internet",
+        "Mengenkripsi traffic internal",
+        "Membuat backup database",
+      ],
+      correctAnswer: 1,
+    },
+    {
+      question: "Berapa jumlah IP address yang tersedia di CIDR block /24?",
+      options: ["16", "256", "1024", "65536"],
+      correctAnswer: 1,
+    },
+    {
+      question: "Apa perbedaan utama Security Group dan Network ACL?",
+      options: [
+        "Keduanya identik",
+        "Security Group stateful & level instance, NACL stateless & level subnet",
+        "Security Group hanya untuk database",
+        "NACL menggantikan Security Group",
+      ],
+      correctAnswer: 1,
+    },
+    {
+      question: "Apa fungsi NAT Gateway untuk server di private subnet?",
+      options: [
+        "Mengizinkan internet mengakses server secara langsung",
+        "Mengizinkan server akses internet tanpa menerima koneksi masuk",
+        "Membuat public IP permanen",
+        "Menerjemahkan domain ke IP",
+      ],
+      correctAnswer: 1,
+    },
+    {
+      question: "Routing 0.0.0.0/0 dalam route table berarti:",
+      options: [
+        "Hanya IP localhost",
+        "Semua IP address (default route ke internet)",
+        "IP internal VPC saja",
+        "IP reserved untuk DNS",
+      ],
+      correctAnswer: 1,
+    },
+    {
+      question: "Apa cara paling aman untuk mengakses server di private subnet?",
+      options: [
+        "Buka port 22 ke 0.0.0.0/0",
+        "Gunakan AWS Systems Manager Session Manager",
+        "Berikan server public IP",
+        "Matikan firewall",
+      ],
+      correctAnswer: 1,
+    },
+    {
+      question: "Load Balancer di cloud berfungsi untuk:",
+      options: [
+        "Menyimpan password database",
+        "Mendistribusikan traffic ke banyak server agar tidak overload",
+        "Menginstall software otomatis",
+        "Mengenkripsi email",
+      ],
+      correctAnswer: 1,
+    },
+    {
+      question: "CDN (Content Delivery Network) mempercepat website dengan cara:",
+      options: [
+        "Menambah RAM server",
+        "Menyimpan copy konten di edge locations dekat user",
+        "Mengkompresi database",
+        "Memperbesar bandwidth server utama",
       ],
       correctAnswer: 1,
     },
