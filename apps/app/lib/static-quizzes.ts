@@ -1568,48 +1568,6 @@ export const STATIC_QUIZ_POOL: Record<string, StaticQuizQuestion[]> = {
       correctAnswer: 1,
     },
   ],
-  "devops-tools": [
-    {
-      question: "Apa fungsi utama dari load balancer dalam cloud computing?",
-      options: [
-        "Meningkatkan kapasitas penyimpanan",
-        "Mendistribusikan lalu lintas ke berbagai server",
-        "Melindungi jaringan dari serangan virus",
-        "Membuat cadangan database",
-      ],
-      correctAnswer: 1,
-    },
-    {
-      question: "Manakah yang BUKAN merupakan jenis layanan cloud computing?",
-      options: ["IaaS", "PaaS", "SaaS", "LaaS"],
-      correctAnswer: 3,
-    },
-    {
-      question: "Apa tujuan utama dari Auto Scaling?",
-      options: [
-        "Otomatis membackup data",
-        "Menambah atau mengurangi jumlah instans komputasi berdasarkan permintaan",
-        "Memperbarui sistem operasi otomatis",
-        "Mengenkripsi lalu lintas data",
-      ],
-      correctAnswer: 1,
-    },
-    {
-      question: "Layanan apa di AWS yang berfungsi sebagai Content Delivery Network (CDN)?",
-      options: ["Amazon S3", "Amazon EC2", "Amazon CloudFront", "Amazon RDS"],
-      correctAnswer: 2,
-    },
-    {
-      question: "Apa yang dimaksud dengan VPC (Virtual Private Cloud)?",
-      options: [
-        "Penyimpanan data cloud khusus",
-        "Jaringan virtual yang terisolasi untuk layanan cloud",
-        "Layanan email cloud",
-        "Alat analitik untuk cloud",
-      ],
-      correctAnswer: 1,
-    },
-  ],
 
   // ───── COURSE SLUG: pengantar-cloud-computing (Free) ─────
   "pengantar-cloud-computing": [
