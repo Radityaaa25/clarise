@@ -10,7 +10,13 @@ const updateUserSchema = z
     name: z.string().max(100).optional(),
     dailyHours: z.number().min(1).max(24).optional(),
     learningGoal: z.string().max(200).optional(),
-    aiPreferences: z.any().optional(),
+    aiPreferences: z
+      .object({
+        tone: z.enum(["formal", "casual", "friendly"]).optional(),
+        language: z.enum(["id", "en"]).optional(),
+      })
+      .strict()
+      .optional(),
   })
   .strict();
 

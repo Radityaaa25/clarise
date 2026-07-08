@@ -5,7 +5,9 @@ import { ThemeProvider } from "next-themes";
 import { ErrorBoundary } from "@/components/layout/error-boundary";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from "@/components/ui/sonner";
+import { PHProvider } from "./providers";
 import "./globals.css";
+
 
 const darkerGrotesque = Darker_Grotesque({
   subsets: ["latin"],
@@ -106,18 +108,20 @@ export default function RootLayout({
           <meta name="viewport" content="width=device-width, initial-scale=1" />
         </head>
         <body suppressHydrationWarning>
-          <ErrorBoundary>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="light"
-              enableSystem={false}
-              disableTransitionOnChange
-            >
-              {children}
-              <Toaster position="top-right" richColors />
-              <SpeedInsights />
-            </ThemeProvider>
-          </ErrorBoundary>
+          <PHProvider>
+            <ErrorBoundary>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="light"
+                enableSystem={false}
+                disableTransitionOnChange
+              >
+                {children}
+                <Toaster position="top-right" richColors />
+                <SpeedInsights />
+              </ThemeProvider>
+            </ErrorBoundary>
+          </PHProvider>
         </body>
       </html>
     </ClerkProvider>

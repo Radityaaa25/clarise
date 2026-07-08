@@ -26,6 +26,26 @@ export async function POST(req: Request) {
     if (!parsed.success)
       return NextResponse.json({ error: "Invalid input" }, { status: 400 });
 
+    const user = await prisma.user.findUnique({
+      where: { clerkId },
+      select: {
+        id: true,
+        subscription: { select: { plan: true, status: true } },
+      },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const isPremium = user.subscription?.status === "ACTIVE" && user.subscription.plan !== "FREE";
+    if (!isPremium) {
+      return NextResponse.json(
+        { error: "Fitur Kuis AI hanya tersedia untuk pengguna Premium." },
+        { status: 403 }
+      );
+    }
+
     const { moduleId } = parsed.data;
 
     const courseModule = await prisma.module.findUnique({
@@ -39,33 +59,19 @@ export async function POST(req: Request) {
       },
     });
 
-    if (!courseModule)
+    if (!courseModule) {
       return NextResponse.json({ error: "Module not found" }, { status: 404 });
-
-    // ── FREE course → langsung ambil dari static quiz pool ──────────
-    // TIDAK panggil AI/Groq, TIDAK butuh API key, TIDAK butuh rate limit.
-    if (!courseModule.course.isPremium) {
-      const staticQuestions = getRandomStaticQuizzes(
-        {
-          courseSlug: courseModule.course.slug,
-          categorySlug: courseModule.course.category?.slug,
-        },
-        5,
-      );
-      return NextResponse.json({ questions: staticQuestions });
     }
 
-    // ── PREMIUM course → rate limit dulu, lalu generate via Groq AI ──
     try {
       const { success } = await ratelimit.limit(clerkId);
       if (!success) {
         return NextResponse.json(
           { error: "Rate limit exceeded" },
-          { status: 429 },
+          { status: 429 }
         );
       }
     } catch (rlErr) {
-      // Rate limiter gagal (Redis down) → tetap lanjut, jangan block user
       console.error("[GENERATE_QUIZ] Rate limiter error:", rlErr);
     }
 

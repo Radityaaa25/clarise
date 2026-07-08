@@ -5,7 +5,7 @@ import { z } from "zod";
 
 const redeemSchema = z.object({
   code: z.string().trim().toUpperCase(),
-});
+}).strict();
 
 export async function POST(req: Request) {
   try {

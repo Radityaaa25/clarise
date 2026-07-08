@@ -70,7 +70,17 @@ async function fetchSub(userId: string) {
 export async function isSubscriptionActive(userId: string): Promise<boolean> {
   const sub = await getUserSubscription(userId);
   if (!sub) return false;
-  if (sub.status === "ACTIVE") return true;
+  
+  if (sub.status === "ACTIVE") {
+    // Kalau aktif tapi punya endDate (seperti trial), pastikan belum lewat batas + grace period
+    if (sub.endDate) {
+      const grace = new Date(sub.endDate);
+      grace.setDate(grace.getDate() + GRACE_PERIOD_DAYS);
+      if (new Date() > grace) return false;
+    }
+    return true;
+  }
+  
   if (sub.status === "EXPIRED" && sub.endDate) {
     const grace = new Date(sub.endDate);
     grace.setDate(grace.getDate() + GRACE_PERIOD_DAYS);

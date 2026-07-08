@@ -53,49 +53,15 @@ export async function POST(
     );
   }
 
-  // 2. Free tier limit validation — hanya jalankan untuk free user
+  // 2. Premium Course Validation
   const isFreeUser = user.subscription?.plan === "FREE" || !user.subscription;
-  if (isFreeUser) {
-    const activeCourses = await prisma.userProgress.findMany({
-      where: { userId: user.id },
-      distinct: ["courseId"],
-      select: {
-        courseId: true,
-        course: { select: { isPremium: true } },
+  if (isFreeUser && course.isPremium) {
+    return NextResponse.json(
+      {
+        error: "Kursus ini khusus untuk pengguna Premium. Yuk upgrade untuk mendapatkan akses penuh!",
       },
-    });
-
-    const alreadyEnrolled = activeCourses.some(
-      (c) => c.courseId === course.id,
+      { status: 403 },
     );
-    if (!alreadyEnrolled) {
-      // Rule 1: Max 2 courses total
-      if (activeCourses.length >= 2) {
-        return NextResponse.json(
-          {
-            error:
-              "Batas 2 kursus gratis tercapai. Yuk upgrade ke Premium untuk akses tanpa batas!",
-          },
-          { status: 403 },
-        );
-      }
-
-      // Rule 2: Max 1 Premium course
-      if (course.isPremium) {
-        const premiumEnrolledCount = activeCourses.filter(
-          (c) => c.course.isPremium,
-        ).length;
-        if (premiumEnrolledCount >= 1) {
-          return NextResponse.json(
-            {
-              error:
-                "Anda sudah mengambil 1 kursus Premium gratis. Upgrade untuk membuka kursus Premium lainnya!",
-            },
-            { status: 403 },
-          );
-        }
-      }
-    }
   }
 
   // Atomic upsert — kalau progress sudah ada, no-op. Hemat 1 round-trip

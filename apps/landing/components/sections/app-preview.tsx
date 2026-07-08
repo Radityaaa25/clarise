@@ -1,5 +1,3 @@
-"use client";
-
 import Image from "next/image";
 
 const features = [
@@ -82,6 +80,8 @@ export function AppPreview() {
                     height={800}
                     className="w-full h-auto object-contain dark:hidden"
                     sizes="(max-width: 768px) 100vw, 50vw"
+                    priority={idx === 0}
+                    loading={idx === 0 ? "eager" : "lazy"}
                   />
                   <Image
                     src={feature.fileDM}
@@ -90,6 +90,8 @@ export function AppPreview() {
                     height={800}
                     className="w-full h-auto object-contain hidden dark:block"
                     sizes="(max-width: 768px) 100vw, 50vw"
+                    priority={idx === 0}
+                    loading={idx === 0 ? "eager" : "lazy"}
                   />
                 </div>
               </div>

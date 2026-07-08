@@ -52,8 +52,15 @@ export async function POST(req: Request) {
       user.subscription?.status === "ACTIVE" &&
       user.subscription.plan !== "FREE";
 
+    if (!isPremium) {
+      return NextResponse.json(
+        { error: "Fitur penilaian otomatis AI hanya tersedia untuk pengguna Premium. Yuk upgrade sekarang!" },
+        { status: 403 }
+      );
+    }
+
     // Rate limiting
-    const limiter = isPremium ? premiumRatelimit : freeRatelimit;
+    const limiter = premiumRatelimit;
     const { success, reset } = await limiter.limit(clerkId);
     if (!success) {
       return NextResponse.json(

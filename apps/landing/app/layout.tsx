@@ -140,6 +140,28 @@ export default function RootLayout({
             }),
           }}
         />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: "Clarise",
+              url: "https://clarise.my.id",
+              description:
+                "Platform pembelajaran AI interaktif dengan tutor AI, kursus terstruktur, dan gamifikasi.",
+              inLanguage: "id",
+              publisher: {
+                "@type": "Organization",
+                name: "Clarise",
+                logo: {
+                  "@type": "ImageObject",
+                  url: "https://clarise.my.id/logoLM.png",
+                },
+              },
+            }),
+          }}
+        />
       </head>
       <body>
         <ThemeProvider

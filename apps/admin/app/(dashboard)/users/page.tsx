@@ -22,12 +22,8 @@ export default async function UsersPage() {
     id: user.id,
     name: user.name,
     email: user.email,
-    plan: user.subscription?.plan || "FREE",
-    status:
-      user.subscription?.status === "CANCELLED" ||
-      user.subscription?.status === "EXPIRED"
-        ? "BANNED"
-        : "ACTIVE", // Simplified status for admin view
+    plan: user.subscription?.status === "ACTIVE" ? (user.subscription.plan || "FREE") : "FREE",
+    status: "ACTIVE", // Karena model User tidak punya kolom banned, default ke ACTIVE
     joined: user.createdAt.toISOString().slice(0, 10),
   }));
 

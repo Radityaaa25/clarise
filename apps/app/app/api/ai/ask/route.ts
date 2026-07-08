@@ -78,8 +78,15 @@ export async function POST(req: Request) {
   const isPremium =
     user.subscription?.status === "ACTIVE" && user.subscription.plan !== "FREE";
 
-  // Rate limiting
-  const limiter = isPremium ? premiumRatelimit : freeRatelimit;
+  if (!isPremium) {
+    return NextResponse.json(
+      { error: "Fitur AI Tutor hanya tersedia untuk pengguna Premium. Yuk upgrade sekarang!" },
+      { status: 403 }
+    );
+  }
+
+  // Rate limiting (now only applies to premium users effectively, but we keep the logic)
+  const limiter = premiumRatelimit;
   const { success, remaining, reset } = await limiter.limit(clerkId);
   if (!success) {
     return NextResponse.json(

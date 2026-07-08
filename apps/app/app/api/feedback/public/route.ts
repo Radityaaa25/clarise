@@ -1,22 +1,28 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { isAllowedOrigin } from "@/lib/cors";
 
 // Endpoint PUBLIK (tanpa auth) untuk landing page.
 // Mengembalikan agregat rating + testimoni terpilih.
-// CORS diaktifkan karena landing (clarise.my.id) beda origin dengan
-// app (app.clarise.my.id).
+// CORS dibatasi ke domain Clarise saja.
 
-const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
-};
-
-export async function OPTIONS() {
-  return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
+function getCorsHeadersPublic(origin: string | null): Record<string, string> {
+  const allowed = isAllowedOrigin(origin);
+  return {
+    "Access-Control-Allow-Origin": allowed && origin ? origin : "",
+    "Access-Control-Allow-Methods": "GET, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+  };
 }
 
-export async function GET() {
+export async function OPTIONS(req: Request) {
+  const origin = req.headers.get("origin");
+  return new NextResponse(null, { status: 204, headers: getCorsHeadersPublic(origin) });
+}
+
+export async function GET(req: Request) {
+  const origin = req.headers.get("origin");
+  const headers = getCorsHeadersPublic(origin);
   try {
     // Agregat: rata-rata rating + total, hanya yang published.
     const agg = await prisma.appFeedback.aggregate({
@@ -52,12 +58,12 @@ export async function GET() {
         totalRatings: agg._count._all,
         testimonials,
       },
-      { headers: CORS_HEADERS },
+      { headers },
     );
   } catch {
     return NextResponse.json(
       { averageRating: 0, totalRatings: 0, testimonials: [] },
-      { status: 200, headers: CORS_HEADERS },
+      { status: 200, headers },
     );
   }
 }

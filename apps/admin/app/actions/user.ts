@@ -89,11 +89,15 @@ export async function updateUserTier(userId: string, tier: "FREE" | "PREMIUM" | 
       });
 
       if (user.clerkId) {
-        await clerkClient.users.updateUserMetadata(user.clerkId, {
-          publicMetadata: {
-            role: "user",
-          },
-        });
+        try {
+          await clerkClient.users.updateUserMetadata(user.clerkId, {
+            publicMetadata: {
+              role: "user",
+            },
+          });
+        } catch (clerkErr) {
+          console.warn("Clerk update failed:", clerkErr);
+        }
       }
     } else if (tier === "PREMIUM" || tier === "PREMIUM_TRIAL") {
       // Buat atau update subscription (misal kasih 1 bulan gratis, atau statis setahun)
@@ -136,13 +140,16 @@ export async function updateUserTier(userId: string, tier: "FREE" | "PREMIUM" | 
 
       // Update role removed since PREMIUM is not a role in Prisma, only USER and ADMIN are roles.
       // We don't touch role here because they remain USER, just their subscription becomes PREMIUM.
-      
       if (user.clerkId) {
-        await clerkClient.users.updateUserMetadata(user.clerkId, {
-          publicMetadata: {
-            role: "premium",
-          },
-        });
+        try {
+          await clerkClient.users.updateUserMetadata(user.clerkId, {
+            publicMetadata: {
+              role: "premium",
+            },
+          });
+        } catch (clerkErr) {
+          console.warn("Clerk update failed:", clerkErr);
+        }
       }
     }
 

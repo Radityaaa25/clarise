@@ -44,6 +44,7 @@ export default function RootLayout({
     <ClerkProvider dynamic>
       <html lang="en" suppressHydrationWarning>
         <body
+          suppressHydrationWarning
           className={`${inter.className} bg-background text-foreground min-h-screen flex`}
         >
           <ThemeProvider

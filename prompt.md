@@ -480,10 +480,11 @@ Hasil query DB saat ini:
 Keterangan: ✅ = sudah ≥ 5 kursus aktif di DB | 🔄 = belum mencapai 5
 
 Kursus yang baru dibuat di batch ini:
-1. [Nama Kursus 1] — [Kategori] — [Free/Premium] — [X] modul
-2. [Nama Kursus 2] — [Kategori] — [Free/Premium] — [X] modul
+1. Pengantar Cloud Computing — DevOps & Tools — Free — 2 modul
+2. AWS untuk Developer — DevOps & Tools — Premium — 4 modul
+3. Docker & Containerization — DevOps & Tools — Premium — 4 modul
 
-Kategori target batch berikutnya:
+Kategori target batch berikutnya:terus
 - Kategori: [Nama kategori]
 - Kursus aktif di DB sekarang: X (butuh Y lagi untuk ≥ 5)
 - Rencana batch berikutnya: [Free: nama kursus] + [Premium: nama kursus]
